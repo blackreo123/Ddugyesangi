@@ -3,7 +3,6 @@ import SwiftUI
 struct ProjectListView: View {
     @StateObject private var viewModel = ProjectListViewModel()
     @State private var showingAddProject = false
-    @State private var newProjectName = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -79,11 +78,5 @@ struct SearchBar: View {
             TextField("뜨개질 검색", text: $text)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
         }
-    }
-}
-
-#Preview {
-    NavigationView {
-        ProjectListView()
     }
 }

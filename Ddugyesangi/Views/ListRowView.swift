@@ -1,14 +1,8 @@
 import SwiftUI
 
-// 화면 타입을 정의하는 enum
-enum ListViewType {
-    case project
-    case part
-    case other
-}
-
 struct ListRowView: View {
-    let project: Project
+    let project: Project?
+    let part: Part?
     let viewModel: ProjectListViewModel
     let viewType: ListViewType
     @State private var showingEditSheet = false
@@ -16,7 +10,7 @@ struct ListRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(project.name ?? "이름 없음")
+                Text(viewType == .project ? project?.name ?? "이름 없음" : part?.name ?? "이름 없음" )
                     .font(.headline)
                     .foregroundColor(.primary)
             }
@@ -28,7 +22,12 @@ struct ListRowView: View {
                     showingEditSheet = true
                 }
                 Button("삭제", role: .destructive) {
-                    viewModel.deleteProject(project)
+                    if viewType == .project {
+                        viewModel.deleteProject(project!)
+                    } else if viewType == .part {
+//                        viewModel.deletePart(part!)
+                    }
+                    
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")
@@ -39,7 +38,11 @@ struct ListRowView: View {
         .background(Color(.systemGray6))
         .cornerRadius(12)
         .sheet(isPresented: $showingEditSheet) {
-            ProjectEditView(project: project, viewModel: viewModel, isPresented: $showingEditSheet)
+            if viewType == .project {
+                ProjectEditView(project: project!, viewModel: viewModel, isPresented: $showingEditSheet)
+            } else if viewType == .part {
+                
+            }
         }
     }
 }
