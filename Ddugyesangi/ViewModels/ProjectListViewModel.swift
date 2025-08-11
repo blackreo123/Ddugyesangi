@@ -34,7 +34,7 @@ class ProjectListViewModel: ObservableObject {
     
     // 새 프로젝트 생성
     func createProject(name: String) {
-        let newProject = coreDataManager.createProject(name: name)
+        _ = coreDataManager.createProject(name: name)
         loadProjects() // 목록 새로고침
     }
     

@@ -11,5 +11,4 @@ import Foundation
 enum ListViewType {
     case project
     case part
-    case other
 }

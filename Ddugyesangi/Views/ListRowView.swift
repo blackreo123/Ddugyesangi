@@ -3,8 +3,9 @@ import SwiftUI
 struct ListRowView: View {
     let project: Project?
     let part: Part?
-    let viewModel: ProjectListViewModel
     let viewType: ListViewType
+    let onDelete: () -> Void
+    let onEdit: () -> Void
     @State private var showingEditSheet = false
     
     var body: some View {
@@ -22,12 +23,7 @@ struct ListRowView: View {
                     showingEditSheet = true
                 }
                 Button("삭제", role: .destructive) {
-                    if viewType == .project {
-                        viewModel.deleteProject(project!)
-                    } else if viewType == .part {
-//                        viewModel.deletePart(part!)
-                    }
-                    
+                    onDelete()
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")
@@ -39,7 +35,7 @@ struct ListRowView: View {
         .cornerRadius(12)
         .sheet(isPresented: $showingEditSheet) {
             if viewType == .project {
-                ProjectEditView(project: project!, viewModel: viewModel, isPresented: $showingEditSheet)
+//                ProjectEditView(project: project!, viewModel: viewModel, isPresented: $showingEditSheet)
             } else if viewType == .part {
                 
             }

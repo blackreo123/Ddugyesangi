@@ -18,7 +18,13 @@ struct ProjectListView: View {
                         EmptyStateView()
                     } else {
                         ForEach(viewModel.filteredProjects, id: \.id) { project in
-                            ListRowView(project: project, viewModel: viewModel, viewType: .project)
+                            NavigationLink(destination: PartListView(project: project)) {
+                                ListRowView(project: project,
+                                            part: nil,
+                                            viewType: .project,
+                                            onDelete: { viewModel.deleteProject(project) },
+                                            onEdit: {  })
+                            }
                         }
                     }
                 }
