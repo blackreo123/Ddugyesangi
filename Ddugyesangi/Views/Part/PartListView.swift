@@ -10,7 +10,7 @@ import SwiftUI
 
 struct PartListView: View {
     @StateObject private var viewModel : PartListViewModel
-    @State private var showingAddProject = false
+    @State private var showingAddPart = false
     let project : Project
 
     init(project: Project) {
@@ -24,16 +24,16 @@ struct PartListView: View {
             contentView
             bannerAdView
         }
-        .navigationTitle("뜨개질")
+        .navigationTitle(project.name ?? "")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             toolbarContent
         }
-        .sheet(isPresented: $showingAddProject) {
-//            ProjectAddView(viewModel: viewModel, isPresented: $showingAddProject)
+        .sheet(isPresented: $showingAddPart) {
+            PartAddView(viewModel: viewModel, project: project, isPresented: $showingAddPart)
         }
         .onAppear {
-//            viewModel.loadAds()
+            viewModel.loadAds()
         }
     }
     
@@ -71,7 +71,7 @@ struct PartListView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .navigationBarTrailing) {
             Button(action: {
-                showingAddProject = true
+                showingAddPart = true
             }) {
                 Image(systemName: "plus")
             }

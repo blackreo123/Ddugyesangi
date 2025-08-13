@@ -9,6 +9,7 @@ import Foundation
 
 class PartListViewModel: ObservableObject {
     @Published var partList: [Part] = []
+    @Published var adService = AdService.shared
     
     private let project: Project
     private let coreDataManager = CoreDataManager.shared
@@ -22,12 +23,26 @@ class PartListViewModel: ObservableObject {
         partList = coreDataManager.fetchParts(for: project)
     }
     
-    private func createPart(name: String, startRow: Int64, startStitch: Int64, project: Project) {
+    func createPart(name: String, startRow: Int64, startStitch: Int64, project: Project) {
         _ = coreDataManager.createPart(name: name, startRow: startRow, startStitch: startStitch, project: self.project)
         loadPartList(project: project)
     }
     
     var partListIsEmpty: Bool {
         return partList.isEmpty
+    }
+    
+    // MARK: - Ad Operations
+    
+    func loadAds() {
+        adService.loadBannerAd()
+    }
+    
+    func showInterstitialAd() {
+        adService.showInterstitialAd()
+    }
+    
+    func showRewardedAd() {
+        adService.showRewardedAd()
     }
 }
