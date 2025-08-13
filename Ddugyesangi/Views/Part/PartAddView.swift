@@ -19,11 +19,44 @@ struct PartAddView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
+                TextField("파트 이름", text: $name)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal)
                 
+                TextField("시작 단수", text: $startRow)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.numberPad)
+                    .padding(.horizontal)
+                
+                TextField("시작 코수", text: $startStitch)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.numberPad)
+                    .padding(.horizontal)
+                
+                Spacer()
             }
             .padding(.top)
             .navigationTitle("새 파트 추가")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("취소") {
+                        isPresented = false
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("저장") {
+                        if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            let startRow = Int64(startRow)
+                            let startStitch = Int64(startStitch)
+                            viewModel.createPart(name: name, startRow: startRow ?? 0, startStitch: startStitch ?? 0, project: project)
+                            isPresented = false
+                        }
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
         }
     }
 }
