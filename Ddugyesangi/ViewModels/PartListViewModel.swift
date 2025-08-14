@@ -23,7 +23,7 @@ class PartListViewModel: ObservableObject {
         partList = coreDataManager.fetchParts(for: project)
     }
     
-    func createPart(name: String, startRow: Int64, startStitch: Int64, project: Project) {
+    func createPart(name: String, startRow: Int16, startStitch: Int16, project: Project) {
         _ = coreDataManager.createPart(name: name, startRow: startRow, startStitch: startStitch, project: self.project)
         loadPartList(project: project)
     }

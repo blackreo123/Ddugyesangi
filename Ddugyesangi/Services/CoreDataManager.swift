@@ -87,7 +87,7 @@ class CoreDataManager: ObservableObject {
     // MARK: - Part CRUD Operations
     
     // 파트 생성
-    func createPart(name: String, startRow: Int64, startStitch: Int64, project: Project) -> Part {
+    func createPart(name: String, startRow: Int16, startStitch: Int16, project: Project) -> Part {
         let part = Part(context: context)
         part.id = UUID()
         part.name = name
@@ -126,6 +126,30 @@ class CoreDataManager: ObservableObject {
             print("Error fetching parts: \(error)")
             return []
         }
+    }
+    
+    // 단수 업
+    func incrementCurrentRow(of part: Part) {
+        part.currentRow += 1
+        save()
+    }
+    
+    // 단수 다운
+    func decrementCurrentRow(of part: Part) {
+        part.currentRow -= 1
+        save()
+    }
+    
+    // 코수 업
+    func incrementCurrentStitch(of part: Part) {
+        part.currentStitch += 1
+        save()
+    }
+    
+    // 코수 다운
+    func decrementCurrentStitch(of part: Part) {
+        part.currentStitch -= 1
+        save()
     }
     
     // 파트 삭제

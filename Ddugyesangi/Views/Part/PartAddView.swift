@@ -48,8 +48,8 @@ struct PartAddView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("저장") {
                         if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            let startRow = Int64(startRow)
-                            let startStitch = Int64(startStitch)
+                            let startRow = Int16(startRow)
+                            let startStitch = Int16(startStitch)
                             viewModel.createPart(name: name, startRow: startRow ?? 0, startStitch: startStitch ?? 0, project: project)
                             isPresented = false
                         }

@@ -10,12 +10,17 @@ import SwiftUI
 
 struct PartDetailView: View {
     let part: Part
+    let viewModel: PartDetailViewModel = PartDetailViewModel()
     
     public var body: some View {
-        VStack {
-            HStack {
-                Counter()
-                Counter()
+        HStack(spacing: 40) {
+            VStack(spacing: 20) {
+                Counter(part: part, viewModel: viewModel, type: .row)
+                Text("시작 단수: \(part.startRow)")
+            }
+            VStack(spacing: 20) {
+                Counter(part: part, viewModel: viewModel, type: .stitch)
+                Text("시작 코수: \(part.startStitch)")
             }
         }
         .navigationTitle(part.name ?? "")
