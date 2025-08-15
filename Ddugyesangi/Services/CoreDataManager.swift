@@ -87,12 +87,14 @@ class CoreDataManager: ObservableObject {
     // MARK: - Part CRUD Operations
     
     // 파트 생성
-    func createPart(name: String, startRow: Int16, startStitch: Int16, project: Project) -> Part {
+    func createPart(name: String, startRow: Int16, targetRow: Int16, startStitch: Int16, targetStitch: Int16, project: Project) -> Part {
         let part = Part(context: context)
         part.id = UUID()
         part.name = name
         part.startRow = startRow
+        part.targetRow = targetRow
         part.startStitch = startStitch
+        part.targetStitch = targetStitch
         part.currentRow = startRow
         part.currentStitch = startStitch
         part.project = project // 관계 설정

@@ -64,7 +64,6 @@ struct PartListView: View {
                             viewModel: .part(viewModel),
                             onDelete: { viewModel.deletePart(part: part) })
             }
-//            .navigationTitle(part.name ?? "")
         }
     }
     
@@ -81,19 +80,6 @@ struct PartListView: View {
                 showingAddPart = true
             }) {
                 Image(systemName: "plus")
-            }
-        }
-        
-        ToolbarItem(placement: .navigationBarLeading) {
-            Menu {
-                Button("샘플 데이터 생성") {
-//                    viewModel.createSampleData()
-                }
-                Button("모든 데이터 삭제", role: .destructive) {
-//                    viewModel.clearAllData()
-                }
-            } label: {
-                Image(systemName: "ellipsis.circle")
             }
         }
     }
