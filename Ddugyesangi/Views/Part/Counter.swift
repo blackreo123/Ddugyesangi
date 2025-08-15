@@ -21,6 +21,8 @@ struct Counter: View {
     let type: CounterType
     @State var count = 0
     @State private var inputText = ""
+    @State private var isEditing: Bool = false
+    @FocusState private var isTextFieldFocused: Bool
     
     init(part: Part, viewModel: PartDetailViewModel, type: CounterType) {
         let (current, min) = Self.extractValues(from: part, type: type)
@@ -62,18 +64,34 @@ struct Counter: View {
                     .foregroundColor(.blue)
             }
             
-            // 카운터 숫자 (탭하면 직접 입력)
-            Button(action: {
-                inputText = String(count)
-            }) {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.blue.opacity(0.1))
-                    .frame(width: 120, height: 80)
-                    .overlay(
-                        Text("\(count)")
-                            .font(.system(size: 36, weight: .bold))
-                            .foregroundColor(.blue)
-                    )
+            if isEditing {
+                TextField("\(count)", text: $inputText)
+                    .keyboardType(.numberPad)
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundColor(.blue)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 120, height: 100)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(15)
+                    .focused($isTextFieldFocused)
+                    .toolbar {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("완료") {
+                                commitEdit()
+                            }
+                        }
+                    }
+            } else {
+                Text("\(count)")
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 120, height: 100)
+                    .background(Color.blue)
+                    .cornerRadius(15)
+                    .onTapGesture {
+                        startEditing()
+                    }
             }
             
             // 아래쪽 화살표 버튼
@@ -93,5 +111,21 @@ struct Counter: View {
             }
             .disabled(count <= minValue)
         }
+    }
+    
+    // 편집 시작
+    private func startEditing() {
+        inputText = String(count)
+        isEditing = true
+        isTextFieldFocused = true
+    }
+    
+    // 편집 완료
+    private func commitEdit() {
+        if let newValue = Int(inputText), newValue > minValue {
+            count = newValue
+        }
+        isEditing = false
+        isTextFieldFocused = false
     }
 }
