@@ -22,8 +22,8 @@ struct ProjectListView: View {
                                 ListRowView(project: project,
                                             part: nil,
                                             viewType: .project,
-                                            onDelete: { viewModel.deleteProject(project) },
-                                            onEdit: {  })
+                                            viewModel: .project(viewModel),
+                                            onDelete: { viewModel.deleteProject(project) })
                             }
                         }
                     }

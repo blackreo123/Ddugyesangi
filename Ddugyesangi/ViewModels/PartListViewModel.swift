@@ -28,6 +28,11 @@ class PartListViewModel: ObservableObject {
         loadPartList(project: project)
     }
     
+    func deletePart(part: Part) {
+        coreDataManager.deletePart(part)
+        loadPartList(project: project)
+    }
+    
     var partListIsEmpty: Bool {
         return partList.isEmpty
     }

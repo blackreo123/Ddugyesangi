@@ -58,7 +58,11 @@ struct PartListView: View {
     private var partListContent: some View {
         ForEach(viewModel.partList, id: \.id) { part in
             NavigationLink(destination: PartDetailView(part: part)) {
-                ListRowView(project: project, part: part, viewType: .part, onDelete: {}, onEdit: {})
+                ListRowView(project: project,
+                            part: part,
+                            viewType: .part,
+                            viewModel: .part(viewModel),
+                            onDelete: { viewModel.deletePart(part: part) })
             }
 //            .navigationTitle(part.name ?? "")
         }

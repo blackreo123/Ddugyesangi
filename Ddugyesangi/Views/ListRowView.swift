@@ -1,11 +1,16 @@
 import SwiftUI
 
+enum ViewModelType {
+    case project(ProjectListViewModel)
+    case part(PartListViewModel)
+}
+
 struct ListRowView: View {
     let project: Project?
     let part: Part?
     let viewType: ListViewType
+    let viewModel: ViewModelType
     let onDelete: () -> Void
-    let onEdit: () -> Void
     @State private var showingEditSheet = false
     
     var body: some View {
@@ -34,10 +39,12 @@ struct ListRowView: View {
         .background(Color(.systemGray6))
         .cornerRadius(12)
         .sheet(isPresented: $showingEditSheet) {
-            if viewType == .project {
-//                ProjectEditView(project: project!, viewModel: viewModel, isPresented: $showingEditSheet)
-            } else if viewType == .part {
-                
+            switch viewModel {
+            case .project(let projectListViewModel):
+                ProjectEditView(project: project!, viewModel: projectListViewModel, isPresented: $showingEditSheet)
+            case .part(let partListViewModel):
+                // todo
+                ProjectEditView(project: project!, viewModel: ProjectListViewModel(), isPresented: $showingEditSheet)
             }
         }
     }
