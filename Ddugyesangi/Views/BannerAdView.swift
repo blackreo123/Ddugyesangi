@@ -8,7 +8,12 @@ struct BannerAdView: UIViewRepresentable {
 //        bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716"
         // 본방
         bannerView.adUnitID = "ca-app-pub-7521928283190614/6447748065"
-        bannerView.rootViewController = UIApplication.shared.windows.first?.rootViewController
+//        bannerView.rootViewController = UIApplication.shared.windows.first?.rootViewController
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
+            bannerView.rootViewController = rootViewController
+        }
         bannerView.load(GADRequest())
         return bannerView
     }
