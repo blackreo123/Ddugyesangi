@@ -13,16 +13,32 @@ struct PartDetailView: View {
     let viewModel: PartDetailViewModel = PartDetailViewModel()
     
     public var body: some View {
-        HStack(spacing: 40) {
-            VStack(spacing: 20) {
-                Counter(part: part, viewModel: viewModel, type: .row)
-                Text("시작 단수: \(part.startRow)")
+        VStack() {
+            Spacer()
+            HStack(spacing: 40) {
+                VStack(spacing: 20) {
+                    Counter(part: part, viewModel: viewModel, type: .row)
+                    Text("시작 단수: \(part.startRow)")
+                }
+                VStack(spacing: 20) {
+                    Counter(part: part, viewModel: viewModel, type: .stitch)
+                    Text("시작 코수: \(part.startStitch)")
+                }
             }
-            VStack(spacing: 20) {
-                Counter(part: part, viewModel: viewModel, type: .stitch)
-                Text("시작 코수: \(part.startStitch)")
-            }
+            .navigationTitle(part.name ?? "")
+            
+            Spacer()
+            
+            bannerAdView
         }
-        .navigationTitle(part.name ?? "")
+        .onAppear {
+            viewModel.loadAds()
+        }
+    }
+    
+    private var bannerAdView: some View {
+        BannerAdView()
+            .frame(height: 50)
+            .background(Color(.systemGray6))
     }
 }

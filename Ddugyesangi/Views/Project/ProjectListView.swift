@@ -50,18 +50,18 @@ struct ProjectListView: View {
                 }
             }
             
-            ToolbarItem(placement: .navigationBarLeading) {
-                Menu {
-                    Button("샘플 데이터 생성") {
-                        viewModel.createSampleData()
-                    }
-                    Button("모든 데이터 삭제", role: .destructive) {
-                        viewModel.clearAllData()
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-            }
+//            ToolbarItem(placement: .navigationBarLeading) {
+//                Menu {
+//                    Button("샘플 데이터 생성") {
+//                        viewModel.createSampleData()
+//                    }
+//                    Button("모든 데이터 삭제", role: .destructive) {
+//                        viewModel.clearAllData()
+//                    }
+//                } label: {
+//                    Image(systemName: "ellipsis.circle")
+//                }
+//            }
         }
         .sheet(isPresented: $showingAddProject) {
             ProjectAddView(viewModel: viewModel, isPresented: $showingAddProject)
