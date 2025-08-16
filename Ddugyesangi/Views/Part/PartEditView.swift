@@ -33,29 +33,54 @@ struct PartEditView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                TextField("파트 이름", text: $name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
+                VStack(alignment: .leading) {
+                    Text("파트 이름")
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
+                    TextField("파트 이름", text: $name)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                }
                 
-                TextField("시작 단수", text: $startRow)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .keyboardType(.numberPad)
-                    .padding(.horizontal)
+                VStack(alignment: .leading) {
+                    Text("시작 단수")
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
+                    TextField("시작 단수", text: $startRow)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.numberPad)
+                        .padding(.horizontal)
+                }
                 
-                TextField("목표 단수", text: $targetRow)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .keyboardType(.numberPad)
-                    .padding(.horizontal)
+                VStack(alignment: .leading) {
+                    Text("목표 단수")
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
+                    TextField("목표 단수", text: $targetRow)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.numberPad)
+                        .padding(.horizontal)
+                }
                 
-                TextField("시작 코수", text: $startStitch)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .keyboardType(.numberPad)
-                    .padding(.horizontal)
+                VStack(alignment: .leading) {
+                    Text("시작 코수")
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
+                    TextField("시작 코수", text: $startStitch)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.numberPad)
+                        .padding(.horizontal)
+                }
                 
-                TextField("목표 코수", text: $targetStitch)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .keyboardType(.numberPad)
-                    .padding(.horizontal)
+                VStack(alignment: .leading) {
+                    Text("목표 코수")
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
+                    TextField("목표 코수", text: $targetStitch)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.numberPad)
+                        .padding(.horizontal)
+                }
                 
                 Spacer()
             }
