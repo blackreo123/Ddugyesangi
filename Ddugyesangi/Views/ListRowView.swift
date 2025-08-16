@@ -24,7 +24,7 @@ struct ListRowView: View {
             Spacer()
             
             Menu {
-                Button("이름 변경") {
+                Button("편집") {
                     showingEditSheet = true
                 }
                 Button("삭제", role: .destructive) {
@@ -41,10 +41,13 @@ struct ListRowView: View {
         .sheet(isPresented: $showingEditSheet) {
             switch viewModel {
             case .project(let projectListViewModel):
-                ProjectEditView(project: project!, viewModel: projectListViewModel, isPresented: $showingEditSheet)
+                if let project = project {
+                    ProjectEditView(project: project, viewModel: projectListViewModel, isPresented: $showingEditSheet)
+                }
             case .part(let partListViewModel):
-                // todo
-                ProjectEditView(project: project!, viewModel: ProjectListViewModel(), isPresented: $showingEditSheet)
+                if let part = part {
+                    PartEditView(part: part, viewModel: partListViewModel, isPresented: $showingEditSheet)
+                }
             }
         }
     }

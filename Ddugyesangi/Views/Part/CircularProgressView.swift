@@ -8,14 +8,18 @@
 import Foundation
 import SwiftUI
 
-struct CircularProgressView: View {
-    let currentValue: Int16
-    let targetValue: Int16
+struct ProgressBarView: View {
+    @Binding var currentValue: Int
+    let targetValue: Int
     
     var body: some View {
+        
         VStack {
-            ProgressView(value: Float(currentValue / targetValue))
-                .progressViewStyle(.circular)
+            ProgressView(value: Double(currentValue) / Double(targetValue)) { Text("\(currentValue) / \(targetValue)") }
         }
+        .progressViewStyle(LinearProgressViewStyle())
+        .padding(4)
+        .cornerRadius(4)
+        
     }
 }

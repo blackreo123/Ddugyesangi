@@ -130,6 +130,16 @@ class CoreDataManager: ObservableObject {
         }
     }
     
+    // 파트 수정
+    func updatePart(_ part: Part, name: String, startRow: Int16, targetRow: Int16, startStitch: Int16, targetStitch: Int16) {
+        part.name = name
+        part.startRow = startRow
+        part.targetRow = targetRow
+        part.startStitch = startStitch
+        part.targetStitch = targetStitch
+        save()
+    }
+    
     // 단수 업
     func incrementCurrentRow(of part: Part) {
         part.currentRow += 1

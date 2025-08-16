@@ -50,6 +50,13 @@ struct Counter: View {
     
     var body: some View {
         VStack(spacing: 20) {
+            switch type {
+            case .row:
+                ProgressBarView(currentValue: $count, targetValue: Int(part.targetRow))
+            case .stitch:
+                ProgressBarView(currentValue: $count, targetValue: Int(part.targetStitch))
+            }
+
             // 위쪽 화살표 버튼
             Button(action: {
                 count += 1

@@ -28,6 +28,11 @@ class PartListViewModel: ObservableObject {
         loadPartList(project: project)
     }
     
+    func updatePart(part: Part, name: String, startRow: Int16, targetRow: Int16, startStitch: Int16, targetStitch: Int16) {
+        coreDataManager.updatePart(part, name: name, startRow: startRow, targetRow: targetRow, startStitch: startStitch, targetStitch: targetStitch)
+        loadPartList(project: project)
+    }
+    
     func deletePart(part: Part) {
         coreDataManager.deletePart(part)
         loadPartList(project: project)
