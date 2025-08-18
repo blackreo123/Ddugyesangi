@@ -6,6 +6,7 @@ enum ViewModelType {
 }
 
 struct ListRowView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let project: Project?
     let part: Part?
     let viewType: ListViewType
@@ -36,7 +37,7 @@ struct ListRowView: View {
             }
         }
         .padding(16)
-        .background(Color(.systemGray6))
+        .background(themeManager.currentTheme.cardColor)
         .cornerRadius(12)
         .sheet(isPresented: $showingEditSheet) {
             switch viewModel {
