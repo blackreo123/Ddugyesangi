@@ -7,7 +7,7 @@ struct BannerAdView: UIViewRepresentable {
 #if DEBUG
         // 테스트 광고 ID
         bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716"
-#elseif release
+#else
         // 본방
         bannerView.adUnitID = "ca-app-pub-7521928283190614/6447748065"
 #endif
