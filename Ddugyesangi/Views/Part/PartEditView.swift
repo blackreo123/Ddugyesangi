@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct PartEditView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let part: Part
     let viewModel: PartListViewModel
     @Binding var isPresented: Bool
@@ -32,80 +33,76 @@ struct PartEditView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                VStack(alignment: .leading) {
-                    Text("파트 이름")
-                        .foregroundStyle(.black)
-                        .padding(.horizontal)
-                    TextField("파트 이름", text: $name)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("시작 단수")
-                        .foregroundStyle(.black)
-                        .padding(.horizontal)
-                    TextField("시작 단수", text: $startRow)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.numberPad)
-                        .padding(.horizontal)
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("목표 단수")
-                        .foregroundStyle(.black)
-                        .padding(.horizontal)
-                    TextField("목표 단수", text: $targetRow)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.numberPad)
-                        .padding(.horizontal)
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("시작 코수")
-                        .foregroundStyle(.black)
-                        .padding(.horizontal)
-                    TextField("시작 코수", text: $startStitch)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.numberPad)
-                        .padding(.horizontal)
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("목표 코수")
-                        .foregroundStyle(.black)
-                        .padding(.horizontal)
-                    TextField("목표 코수", text: $targetStitch)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.numberPad)
-                        .padding(.horizontal)
-                }
-                
-                Spacer()
-            }
-            .padding(.top)
-            .navigationTitle("파트 편집")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("취소") {
-                        isPresented = false
+            ZStack {
+                themeManager.currentTheme.backgroundColor
+                    .ignoresSafeArea()
+                VStack(spacing: 20) {
+                    VStack(alignment: .leading) {
+                        Text("파트 이름")
+                            .foregroundStyle(.black)
+                            .padding(.horizontal)
+                        NomalTextField(placeholder: "파트 이름", text: $name)
                     }
+                    
+                    VStack(alignment: .leading) {
+                        Text("시작 단수")
+                            .foregroundStyle(.black)
+                            .padding(.horizontal)
+                        NomalTextField(placeholder: "시작 단수", text: $startRow)
+                            .keyboardType(.numberPad)
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        Text("목표 단수")
+                            .foregroundStyle(.black)
+                            .padding(.horizontal)
+                        NomalTextField(placeholder: "목표 단수", text: $targetRow)
+                            .keyboardType(.numberPad)
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        Text("시작 코수")
+                            .foregroundStyle(.black)
+                            .padding(.horizontal)
+                        NomalTextField(placeholder: "시작 코수", text: $startStitch)
+                            .keyboardType(.numberPad)
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        Text("목표 코수")
+                            .foregroundStyle(.black)
+                            .padding(.horizontal)
+                        NomalTextField(placeholder: "목표 코수", text: $targetStitch)
+                            .keyboardType(.numberPad)
+                    }
+                    
+                    Spacer()
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("저장") {
-                        if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            let startRow = Int16(startRow)
-                            let targetRow = Int16(targetRow)
-                            let startStitch = Int16(startStitch)
-                            let targetStitch = Int16(targetStitch)
-                            viewModel.updatePart(part: part ,name: name, startRow: startRow ?? 0, targetRow: targetRow ?? 0, startStitch: startStitch ?? 0, targetStitch: targetStitch ?? 0)
+                .padding(.top)
+                .navigationTitle("파트 편집")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("취소") {
                             isPresented = false
                         }
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        let isNameValid = !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        Button("저장") {
+                            if isNameValid {
+                                let startRow = Int16(startRow)
+                                let targetRow = Int16(targetRow)
+                                let startStitch = Int16(startStitch)
+                                let targetStitch = Int16(targetStitch)
+                                viewModel.updatePart(part: part ,name: name, startRow: startRow ?? 0, targetRow: targetRow ?? 0, startStitch: startStitch ?? 0, targetStitch: targetStitch ?? 0)
+                                isPresented = false
+                            }
+                        }
+                        .foregroundStyle(isNameValid ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
+                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
                 }
             }
         }

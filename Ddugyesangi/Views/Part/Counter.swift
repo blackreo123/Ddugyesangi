@@ -14,6 +14,7 @@ enum CounterType {
 }
 
 struct Counter: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let minValue: Int
     let currentValue: Int?
     let part: Part
@@ -68,17 +69,17 @@ struct Counter: View {
             }) {
                 Image(systemName: "chevron.up.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(.blue)
+                    .foregroundStyle(themeManager.currentTheme.primaryColor)
             }
             
             if isEditing {
                 TextField("\(count)", text: $inputText)
                     .keyboardType(.numberPad)
                     .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.blue)
+                    .foregroundStyle(themeManager.currentTheme.primaryColor)
                     .multilineTextAlignment(.center)
                     .frame(width: 120, height: 100)
-                    .background(Color.blue.opacity(0.1))
+                    .background(themeManager.currentTheme.cardColor)
                     .cornerRadius(15)
                     .focused($isTextFieldFocused)
                     .toolbar {
@@ -94,7 +95,7 @@ struct Counter: View {
                     .font(.system(size: 36, weight: .bold))
                     .foregroundColor(.white)
                     .frame(width: 120, height: 100)
-                    .background(Color.blue)
+                    .background(themeManager.currentTheme.primaryColor)
                     .cornerRadius(15)
                     .onTapGesture {
                         startEditing()
@@ -114,7 +115,7 @@ struct Counter: View {
             }) {
                 Image(systemName: "chevron.down.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(count > minValue ? .blue : .gray)
+                    .foregroundStyle(count > minValue ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
             }
             .disabled(count <= minValue)
         }

@@ -64,7 +64,7 @@ struct ProjectListView: View {
         }
         .sheet(isPresented: $showingAddProject) {
                 ProjectAddView(viewModel: viewModel, isPresented: $showingAddProject)
-                .presentationDetents([.medium])
+                .presentationDetents([.fraction(0.25)])
         }
         .sheet(isPresented: $showingThemeSelector) {
             ThemeSelector(isPresented: $showingThemeSelector)

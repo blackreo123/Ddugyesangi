@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct PartDetailView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let part: Part
     let viewModel: PartDetailViewModel = PartDetailViewModel()
     
@@ -31,6 +32,7 @@ struct PartDetailView: View {
             
             bannerAdView
         }
+        .background(themeManager.currentTheme.backgroundColor)
         .onAppear {
             viewModel.loadAds()
         }
@@ -39,6 +41,6 @@ struct PartDetailView: View {
     private var bannerAdView: some View {
         BannerAdView()
             .frame(height: 50)
-            .background(Color(.systemGray6))
+            .background(themeManager.currentTheme.backgroundColor)
     }
 }

@@ -21,18 +21,7 @@ struct ProjectAddView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(themeManager.currentTheme.cardColor)
-                        HStack {
-                            TextField("뜨개질 이름", text: $projectName)
-                                .textFieldStyle(PlainTextFieldStyle())
-                            
-                        }
-                        .padding(.horizontal, 16)
-                    }
-                    .frame(height: 44)
-                    .padding(.horizontal, 16)
+                    NomalTextField(placeholder: "뜨개질 이름", text: $projectName)
                     Spacer()
                 }
                 .navigationTitle("새 뜨개질")
