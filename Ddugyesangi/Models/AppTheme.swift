@@ -13,6 +13,7 @@ enum ThemeType: String, CaseIterable {
     case lightPurple = "연보라"
     case red = "빨강"
     case blue = "파랑"
+    case pink = "핑크"
 }
 
 struct AppTheme {
@@ -30,36 +31,45 @@ struct AppTheme {
             primaryColor: .blue,
             secondaryColor: .gray,
             backgroundColor: .white,
-            cardColor: Color.gray.opacity(0.1),
+            cardColor: Color(red: 0.95, green: 0.95, blue: 0.97),
             textColor: .black,
             accentColor: .blue
         ),
         .lightPurple: AppTheme(
             type: .lightPurple,
-            primaryColor: Color.purple.opacity(0.7),
-            secondaryColor: Color.purple.opacity(0.3),
-            backgroundColor: Color.purple.opacity(0.05),
-            cardColor: Color.purple.opacity(0.08),
+            primaryColor: Color(red: 0.69, green: 0.32, blue: 0.87),
+            secondaryColor: Color(red: 0.90, green: 0.80, blue: 0.95),
+            backgroundColor: Color(red: 0.99, green: 0.98, blue: 1.0),
+            cardColor: Color(red: 0.96, green: 0.92, blue: 0.99),
             textColor: .black,
             accentColor: .purple
         ),
         .red: AppTheme(
             type: .red,
             primaryColor: .red,
-            secondaryColor: Color.pink.opacity(0.5),
-            backgroundColor: Color.red.opacity(0.05),
-            cardColor: Color.red.opacity(0.06),
+            secondaryColor: Color(red: 1.0, green: 0.75, blue: 0.80),
+            backgroundColor: Color(red: 1.0, green: 0.98, blue: 0.98),
+            cardColor: Color(red: 1.0, green: 0.94, blue: 0.94),
             textColor: .black,
             accentColor: .red
         ),
         .blue: AppTheme(
             type: .blue,
             primaryColor: .blue,
-            secondaryColor: Color.cyan.opacity(0.5),
-            backgroundColor: Color.blue.opacity(0.05),
-            cardColor: Color.blue.opacity(0.08),
+            secondaryColor: Color(red: 0.75, green: 0.90, blue: 1.0),
+            backgroundColor: Color(red: 0.98, green: 0.99, blue: 1.0),
+            cardColor: Color(red: 0.93, green: 0.96, blue: 1.0),
             textColor: .black,
             accentColor: .blue
+        ),
+        .pink: AppTheme(
+            type: .pink,
+            primaryColor: Color(red: 1.0, green: 0.41, blue: 0.71),    // 선명한 핑크
+            secondaryColor: Color(red: 1.0, green: 0.85, blue: 0.93),  // 연한 핑크
+            backgroundColor: Color(red: 1.0, green: 0.99, blue: 0.99), // 아주 연한 핑크 배경
+            cardColor: Color(red: 1.0, green: 0.96, blue: 0.98),       // 카드용 연한 핑크
+            textColor: .black,
+            accentColor: Color(red: 1.0, green: 0.41, blue: 0.71)      // 액센트도 메인 핑크
         )
     ]
 }

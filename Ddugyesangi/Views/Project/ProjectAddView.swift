@@ -9,37 +9,53 @@ import Foundation
 import SwiftUI
 
 struct ProjectAddView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let viewModel: ProjectListViewModel
     @Binding var isPresented: Bool
     @State private var projectName = ""
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                TextField("뜨개질 이름", text: $projectName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
+            ZStack {
+                themeManager.currentTheme.backgroundColor
+                    .ignoresSafeArea()
                 
-                Spacer()
-            }
-            .padding(.top)
-            .navigationTitle("새 뜨개질")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("취소") {
-                        isPresented = false
+                VStack(spacing: 20) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(themeManager.currentTheme.cardColor)
+                        HStack {
+                            TextField("뜨개질 이름", text: $projectName)
+                                .textFieldStyle(PlainTextFieldStyle())
+                            
+                        }
+                        .padding(.horizontal, 16)
                     }
+                    .frame(height: 44)
+                    .padding(.horizontal, 16)
+                    Spacer()
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("저장") {
-                        if !projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            viewModel.createProject(name: projectName.trimmingCharacters(in: .whitespacesAndNewlines))
+                .navigationTitle("새 뜨개질")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("취소") {
                             isPresented = false
                         }
+                        .foregroundStyle(themeManager.currentTheme.primaryColor)
                     }
-                    .disabled(projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        let isNameValid = !projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        Button("저장") {
+                            if isNameValid {
+                                viewModel.createProject(name: projectName.trimmingCharacters(in: .whitespacesAndNewlines))
+                                isPresented = false
+                            }
+                        }
+                        .foregroundStyle(isNameValid ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
+                        .disabled(!isNameValid)
+                    }
                 }
             }
         }

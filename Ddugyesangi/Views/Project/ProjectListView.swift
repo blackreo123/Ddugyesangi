@@ -51,7 +51,7 @@ struct ProjectListView: View {
                     showingAddProject = true
                 }) {
                     Image(systemName: "plus")
-                        .foregroundColor(themeManager.currentTheme.accentColor)
+                        .foregroundStyle(themeManager.currentTheme.primaryColor)
                 }
             }
             
@@ -60,12 +60,13 @@ struct ProjectListView: View {
                     showingThemeSelector = true
                 }) {
                     Image(systemName: "paintpalette")
-                        .foregroundColor(themeManager.currentTheme.accentColor)
+                        .foregroundStyle(themeManager.currentTheme.primaryColor)
                 }
             }
         }
         .sheet(isPresented: $showingAddProject) {
-            ProjectAddView(viewModel: viewModel, isPresented: $showingAddProject)
+                ProjectAddView(viewModel: viewModel, isPresented: $showingAddProject)
+                .presentationDetents([.medium])
         }
         .sheet(isPresented: $showingThemeSelector) {
             ThemeSelector(isPresented: $showingThemeSelector)
@@ -84,7 +85,7 @@ struct SearchBar: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
-                            .fill(themeManager.currentTheme.cardColor)
+                .fill(themeManager.currentTheme.cardColor)
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.gray)
