@@ -51,7 +51,6 @@ struct ProjectListView: View {
                     showingAddProject = true
                 }) {
                     Image(systemName: "plus")
-                        .foregroundStyle(themeManager.currentTheme.primaryColor)
                 }
             }
             
@@ -60,7 +59,6 @@ struct ProjectListView: View {
                     showingThemeSelector = true
                 }) {
                     Image(systemName: "paintpalette")
-                        .foregroundStyle(themeManager.currentTheme.primaryColor)
                 }
             }
         }

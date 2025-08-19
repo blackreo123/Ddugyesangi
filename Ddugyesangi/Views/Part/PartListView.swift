@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct PartListView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var viewModel : PartListViewModel
     @State private var showingAddPart = false
     let project : Project
@@ -52,7 +53,7 @@ struct PartListView: View {
             .padding(.top, 16)
             .padding(.bottom, 16)
         }
-        .background(Color(.systemBackground))
+        .background(themeManager.currentTheme.backgroundColor)
     }
     
     private var partListContent: some View {
@@ -70,7 +71,7 @@ struct PartListView: View {
     private var bannerAdView: some View {
         BannerAdView()
             .frame(height: 50)
-            .background(Color(.systemGray6))
+            .background(themeManager.currentTheme.backgroundColor)
     }
     
     @ToolbarContentBuilder

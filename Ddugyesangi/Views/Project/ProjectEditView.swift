@@ -52,7 +52,6 @@ struct ProjectEditView: View {
                         Button("취소") {
                             isPresented = false
                         }
-                        .foregroundStyle(themeManager.currentTheme.primaryColor)
                     }
                     
                     ToolbarItem(placement: .navigationBarTrailing) {

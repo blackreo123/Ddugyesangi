@@ -8,6 +8,7 @@ struct DdugyesangiApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(themeManager)
+                .tint(themeManager.currentTheme.primaryColor)
         }
     }
 } 

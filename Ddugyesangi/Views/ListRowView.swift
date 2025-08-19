@@ -50,8 +50,6 @@ struct ListRowView: View {
             case .part(let partListViewModel):
                 if let part = part {
                     PartEditView(part: part, viewModel: partListViewModel, isPresented: $showingEditSheet)
-                        .environmentObject(themeManager)
-                        .presentationBackground(themeManager.currentTheme.backgroundColor)
                 }
             }
         }
