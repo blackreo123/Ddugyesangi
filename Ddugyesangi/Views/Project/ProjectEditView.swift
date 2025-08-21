@@ -29,21 +29,21 @@ struct ProjectEditView: View {
                 themeManager.currentTheme.backgroundColor
                     .ignoresSafeArea()
                 VStack(spacing: 20) {
-                    NomalTextField(placeholder: "뜨개질 이름", text: $projectName)
+                    NomalTextField(placeholder: NSLocalizedString("Project Name", comment: ""), text: $projectName)
                     Spacer()
                 }
-                .navigationTitle("뜨개질 편집")
+                .navigationTitle("Edit Project")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        Button("취소") {
+                        Button("Cancel") {
                             isPresented = false
                         }
                     }
                     
                     ToolbarItem(placement: .navigationBarTrailing) {
                         let isNameValid = !projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        Button("저장") {
+                        Button("Save") {
                             if isNameValid {
                                 viewModel.updateProject(project, newName: projectName.trimmingCharacters(in: .whitespacesAndNewlines))
                                 isPresented = false

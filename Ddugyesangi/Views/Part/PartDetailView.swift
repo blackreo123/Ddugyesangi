@@ -19,11 +19,11 @@ struct PartDetailView: View {
             HStack(spacing: 40) {
                 VStack(spacing: 20) {
                     Counter(part: part, viewModel: viewModel, type: .row)
-                    Text("시작 단수: \(part.startRow)")
+                    Text("Start Row") + Text(": \(part.startRow)")
                 }
                 VStack(spacing: 20) {
                     Counter(part: part, viewModel: viewModel, type: .stitch)
-                    Text("시작 코수: \(part.startStitch)")
+                    Text("Start Stitch") + Text(": \(part.startStitch)")
                 }
             }
             .navigationTitle(part.name ?? "")

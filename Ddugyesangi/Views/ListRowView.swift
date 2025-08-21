@@ -17,7 +17,7 @@ struct ListRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(viewType == .project ? project?.name ?? "이름 없음" : part?.name ?? "이름 없음" )
+                Text(viewType == .project ? project?.name ?? "No Name" : part?.name ?? "No Name")
                     .font(.headline)
                     .foregroundStyle(themeManager.currentTheme.textColor)
             }
@@ -25,10 +25,10 @@ struct ListRowView: View {
             Spacer()
             
             Menu {
-                Button(viewType == .project ? "이름 변경" : "편집") {
+                Button(viewType == .project ? "Name Change" : "Edit") {
                     showingEditSheet = true
                 }
-                Button("삭제", role: .destructive) {
+                Button("Delete", role: .destructive) {
                     onDelete()
                 }
             } label: {

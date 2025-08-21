@@ -21,21 +21,21 @@ struct ProjectAddView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
-                    NomalTextField(placeholder: "뜨개질 이름", text: $projectName)
+                    NomalTextField(placeholder: NSLocalizedString("Project Name", comment: ""), text: $projectName)
                     Spacer()
                 }
-                .navigationTitle("새 뜨개질")
+                .navigationTitle("New Project")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        Button("취소") {
+                        Button("Cancel") {
                             isPresented = false
                         }
                     }
                     
                     ToolbarItem(placement: .navigationBarTrailing) {
                         let isNameValid = !projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        Button("저장") {
+                        Button("Save") {
                             if isNameValid {
                                 viewModel.createProject(name: projectName.trimmingCharacters(in: .whitespacesAndNewlines))
                                 isPresented = false

@@ -1,0 +1,34 @@
+/* 
+  Localizable.strings
+  Ddugyesangi
+
+  Created by JIHA YOON on 2025/08/21.
+  
+*/
+
+"Select a theme" = "テーマ選択";
+"Done" = "完了";
+"No Name" = "名前なし";
+"Name Change" = "タイトル変更";
+"Edit" = "編集";
+"Delete" = "削除";
+"Nothing to show" = "まだデータがないです";
+"Project Name" = "編み物名";
+"New Project" = "新しい編み物";
+"Cancel" = "キャンセル";
+"Save" = "保存";
+"Project List" = "編み物リスト";
+"Search Projects" = "編み物検索";
+"Part Name" = "パート名";
+"Start Row" = "開始段数";
+"Target row" = "目標段数";
+"Start Stitch" = "開始目数";
+"Target Stitch" = "目標目数";
+"Add New Part" = "新しいパート追加";
+"Edit Part" = "パート編集";
+"Edit Project" = "編み物編集";
+"basic" = "基本";
+"lightPurple" = "薄紫";
+"red" = "赤";
+"blue" = "青";
+"pink" = "ピンク";

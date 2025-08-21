@@ -9,11 +9,15 @@ import Foundation
 import SwiftUI
 
 enum ThemeType: String, CaseIterable {
-    case basic = "기본"
-    case lightPurple = "연보라"
-    case red = "빨강"
-    case blue = "파랑"
-    case pink = "핑크"
+    case basic
+    case lightPurple
+    case red
+    case blue
+    case pink
+    
+    var localizedName: String {
+        return NSLocalizedString(self.rawValue, comment: "")
+    }
 }
 
 struct AppTheme {

@@ -17,13 +17,13 @@ struct ThemeSelector: View {
             ZStack {
                 themeManager.currentTheme.backgroundColor.ignoresSafeArea()
                 VStack(spacing: 20) {
-                    Text("테마 선택")
+                    Text("Select a theme")
                         .font(.title)
                         .foregroundStyle(themeManager.currentTheme.textColor)
                     
                     LazyVGrid(columns: [GridItem(), GridItem()], spacing: 10) {
                         ForEach(ThemeType.allCases, id: \.self) { themeType in
-                            Button(themeType.rawValue) {
+                            Button(themeType.localizedName) {
                                 themeManager.changeTheme(to: themeType)
                             }
                             .frame(width: 100, height: 100)
@@ -44,7 +44,7 @@ struct ThemeSelector: View {
                 .padding()
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("완료") {
+                        Button("Done") {
                             isPresented = false
                         }
                     }

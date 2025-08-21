@@ -38,59 +38,59 @@ struct PartEditView: View {
                     .ignoresSafeArea()
                 VStack(spacing: 20) {
                     VStack(alignment: .leading) {
-                        Text("파트 이름")
+                        Text("Part Name")
                             .foregroundStyle(.black)
                             .padding(.horizontal)
-                        NomalTextField(placeholder: "파트 이름", text: $name)
+                        NomalTextField(placeholder: NSLocalizedString("Part Name", comment: ""), text: $name)
                     }
                     
                     VStack(alignment: .leading) {
-                        Text("시작 단수")
+                        Text("Start Row")
                             .foregroundStyle(.black)
                             .padding(.horizontal)
-                        NomalTextField(placeholder: "시작 단수", text: $startRow)
+                        NomalTextField(placeholder: NSLocalizedString("Start Row", comment: ""), text: $startRow)
                             .keyboardType(.numberPad)
                     }
                     
                     VStack(alignment: .leading) {
-                        Text("목표 단수")
+                        Text("Target row")
                             .foregroundStyle(.black)
                             .padding(.horizontal)
-                        NomalTextField(placeholder: "목표 단수", text: $targetRow)
+                        NomalTextField(placeholder: NSLocalizedString("Target row", comment: ""), text: $targetRow)
                             .keyboardType(.numberPad)
                     }
                     
                     VStack(alignment: .leading) {
-                        Text("시작 코수")
+                        Text("Start Stitch")
                             .foregroundStyle(.black)
                             .padding(.horizontal)
-                        NomalTextField(placeholder: "시작 코수", text: $startStitch)
+                        NomalTextField(placeholder: NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
                             .keyboardType(.numberPad)
                     }
                     
                     VStack(alignment: .leading) {
-                        Text("목표 코수")
+                        Text("Target Stitch")
                             .foregroundStyle(.black)
                             .padding(.horizontal)
-                        NomalTextField(placeholder: "목표 코수", text: $targetStitch)
+                        NomalTextField(placeholder: NSLocalizedString("Target Stitch", comment: ""), text: $targetStitch)
                             .keyboardType(.numberPad)
                     }
                     
                     Spacer()
                 }
                 .padding(.top)
-                .navigationTitle("파트 편집")
+                .navigationTitle("Edit Part")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        Button("취소") {
+                        Button("Cancel") {
                             isPresented = false
                         }
                     }
                     
                     ToolbarItem(placement: .navigationBarTrailing) {
                         let isNameValid = !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        Button("저장") {
+                        Button("Save") {
                             if isNameValid {
                                 let startRow = Int16(startRow)
                                 let targetRow = Int16(targetRow)

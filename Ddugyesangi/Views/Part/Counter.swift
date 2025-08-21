@@ -85,7 +85,7 @@ struct Counter: View {
                     .toolbar {
                         ToolbarItemGroup(placement: .keyboard) {
                             Spacer()
-                            Button("완료") {
+                            Button("Done") {
                                 commitEdit()
                             }
                         }

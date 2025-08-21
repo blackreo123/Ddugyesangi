@@ -43,7 +43,7 @@ struct ProjectListView: View {
                 .background(themeManager.currentTheme.backgroundColor)
         }
         .background(themeManager.currentTheme.backgroundColor)
-        .navigationTitle("뜨개질")
+        .navigationTitle("Project List")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -88,7 +88,7 @@ struct SearchBar: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.gray)
                 
-                TextField("뜨개질 검색", text: $text)
+                TextField("Search Projects", text: $text)
                     .foregroundStyle(themeManager.currentTheme.textColor)
                     .textFieldStyle(PlainTextFieldStyle())
             }

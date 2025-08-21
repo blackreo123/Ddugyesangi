@@ -7,14 +7,10 @@ struct EmptyStateView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.secondary)
             
-            Text("표시할 내용이 없습니다")
+            Text("Nothing to show")
                 .font(.headline)
                 .foregroundColor(.secondary)
         }
         .padding(.vertical, 60)
     }
 }
-
-#Preview {
-    EmptyStateView()
-} 

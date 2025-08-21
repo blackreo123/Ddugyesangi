@@ -21,26 +21,26 @@ struct PartAddView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                TextField("파트 이름", text: $name)
+                TextField(NSLocalizedString("Part Name", comment: ""), text: $name)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
                 
-                TextField("시작 단수", text: $startRow)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .keyboardType(.numberPad)
-                    .padding(.horizontal)
-                
-                TextField("목표 단수", text: $targetRow)
+                TextField(NSLocalizedString("Start Row", comment: ""), text: $startRow)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .keyboardType(.numberPad)
                     .padding(.horizontal)
                 
-                TextField("시작 코수", text: $startStitch)
+                TextField(NSLocalizedString("Target row", comment: ""), text: $targetRow)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .keyboardType(.numberPad)
                     .padding(.horizontal)
                 
-                TextField("목표 코수", text: $targetStitch)
+                TextField(NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.numberPad)
+                    .padding(.horizontal)
+                
+                TextField(NSLocalizedString("Target Stitch", comment: ""), text: $targetStitch)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .keyboardType(.numberPad)
                     .padding(.horizontal)
@@ -48,17 +48,17 @@ struct PartAddView: View {
                 Spacer()
             }
             .padding(.top)
-            .navigationTitle("새 파트 추가")
+            .navigationTitle("Add New Part")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("취소") {
+                    Button("Cancel") {
                         isPresented = false
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("저장") {
+                    Button("Save") {
                         if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             let startRow = Int16(startRow)
                             let targetRow = Int16(targetRow)
