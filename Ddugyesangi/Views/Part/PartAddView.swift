@@ -32,9 +32,6 @@ struct PartAddView: View {
                 NomalTextField(placeholder: NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
                     .keyboardType(.numberPad)
                 
-                NomalTextField(placeholder: NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
-                    .keyboardType(.numberPad)
-                
                 NomalTextField(placeholder: NSLocalizedString("Target Stitch", comment: ""), text: $targetStitch)
                     .keyboardType(.numberPad)
                 
