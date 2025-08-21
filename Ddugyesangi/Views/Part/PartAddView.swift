@@ -21,29 +21,22 @@ struct PartAddView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                TextField(NSLocalizedString("Part Name", comment: ""), text: $name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
+                NomalTextField(placeholder: NSLocalizedString("Part Name", comment: ""), text: $name)
                 
-                TextField(NSLocalizedString("Start Row", comment: ""), text: $startRow)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                NomalTextField(placeholder: NSLocalizedString("Start Row", comment: ""), text: $startRow)
                     .keyboardType(.numberPad)
-                    .padding(.horizontal)
+               
+                NomalTextField(placeholder: NSLocalizedString("Target row", comment: ""), text: $targetRow)
+                    .keyboardType(.numberPad)
                 
-                TextField(NSLocalizedString("Target row", comment: ""), text: $targetRow)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                NomalTextField(placeholder: NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
                     .keyboardType(.numberPad)
-                    .padding(.horizontal)
                 
-                TextField(NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                NomalTextField(placeholder: NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
                     .keyboardType(.numberPad)
-                    .padding(.horizontal)
                 
-                TextField(NSLocalizedString("Target Stitch", comment: ""), text: $targetStitch)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                NomalTextField(placeholder: NSLocalizedString("Target Stitch", comment: ""), text: $targetStitch)
                     .keyboardType(.numberPad)
-                    .padding(.horizontal)
                 
                 Spacer()
             }
