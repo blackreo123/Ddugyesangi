@@ -305,7 +305,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 789YC4G9T9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ddugyesangi/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "뜨개산기";
+				INFOPLIST_KEY_CFBundleDisplayName = "$(CFBundleDisplayName)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
@@ -344,7 +344,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 789YC4G9T9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ddugyesangi/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "뜨개산기";
+				INFOPLIST_KEY_CFBundleDisplayName = "$(CFBundleDisplayName)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
