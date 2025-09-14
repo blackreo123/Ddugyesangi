@@ -27,8 +27,6 @@ struct PartEditView: View {
         self._name = .init(initialValue: part.name ?? "")
         self._startRow = .init(initialValue: String(part.startRow))
         self._targetRow = .init(initialValue: String(part.targetRow))
-        self._startStitch = .init(initialValue: String(part.startStitch))
-        self._targetStitch = .init(initialValue: String(part.targetStitch))
     }
     
     var body: some View {
@@ -60,22 +58,6 @@ struct PartEditView: View {
                             .keyboardType(.numberPad)
                     }
                     
-                    VStack(alignment: .leading) {
-                        Text("Start Stitch")
-                            .foregroundStyle(.black)
-                            .padding(.horizontal)
-                        NomalTextField(placeholder: NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
-                            .keyboardType(.numberPad)
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("Target Stitch")
-                            .foregroundStyle(.black)
-                            .padding(.horizontal)
-                        NomalTextField(placeholder: NSLocalizedString("Target Stitch", comment: ""), text: $targetStitch)
-                            .keyboardType(.numberPad)
-                    }
-                    
                     Spacer()
                 }
                 .padding(.top)
@@ -94,9 +76,7 @@ struct PartEditView: View {
                             if isNameValid {
                                 let startRow = Int16(startRow)
                                 let targetRow = Int16(targetRow)
-                                let startStitch = Int16(startStitch)
-                                let targetStitch = Int16(targetStitch)
-                                viewModel.updatePart(part: part ,name: name, startRow: startRow ?? 0, targetRow: targetRow ?? 0, startStitch: startStitch ?? 0, targetStitch: targetStitch ?? 0)
+                                viewModel.updatePart(part: part ,name: name, startRow: startRow ?? 0, targetRow: targetRow ?? 0)
                                 isPresented = false
                             }
                         }

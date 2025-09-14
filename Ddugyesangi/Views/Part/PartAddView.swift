@@ -14,9 +14,7 @@ struct PartAddView: View {
     @Binding var isPresented: Bool
     @State private var name = ""
     @State private var startRow = ""
-    @State private var startStitch = ""
     @State private var targetRow = ""
-    @State private var targetStitch = ""
     
     var body: some View {
         NavigationView {
@@ -29,11 +27,6 @@ struct PartAddView: View {
                 NomalTextField(placeholder: NSLocalizedString("Target row", comment: ""), text: $targetRow)
                     .keyboardType(.numberPad)
                 
-                NomalTextField(placeholder: NSLocalizedString("Start Stitch", comment: ""), text: $startStitch)
-                    .keyboardType(.numberPad)
-                
-                NomalTextField(placeholder: NSLocalizedString("Target Stitch", comment: ""), text: $targetStitch)
-                    .keyboardType(.numberPad)
                 
                 Spacer()
             }
@@ -52,9 +45,7 @@ struct PartAddView: View {
                         if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             let startRow = Int16(startRow)
                             let targetRow = Int16(targetRow)
-                            let startStitch = Int16(startStitch)
-                            let targetStitch = Int16(targetStitch)
-                            viewModel.createPart(name: name, startRow: startRow ?? 0, targetRow: targetRow ?? 0, startStitch: startStitch ?? 0, targetStitch: targetStitch ?? 0, project: project)
+                            viewModel.createPart(name: name, startRow: startRow ?? 0, targetRow: targetRow ?? 0, project: project)
                             isPresented = false
                         }
                     }

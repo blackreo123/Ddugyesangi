@@ -20,6 +20,7 @@ struct Counter: View {
     let part: Part
     let viewModel: PartDetailViewModel
     let type: CounterType
+    let isSmart: Bool = false
     @State var count = 0
     @State private var inputText = ""
     @State private var isEditing: Bool = false
@@ -45,7 +46,7 @@ struct Counter: View {
         case .row:
             return (Int(part.currentRow), Int(part.startRow))
         case .stitch:
-            return (Int(part.currentStitch), Int(part.startStitch))
+            return (Int(part.currentStitch), 0)
         }
     }
     
@@ -55,7 +56,7 @@ struct Counter: View {
             case .row:
                 ProgressBarView(currentValue: $count, targetValue: Int(part.targetRow))
             case .stitch:
-                ProgressBarView(currentValue: $count, targetValue: Int(part.targetStitch))
+                 ProgressBarView(currentValue: $count, targetValue: 0)
             }
 
             // 위쪽 화살표 버튼
