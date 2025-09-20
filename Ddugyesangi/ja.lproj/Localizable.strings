@@ -32,3 +32,6 @@
 "red" = "赤";
 "blue" = "青";
 "pink" = "ピンク";
+"Reset" = "リセット";
+"Reset Stitch Count" = "目数をリセット";
+"Are you sure you want to reset the stitch count to 0?" = "目数を０にリセットしますか？";

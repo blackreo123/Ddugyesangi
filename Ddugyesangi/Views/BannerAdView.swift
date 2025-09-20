@@ -6,10 +6,10 @@ struct BannerAdView: UIViewRepresentable {
         let bannerView = GADBannerView(adSize: GADAdSizeBanner)
 #if DEBUG
         // 테스트 광고 ID
-        bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+        bannerView.adUnitID = Constants.AdIDs.bannerTest
 #else
         // 본방
-        bannerView.adUnitID = "ca-app-pub-7521928283190614/6447748065"
+        bannerView.adUnitID = Constants.AdIDs.banner
 #endif
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,

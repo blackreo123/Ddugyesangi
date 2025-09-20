@@ -32,3 +32,6 @@
 "red" = "빨강";
 "blue" = "파랑";
 "pink" = "핑크";
+"Reset" = "리셋";
+"Reset Stitch Count" = "코수 리셋";
+"Are you sure you want to reset the stitch count to 0?" = "코수를 0으로 리셋하시겠습니까?";

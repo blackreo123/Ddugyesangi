@@ -32,6 +32,11 @@ class PartDetailViewModel {
         coreDataManager.decrementCurrentStitch(of: part)
     }
     
+    // 코수 리셋
+    func resetCurrentStitch(part: Part) {
+        coreDataManager.resetCurrentStitch(of: part)
+    }
+    
     // MARK: - Ad Operations
     
     func loadAds() {

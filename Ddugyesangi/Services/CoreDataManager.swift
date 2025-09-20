@@ -159,6 +159,12 @@ class CoreDataManager: ObservableObject {
         save()
     }
     
+    // 코수 리셋
+    func resetCurrentStitch(of part: Part) {
+        part.currentStitch = 0
+        save()
+    }
+    
     // 파트 삭제
     func deletePart(_ part: Part) {
         context.delete(part)

@@ -12,21 +12,15 @@ struct PartDetailView: View {
     @EnvironmentObject var themeManager: ThemeManager
     let part: Part
     let viewModel: PartDetailViewModel = PartDetailViewModel()
-    let isSmart: Bool = false
+    
+    @State private var hasLoadedAds = false
     
     public var body: some View {
         VStack() {
             Spacer()
             HStack(spacing: 40) {
-                VStack(spacing: 20) {
-                    Counter(part: part, viewModel: viewModel, type: .row)
-                    Text("Start Row") + Text(": \(part.startRow)")
-                }
-                VStack(spacing: 20) {
-                    Counter(part: part, viewModel: viewModel, type: .stitch)
-                    isSmart ? Text("Start Stitch") + Text(": 0") : Text(" ")
-                    
-                }
+                Counter(part: part, viewModel: viewModel, type: .row)
+                Counter(part: part, viewModel: viewModel, type: .stitch)
             }
             .navigationTitle(part.name ?? "")
             

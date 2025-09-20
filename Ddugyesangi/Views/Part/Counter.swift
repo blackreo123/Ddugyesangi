@@ -20,11 +20,11 @@ struct Counter: View {
     let part: Part
     let viewModel: PartDetailViewModel
     let type: CounterType
-    let isSmart: Bool = false
     @State var count = 0
     @State private var inputText = ""
     @State private var isEditing: Bool = false
     @FocusState private var isTextFieldFocused: Bool
+    @State private var showingStitchResetAlert = false
     
     init(part: Part, viewModel: PartDetailViewModel, type: CounterType) {
         let (current, min) = Self.extractValues(from: part, type: type)
@@ -119,6 +119,38 @@ struct Counter: View {
                     .foregroundStyle(count > minValue ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
             }
             .disabled(count <= minValue)
+            
+            switch type {
+            case .row:
+                (Text("Start Row") + Text(": \(part.startRow)")).frame(height: 44)
+            case .stitch:
+                if part.isSmart {
+                    // AI 분석 결과: 단수별 목표 코수 표시 (나중에 구현)
+                    Text("AI Pattern Guide")
+                        .font(.caption)
+                        .foregroundStyle(themeManager.currentTheme.secondaryColor)
+                } else {
+                    // 일반 모드: 리셋 버튼
+                    Button(action: {
+                        showingStitchResetAlert = true
+                    }) {
+                        Image(systemName: "arrow.trianglehead.counterclockwise.rotate.90")
+                            .font(.system(size: 24))
+                            .foregroundStyle(count == 0 ? themeManager.currentTheme.secondaryColor : themeManager.currentTheme.primaryColor)
+                            .frame(height: 44)
+                    }
+                    .disabled(count == 0)
+                }
+            }
+        }
+        .alert("Reset Stitch Count", isPresented: $showingStitchResetAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                count = 0
+                viewModel.resetCurrentStitch(part: part)
+            }
+        } message: {
+            Text("Are you sure you want to reset the stitch count to 0?")
         }
     }
     
