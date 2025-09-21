@@ -31,12 +31,14 @@ class BannerAdManager: ObservableObject {
             newBannerView.rootViewController = rootViewController
         }
         
-        // 한 번만 로드
-        if !isLoaded {
+        // ✅ SDK 초기화 완료 후에만 로드
+        if !isLoaded && AdService.shared.isAdLoaded {
             let request = GADRequest()
             newBannerView.load(request)
             isLoaded = true
             print("🟢 배너 광고 로드됨 (한 번만)")
+        } else if !AdService.shared.isAdLoaded {
+            print("⏳ 배너 광고 대기 중 - SDK 초기화 완료 대기")
         }
         
         self.bannerView = newBannerView
@@ -48,6 +50,16 @@ class BannerAdManager: ObservableObject {
         let request = GADRequest()
         banner.load(request)
         print("🟡 배너 광고 새로고침됨")
+    }
+    
+    // ✅ SDK 초기화 완료 후 광고 로드
+    func loadAdIfReady() {
+        guard let banner = bannerView, !isLoaded, AdService.shared.isAdLoaded else { return }
+        
+        let request = GADRequest()
+        banner.load(request)
+        isLoaded = true
+        print("🟢 배너 광고 로드됨 (한 번만)")
     }
 }
 

@@ -43,6 +43,9 @@ class AdService: ObservableObject {
                                 print("     상태: \(adapterStatus.description)")
                             }
                         }
+                        
+                        // ✅ SDK 초기화 완료 후 배너 광고 로드 시도
+                        BannerAdManager.shared.loadAdIfReady()
                     }
                 }
             }
