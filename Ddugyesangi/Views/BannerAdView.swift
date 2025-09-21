@@ -1,26 +1,65 @@
 import SwiftUI
 import GoogleMobileAds
 
-struct BannerAdView: UIViewRepresentable {
-    func makeUIView(context: Context) -> GADBannerView {
-        let bannerView = GADBannerView(adSize: GADAdSizeBanner)
+// MARK: - 싱글톤 배너 광고 관리자
+class BannerAdManager: ObservableObject {
+    static let shared = BannerAdManager()
+    
+    private var bannerView: GADBannerView?
+    private var isLoaded = false
+    
+    private init() {}
+    
+    func getBannerView() -> GADBannerView {
+        if bannerView == nil {
+            createBannerView()
+        }
+        return bannerView!
+    }
+    
+    private func createBannerView() {
+        let newBannerView = GADBannerView(adSize: GADAdSizeBanner)
+        
 #if DEBUG
-        // 테스트 광고 ID
-        bannerView.adUnitID = Constants.AdIDs.bannerTest
+        newBannerView.adUnitID = Constants.AdIDs.bannerTest
 #else
-        // 본방
-        bannerView.adUnitID = Constants.AdIDs.banner
+        newBannerView.adUnitID = Constants.AdIDs.banner
 #endif
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootViewController = windowScene.windows.first?.rootViewController {
-            bannerView.rootViewController = rootViewController
+            newBannerView.rootViewController = rootViewController
         }
-        bannerView.load(GADRequest())
-        return bannerView
+        
+        // 한 번만 로드
+        if !isLoaded {
+            let request = GADRequest()
+            newBannerView.load(request)
+            isLoaded = true
+            print("🟢 배너 광고 로드됨 (한 번만)")
+        }
+        
+        self.bannerView = newBannerView
+    }
+    
+    func refreshAd() {
+        // 필요시에만 광고 새로고침 (예: 5분마다)
+        guard let banner = bannerView else { return }
+        let request = GADRequest()
+        banner.load(request)
+        print("🟡 배너 광고 새로고침됨")
+    }
+}
+
+// MARK: - 개선된 BannerAdView
+struct BannerAdView: UIViewRepresentable {
+    @StateObject private var adManager = BannerAdManager.shared
+    
+    func makeUIView(context: Context) -> GADBannerView {
+        return adManager.getBannerView()
     }
     
     func updateUIView(_ uiView: GADBannerView, context: Context) {
-        // 업데이트 로직이 필요한 경우 여기에 작성
+        // 불필요한 업데이트 방지
     }
 } 

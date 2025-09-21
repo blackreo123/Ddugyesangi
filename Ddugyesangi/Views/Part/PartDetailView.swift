@@ -29,9 +29,7 @@ struct PartDetailView: View {
             bannerAdView
         }
         .background(themeManager.currentTheme.backgroundColor)
-        .onAppear {
-            viewModel.loadAds()
-        }
+        // ✅ onAppear에서 loadAds() 호출 제거 (BannerAdManager에서 자동 처리)
     }
     
     private var bannerAdView: some View {

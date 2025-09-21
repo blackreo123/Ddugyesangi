@@ -12,4 +12,10 @@ struct Constants {
         // static let interstitial = "your-interstitial-ad-id"
         // static let rewarded = "your-rewarded-ad-id"
     }
+    
+    // 앱 설정
+    struct App {
+        static let name = "Ddugyesangi"
+        static let version = "1.5.0"
+    }
 } 

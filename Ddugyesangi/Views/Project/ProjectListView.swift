@@ -69,9 +69,7 @@ struct ProjectListView: View {
         .sheet(isPresented: $showingThemeSelector) {
             ThemeSelector(isPresented: $showingThemeSelector)
         }
-        .onAppear {
-            viewModel.loadAds()
-        }
+        // ✅ onAppear에서 loadAds() 호출 제거 (BannerAdManager에서 자동 처리)
     }
 }
 
