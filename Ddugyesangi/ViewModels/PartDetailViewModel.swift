@@ -22,6 +22,11 @@ class PartDetailViewModel {
         coreDataManager.decrementCurrentRow(of: part)
     }
     
+    // 단수 한번에 업다운
+    func updateCurrentRow(part: Part, to newValue: Int16) {
+        coreDataManager.updateCurrentRow(of: part, to: newValue)
+    }
+    
     // 코수 업
     func incrementCurrentStitch(part: Part) {
         coreDataManager.incrementCurrentStitch(of: part)
@@ -30,6 +35,10 @@ class PartDetailViewModel {
     // 코수 다운
     func decrementCurrentStitch(part: Part) {
         coreDataManager.decrementCurrentStitch(of: part)
+    }
+    
+    func updateCurrentStitch(part: Part, to newValue: Int16) {
+        coreDataManager.updateCurrentStitch(of: part, to: newValue)
     }
     
     // 코수 리셋

@@ -163,8 +163,17 @@ struct Counter: View {
     
     // 편집 완료
     private func commitEdit() {
-        if let newValue = Int(inputText), newValue > minValue {
-            count = newValue
+        switch type {
+        case .row:
+            if let newValue = Int(inputText), newValue > minValue, newValue <= part.targetRow {
+                count = newValue
+                viewModel.updateCurrentRow(part: part, to: Int16(newValue))
+            }
+        case .stitch:
+            if let newValue = Int(inputText), newValue > minValue {
+                count = newValue
+                viewModel.updateCurrentStitch(part: part, to: Int16(newValue))
+            }
         }
         isEditing = false
         isTextFieldFocused = false

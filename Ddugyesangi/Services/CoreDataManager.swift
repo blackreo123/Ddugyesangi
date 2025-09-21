@@ -147,6 +147,11 @@ class CoreDataManager: ObservableObject {
         save()
     }
     
+    func updateCurrentRow(of part: Part, to value: Int16) {
+        part.currentRow = value
+        save()
+    }
+    
     // 코수 업
     func incrementCurrentStitch(of part: Part) {
         part.currentStitch += 1
@@ -156,6 +161,11 @@ class CoreDataManager: ObservableObject {
     // 코수 다운
     func decrementCurrentStitch(of part: Part) {
         part.currentStitch -= 1
+        save()
+    }
+    
+    func updateCurrentStitch(of part: Part, to value: Int16) {
+        part.currentStitch = value
         save()
     }
     
