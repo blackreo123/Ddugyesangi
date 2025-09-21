@@ -1,93 +1,77 @@
 import Foundation
-import Foundation
 import GoogleMobileAds
 
-class AdService: ObservableObject {
-    static let shared = AdService()
-    
-    @Published var isAdLoaded = false
+class AdService: NSObject, ObservableObject, GADBannerViewDelegate {
+    @Published var isBannerAdLoaded = false
     @Published var adError: String?
     
-    private var isSDKInitialized = false
-    private let initializationQueue = DispatchQueue(label: "com.ddugyesangi.ad-init", qos: .userInitiated)
+    private var bannerView: GADBannerView?
     
-    private init() {
-        setupAds()
+    override init() {
+        super.init()
+        setupBannerAd()
     }
     
-    private func setupAds() {
-        print("🚀 AdService: 광고 서비스 초기화 시작")
-        // LifecycleManager에서 이미 ATT를 처리하므로 바로 SDK 초기화
-        initializeGoogleMobileAds()
-    }
-    
-    private func initializeGoogleMobileAds() {
-        let workItem = DispatchWorkItem { [weak self] in
-                guard let self = self, !self.isSDKInitialized else { return }
-                
-                print("🚀 Google Mobile Ads SDK 초기화 중...")
-                
-                GADMobileAds.sharedInstance().start { [weak self] status in
-                    DispatchQueue.main.async {
-                        self?.isSDKInitialized = true
-                        self?.isAdLoaded = true
-                        
-                        print("✅ Google Mobile Ads SDK 초기화 완료")
-                        print("📱 이제 광고가 시작됩니다")
-                        
-                        for (adapterClass, adapterStatus) in status.adapterStatusesByClassName {
-                            let state = adapterStatus.state == .ready ? "준비됨 ✅" : "준비안됨 ❌"
-                            print("  - \(adapterClass): \(state)")
-                            
-                            if adapterStatus.state != .ready {
-                                print("     상태: \(adapterStatus.description)")
-                            }
-                        }
-                        
-                        // ✅ SDK 초기화 완료 후 배너 광고 로드 시도
-                        BannerAdManager.shared.loadAdIfReady()
-                    }
-                }
-            }
-            initializationQueue.async(execute: workItem)
+    private func setupBannerAd() {
+        print("🚀 AdService: 배너 광고 설정 시작")
+        
+        let bannerView = GADBannerView(adSize: GADAdSizeBanner)
+        
+        #if DEBUG
+        bannerView.adUnitID = Constants.AdIDs.bannerTest
+        #else
+        bannerView.adUnitID = Constants.AdIDs.banner
+        #endif
+        
+        bannerView.delegate = self
+        
+        // rootViewController 설정
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
+            bannerView.rootViewController = rootViewController
+        }
+        
+        self.bannerView = bannerView
     }
     
     func loadBannerAd() {
-        guard isSDKInitialized else {
-            print("⚠️ AdService: SDK 초기화 대기 중...")
-            adError = "SDK 초기화 중"
-            return
-        }
+        guard let bannerView = bannerView else { return }
         
-        // ✅ 중복 로드 방지 - BannerAdManager에서 처리
-        // 필요시에만 새로고침 호출
-        BannerAdManager.shared.refreshAd()
-        isAdLoaded = true
-        print("🔄 AdService: 배너 광고 새로고침 요청")
+        let request = GADRequest()
+        bannerView.load(request)
+        print("🔄 배너 광고 로드 요청됨")
     }
     
-    // MARK: - 전면 광고 및 보상 광고는 사용하지 않음
-    
-    func showInterstitialAd() {
-        print("📺 AdService: 전면 광고는 사용하지 않습니다")
-        // 전면 광고 사용하지 않음
+    func getBannerView() -> GADBannerView? {
+        return bannerView
     }
     
-    func showRewardedAd() {
-        print("🎁 AdService: 보상형 광고는 사용하지 않습니다")
-        // 보상형 광고 사용하지 않음
-    }
-    
-    // MARK: - Helper Methods
-    
-    /// 디버그 정보 출력
-    func printDebugInfo() {
-        print("🔍 AdService 디버그 정보:")
-        print("   - SDK 초기화: \(isSDKInitialized ? "완료" : "대기중")")
-        print("   - 광고 로드: \(isAdLoaded ? "완료" : "대기중")")
-        if let error = adError {
-            print("   - 오류: \(error)")
+    // MARK: - GADBannerViewDelegate
+    func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
+        DispatchQueue.main.async {
+            self.isBannerAdLoaded = true
+            self.adError = nil
+            print("✅ 배너 광고 로드 성공")
         }
-        print("   - ATT는 LifecycleManager에서 관리됨")
     }
-} 
+    
+    func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
+        DispatchQueue.main.async {
+            self.isBannerAdLoaded = false
+            self.adError = error.localizedDescription
+            print("❌ 배너 광고 로드 실패: \(error.localizedDescription)")
+        }
+    }
+    
+    func bannerViewDidRecordImpression(_ bannerView: GADBannerView) {
+        print("👁️ 배너 광고 노출됨")
+    }
+    
+    func bannerViewWillPresentScreen(_ bannerView: GADBannerView) {
+        print("📱 배너 광고 화면 표시됨")
+    }
+    
+    func bannerViewWillDismissScreen(_ bannerView: GADBannerView) {
+        print("📱 배너 광고 화면 닫힘")
+    }
+}

@@ -7,8 +7,8 @@
 
 import Foundation
 
-class PartDetailViewModel {
-    @Published var adService = AdService.shared
+class PartDetailViewModel: ObservableObject {
+    @Published var adService = AdService()
     private let coreDataManager = CoreDataManager.shared
     
     
@@ -44,19 +44,5 @@ class PartDetailViewModel {
     // 코수 리셋
     func resetCurrentStitch(part: Part) {
         coreDataManager.resetCurrentStitch(of: part)
-    }
-    
-    // MARK: - Ad Operations
-    
-    func loadAds() {
-        adService.loadBannerAd()
-    }
-    
-    func showInterstitialAd() {
-        adService.showInterstitialAd()
-    }
-    
-    func showRewardedAd() {
-        adService.showRewardedAd()
     }
 }

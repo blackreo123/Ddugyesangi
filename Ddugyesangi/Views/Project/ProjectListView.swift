@@ -38,9 +38,7 @@ struct ProjectListView: View {
             .background(themeManager.currentTheme.backgroundColor)
             
             // 배너 광고 영역 (고정 위치)
-            BannerAdView()
-                .frame(height: 50)
-                .background(themeManager.currentTheme.backgroundColor)
+            bannerAdView
         }
         .background(themeManager.currentTheme.backgroundColor)
         .navigationTitle("Project List")
@@ -69,7 +67,15 @@ struct ProjectListView: View {
         .sheet(isPresented: $showingThemeSelector) {
             ThemeSelector(isPresented: $showingThemeSelector)
         }
-        // ✅ onAppear에서 loadAds() 호출 제거 (BannerAdManager에서 자동 처리)
+        .onAppear {
+            // onAppear에서 광고 로드
+            viewModel.adService.loadBannerAd()
+        }
+    }
+    
+    // 배너 광고 뷰
+    private var bannerAdView: some View {
+        BannerAdContainerView(adService: viewModel.adService)
     }
 }
 

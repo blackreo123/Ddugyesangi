@@ -1,28 +1,15 @@
 import Foundation
-import Combine
 import CoreData
 
 class ProjectListViewModel: ObservableObject {
-    @Published var isLoading = false
-    @Published var adService = AdService.shared
+    @Published var adService = AdService()
     @Published var projects: [Project] = []
     @Published var searchText = ""
     
     private let coreDataManager = CoreDataManager.shared
-    private var cancellables = Set<AnyCancellable>()
     
     init() {
-        setupBindings()
         loadProjects()
-    }
-    
-    private func setupBindings() {
-        // AdService와의 바인딩 설정
-        adService.$isAdLoaded
-            .sink { [weak self] isLoaded in
-                self?.isLoading = !isLoaded
-            }
-            .store(in: &cancellables)
     }
     
     // MARK: - Core Data Operations
@@ -60,20 +47,6 @@ class ProjectListViewModel: ObservableObject {
                 project.name?.localizedCaseInsensitiveContains(searchText) ?? false
             }
         }
-    }
-    
-    // MARK: - Ad Operations
-    
-    func loadAds() {
-        adService.loadBannerAd()
-    }
-    
-    func showInterstitialAd() {
-        adService.showInterstitialAd()
-    }
-    
-    func showRewardedAd() {
-        adService.showRewardedAd()
     }
     
     // MARK: - Utility Methods

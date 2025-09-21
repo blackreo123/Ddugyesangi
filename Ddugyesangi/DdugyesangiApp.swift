@@ -7,11 +7,9 @@ struct DdugyesangiApp: App {
     @StateObject private var lifecycleManager = LifecycleManager()
     
     init() {
-        // 앱 시작 시 Google Mobile Ads 초기화
+        // 앱 시작 시 Google Mobile Ads 초기화만 진행
         GADMobileAds.sharedInstance().start(completionHandler: nil)
-        
-        // AdService 초기화
-        _ = AdService.shared
+        print("🚀 Google Mobile Ads SDK 초기화 완료")
     }
     
     var body: some Scene {

@@ -9,7 +9,7 @@ import Foundation
 
 class PartListViewModel: ObservableObject {
     @Published var partList: [Part] = []
-    @Published var adService = AdService.shared
+    @Published var adService = AdService()
     
     private let project: Project
     private let coreDataManager = CoreDataManager.shared
@@ -40,19 +40,5 @@ class PartListViewModel: ObservableObject {
     
     var partListIsEmpty: Bool {
         return partList.isEmpty
-    }
-    
-    // MARK: - Ad Operations
-    
-    func loadAds() {
-        adService.loadBannerAd()
-    }
-    
-    func showInterstitialAd() {
-        adService.showInterstitialAd()
-    }
-    
-    func showRewardedAd() {
-        adService.showRewardedAd()
     }
 }

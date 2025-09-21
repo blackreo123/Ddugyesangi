@@ -11,9 +11,7 @@ import SwiftUI
 struct PartDetailView: View {
     @EnvironmentObject var themeManager: ThemeManager
     let part: Part
-    let viewModel: PartDetailViewModel = PartDetailViewModel()
-    
-    @State private var hasLoadedAds = false
+    @StateObject private var viewModel = PartDetailViewModel()
     
     public var body: some View {
         VStack() {
@@ -29,12 +27,13 @@ struct PartDetailView: View {
             bannerAdView
         }
         .background(themeManager.currentTheme.backgroundColor)
-        // ✅ onAppear에서 loadAds() 호출 제거 (BannerAdManager에서 자동 처리)
+        .onAppear {
+            // onAppear에서 광고 로드
+            viewModel.adService.loadBannerAd()
+        }
     }
     
     private var bannerAdView: some View {
-        BannerAdView()
-            .frame(height: 50)
-            .background(themeManager.currentTheme.backgroundColor)
+        BannerAdContainerView(adService: viewModel.adService)
     }
 }

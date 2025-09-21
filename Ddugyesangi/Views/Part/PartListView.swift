@@ -34,7 +34,8 @@ struct PartListView: View {
             PartAddView(viewModel: viewModel, project: project, isPresented: $showingAddPart)
         }
         .onAppear {
-            viewModel.loadAds()
+            // onAppear에서 광고 로드
+            viewModel.adService.loadBannerAd()
         }
     }
     
@@ -69,9 +70,7 @@ struct PartListView: View {
     }
     
     private var bannerAdView: some View {
-        BannerAdView()
-            .frame(height: 50)
-            .background(themeManager.currentTheme.backgroundColor)
+        BannerAdContainerView(adService: viewModel.adService)
     }
     
     @ToolbarContentBuilder
