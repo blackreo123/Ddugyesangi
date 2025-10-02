@@ -36,18 +36,26 @@ struct ProjectListView: View {
                 .padding(.bottom, 16)
             }
             .background(themeManager.currentTheme.backgroundColor)
-            
-            // 배너 광고 영역 (고정 위치)
-            bannerAdView
         }
         .background(themeManager.currentTheme.backgroundColor)
         .navigationTitle("Project List")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    showingAddProject = true
-                }) {
+                Menu {
+                    Button(action: {
+                        // 스마트 추가 기능 - 향후 구현
+                        // showingSmartAdd = true
+                    }) {
+                        Label("스마트 추가", systemImage: "wand.and.rays")
+                    }
+                    
+                    Button(action: {
+                        showingAddProject = true
+                    }) {
+                        Label("일반 추가", systemImage: "plus.circle")
+                    }
+                } label: {
                     Image(systemName: "plus")
                 }
             }
@@ -67,15 +75,6 @@ struct ProjectListView: View {
         .sheet(isPresented: $showingThemeSelector) {
             ThemeSelector(isPresented: $showingThemeSelector)
         }
-        .onAppear {
-            // onAppear에서 광고 로드
-            viewModel.adService.loadBannerAd()
-        }
-    }
-    
-    // 배너 광고 뷰
-    private var bannerAdView: some View {
-        BannerAdContainerView(adService: viewModel.adService)
     }
 }
 

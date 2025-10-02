@@ -87,14 +87,16 @@ class CoreDataManager: ObservableObject {
     // MARK: - Part CRUD Operations
     
     // 파트 생성
-    func createPart(name: String, startRow: Int16, targetRow: Int16, project: Project) -> Part {
+    func createPart(name: String, targetRow: Int16, targetStitch: Int16 = 0, project: Project) -> Part {
         let part = Part(context: context)
         part.id = UUID()
         part.name = name
-        part.startRow = startRow
         part.targetRow = targetRow
-        part.currentRow = startRow
-        part.project = project // 관계 설정
+        part.currentRow = 0
+        part.targetStitch = targetStitch
+        part.currentStitch = 0
+        part.project = project
+        part.isSmart = false
         
         save()
         return part
@@ -128,9 +130,8 @@ class CoreDataManager: ObservableObject {
     }
     
     // 파트 수정
-    func updatePart(_ part: Part, name: String, startRow: Int16, targetRow: Int16) {
+    func updatePart(_ part: Part, name: String, targetRow: Int16) {
         part.name = name
-        part.startRow = startRow
         part.targetRow = targetRow
         save()
     }

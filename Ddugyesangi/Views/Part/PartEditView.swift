@@ -25,7 +25,6 @@ struct PartEditView: View {
         self.viewModel = viewModel
         self._isPresented = isPresented
         self._name = .init(initialValue: part.name ?? "")
-        self._startRow = .init(initialValue: String(part.startRow))
         self._targetRow = .init(initialValue: String(part.targetRow))
     }
     
@@ -40,14 +39,6 @@ struct PartEditView: View {
                             .foregroundStyle(.black)
                             .padding(.horizontal)
                         NomalTextField(placeholder: NSLocalizedString("Part Name", comment: ""), text: $name)
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("Start Row")
-                            .foregroundStyle(.black)
-                            .padding(.horizontal)
-                        NomalTextField(placeholder: NSLocalizedString("Start Row", comment: ""), text: $startRow)
-                            .keyboardType(.numberPad)
                     }
                     
                     VStack(alignment: .leading) {
@@ -76,7 +67,7 @@ struct PartEditView: View {
                             if isNameValid {
                                 let startRow = Int16(startRow)
                                 let targetRow = Int16(targetRow)
-                                viewModel.updatePart(part: part ,name: name, startRow: startRow ?? 0, targetRow: targetRow ?? 0)
+                                viewModel.updatePart(part: part ,name: name, targetRow: targetRow ?? 0)
                                 isPresented = false
                             }
                         }

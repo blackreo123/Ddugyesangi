@@ -13,7 +13,7 @@ struct PartListView: View {
     @StateObject private var viewModel : PartListViewModel
     @State private var showingAddPart = false
     let project : Project
-
+    
     init(project: Project) {
         self.project = project
         // StateObject 초기화
@@ -23,7 +23,6 @@ struct PartListView: View {
     var body: some View {
         VStack(spacing: 0) {
             contentView
-            bannerAdView
         }
         .navigationTitle(project.name ?? "")
         .navigationBarTitleDisplayMode(.large)
@@ -32,10 +31,7 @@ struct PartListView: View {
         }
         .sheet(isPresented: $showingAddPart) {
             PartAddView(viewModel: viewModel, project: project, isPresented: $showingAddPart)
-        }
-        .onAppear {
-            // onAppear에서 광고 로드
-            viewModel.adService.loadBannerAd()
+                .presentationDetents([.fraction(0.25)])
         }
     }
     
@@ -67,10 +63,6 @@ struct PartListView: View {
                             onDelete: { viewModel.deletePart(part: part) })
             }
         }
-    }
-    
-    private var bannerAdView: some View {
-        BannerAdContainerView(adService: viewModel.adService)
     }
     
     @ToolbarContentBuilder

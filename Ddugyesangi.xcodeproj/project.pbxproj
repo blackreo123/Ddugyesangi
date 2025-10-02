@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		62B18DE12E815CCE00C7ED06 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 62B18DE02E815CCE00C7ED06 /* Alamofire */; };
 		62E8BCFC2D25040C0082A0A9 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 62E8BCFB2D25040C0082A0A9 /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				62E8BCFC2D25040C0082A0A9 /* GoogleMobileAds in Frameworks */,
+				62B18DE12E815CCE00C7ED06 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +133,7 @@
 			name = Ddugyesangi;
 			packageProductDependencies = (
 				62E8BCFB2D25040C0082A0A9 /* GoogleMobileAds */,
+				62B18DE02E815CCE00C7ED06 /* Alamofire */,
 			);
 			productName = Ddugyesangi;
 			productReference = 6277CA152D2448200028F852 /* Ddugyesangi.app */;
@@ -218,6 +221,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				62E8BCFA2D25040C0082A0A9 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				62B18DDF2E815CCE00C7ED06 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6277CA162D2448200028F852 /* Products */;
@@ -600,6 +604,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		62B18DDF2E815CCE00C7ED06 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
 		62E8BCFA2D25040C0082A0A9 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
@@ -611,6 +623,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		62B18DE02E815CCE00C7ED06 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 62B18DDF2E815CCE00C7ED06 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
 		62E8BCFB2D25040C0082A0A9 /* GoogleMobileAds */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 62E8BCFA2D25040C0082A0A9 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;

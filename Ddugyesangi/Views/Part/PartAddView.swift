@@ -13,16 +13,12 @@ struct PartAddView: View {
     let project: Project
     @Binding var isPresented: Bool
     @State private var name = ""
-    @State private var startRow = ""
     @State private var targetRow = ""
     
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
                 NomalTextField(placeholder: NSLocalizedString("Part Name", comment: ""), text: $name)
-                
-                NomalTextField(placeholder: NSLocalizedString("Start Row", comment: ""), text: $startRow)
-                    .keyboardType(.numberPad)
                
                 NomalTextField(placeholder: NSLocalizedString("Target row", comment: ""), text: $targetRow)
                     .keyboardType(.numberPad)
@@ -43,9 +39,8 @@ struct PartAddView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            let startRow = Int16(startRow)
                             let targetRow = Int16(targetRow)
-                            viewModel.createPart(name: name, startRow: startRow ?? 0, targetRow: targetRow ?? 0, project: project)
+                            viewModel.createPart(name: name, targetRow: targetRow ?? 0, project: project)
                             isPresented = false
                         }
                     }

@@ -18,4 +18,15 @@ struct Constants {
         static let name = "Ddugyesangi"
         static let version = "1.5.0"
     }
-} 
+    
+    struct Claude {
+        static let apiKey: String = {
+            guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+                  let plist = NSDictionary(contentsOfFile: path),
+                  let apiKey = plist["CLAUDE_API_KEY"] as? String else {
+                return ""
+            }
+            return apiKey
+        }()
+    }
+}

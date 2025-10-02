@@ -15,7 +15,6 @@ enum CounterType {
 
 struct Counter: View {
     @EnvironmentObject var themeManager: ThemeManager
-    let minValue: Int
     let currentValue: Int?
     let part: Part
     let viewModel: PartDetailViewModel
@@ -27,26 +26,25 @@ struct Counter: View {
     @State private var showingStitchResetAlert = false
     
     init(part: Part, viewModel: PartDetailViewModel, type: CounterType) {
-        let (current, min) = Self.extractValues(from: part, type: type)
+        let current = Self.extractCurrentValue(from: part, type: type)
         self.part = part
         self.currentValue = current
-        self.minValue = min
         self.viewModel = viewModel
         self.type = type
         
-        if let currentValue = currentValue {
+        if let currentValue = current {
             self._count = State(initialValue: currentValue)
         } else {
-            self._count = State(initialValue: minValue)
+            self._count = State(initialValue: 0)
         }
     }
     
-    private static func extractValues(from part: Part, type: CounterType) -> (current: Int?, min: Int) {
+    private static func extractCurrentValue(from part: Part, type: CounterType) -> Int? {
         switch type {
         case .row:
-            return (Int(part.currentRow), Int(part.startRow))
+            return Int(part.currentRow)
         case .stitch:
-            return (Int(part.currentStitch), 0)
+            return Int(part.currentStitch)
         }
     }
     
@@ -105,7 +103,7 @@ struct Counter: View {
             
             // 아래쪽 화살표 버튼
             Button(action: {
-                if count > minValue {
+                if count > 0 {
                     count -= 1
                     if type == .row {
                         viewModel.decrementCurrentRow(part: part)
@@ -116,13 +114,13 @@ struct Counter: View {
             }) {
                 Image(systemName: "chevron.down.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundStyle(count > minValue ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
+                    .foregroundStyle(count > 0 ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
             }
-            .disabled(count <= minValue)
+            .disabled(count <= 0)
             
             switch type {
             case .row:
-                (Text("Start Row") + Text(": \(part.startRow)")).frame(height: 44)
+                Text("").frame(height: 44)
             case .stitch:
                 if part.isSmart {
                     // AI 분석 결과: 단수별 목표 코수 표시 (나중에 구현)
@@ -165,12 +163,12 @@ struct Counter: View {
     private func commitEdit() {
         switch type {
         case .row:
-            if let newValue = Int(inputText), newValue > minValue, newValue <= part.targetRow {
+            if let newValue = Int(inputText), newValue > 0, newValue <= part.targetRow {
                 count = newValue
                 viewModel.updateCurrentRow(part: part, to: Int16(newValue))
             }
         case .stitch:
-            if let newValue = Int(inputText), newValue > minValue {
+            if let newValue = Int(inputText), newValue > 0 {
                 count = newValue
                 viewModel.updateCurrentStitch(part: part, to: Int16(newValue))
             }
