@@ -151,5 +151,5 @@ exportOptions.plist
 # Documentation
 docs/
 
-# Custom project specific
-# Add your own project specific ignores here
+# API Keys and sensitive configuration
+Config.plist
