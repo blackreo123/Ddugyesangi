@@ -15,7 +15,6 @@ struct PartEditView: View {
     @Binding var isPresented: Bool
     
     @State private var name = ""
-    @State private var startRow = ""
     @State private var startStitch = ""
     @State private var targetRow = ""
     @State private var targetStitch = ""
@@ -65,7 +64,6 @@ struct PartEditView: View {
                         let isNameValid = !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                         Button("Save") {
                             if isNameValid {
-                                let startRow = Int16(startRow)
                                 let targetRow = Int16(targetRow)
                                 viewModel.updatePart(part: part ,name: name, targetRow: targetRow ?? 0)
                                 isPresented = false

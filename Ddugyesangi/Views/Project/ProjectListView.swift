@@ -4,6 +4,7 @@ struct ProjectListView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var viewModel = ProjectListViewModel()
     @State private var showingAddProject = false
+    @State private var showingSmartAdd = false
     @State private var showingThemeSelector = false
     
     var body: some View {
@@ -44,8 +45,7 @@ struct ProjectListView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
                     Button(action: {
-                        // 스마트 추가 기능 - 향후 구현
-                        // showingSmartAdd = true
+                        showingSmartAdd = true
                     }) {
                         Label("스마트 추가", systemImage: "wand.and.rays")
                     }
@@ -71,6 +71,9 @@ struct ProjectListView: View {
         .sheet(isPresented: $showingAddProject) {
                 ProjectAddView(viewModel: viewModel, isPresented: $showingAddProject)
                 .presentationDetents([.fraction(0.25)])
+        }
+        .sheet(isPresented: $showingSmartAdd) {
+            SmartAddView(isPresented: $showingSmartAdd)
         }
         .sheet(isPresented: $showingThemeSelector) {
             ThemeSelector(isPresented: $showingThemeSelector)

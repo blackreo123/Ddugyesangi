@@ -7,19 +7,18 @@
 
 import Foundation
 
-struct KnittingAnalysis: Codable {
+struct KnittingAnalysis: Codable, Equatable {
     let projectName: String
     let parts: [KnittingPart]
 }
 
-struct KnittingPart: Codable {
+struct KnittingPart: Codable, Equatable {
     let partName: String
-    let startRow: Int
     let targetRow: Int
     let stitchGuide: [StitchGuide]
 }
 
-struct StitchGuide: Codable {
+struct StitchGuide: Codable, Equatable {
     let row: Int
     let targetStitch: Int
 }

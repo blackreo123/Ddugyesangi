@@ -28,5 +28,12 @@ struct Constants {
             }
             return apiKey
         }()
+        
+        // Claude API 설정
+        static let anthropicVersion = "2023-06-01"
+        static let baseURL = "https://api.anthropic.com/v1"
+        
+        // 모델 캐시 설정 (1시간)
+        static let modelCacheExpiration: TimeInterval = 3600
     }
 }
