@@ -85,6 +85,7 @@ struct SmartAddView: View {
             fileReselectionButton
             Spacer()
             analysisSection
+            noticeSection
         }
     }
     
@@ -302,8 +303,42 @@ struct SmartAddView: View {
     
     private var analysisButtonBackground: some View {
         RoundedRectangle(cornerRadius: 12)
-            .fill(aiManager.isAnalyzing || !aiManager.canUseAIAnalysis() ? 
+            .fill(aiManager.isAnalyzing || !aiManager.canUseAIAnalysis() ?
                   themeManager.currentTheme.secondaryColor : themeManager.currentTheme.primaryColor)
+    }
+    
+    private var noticeSection: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: "info.circle.fill")
+                    .font(.system(size: 14))
+                Text("주의사항")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundColor(themeManager.currentTheme.secondaryColor)
+            
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .top, spacing: 6) {
+                    Text("•")
+                    Text("AI를 사용한 도안 분석은 정확하지 않을 수 있습니다. 분석이 완료되면 반드시 확인해 주세요.")
+                }
+                
+                HStack(alignment: .top, spacing: 6) {
+                    Text("•")
+                    Text("파일이 단순하고 정확한 숫자가 나와 있을수록 분석 정확도가 올라갑니다.")
+                }
+            }
+            .font(.system(size: 12))
+            .foregroundColor(themeManager.currentTheme.secondaryColor)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(themeManager.currentTheme.secondaryColor.opacity(0.1))
+        )
+        .padding(.horizontal, 16)
+        .padding(.bottom, 20)
     }
     
     // MARK: - Helper Methods
@@ -326,11 +361,11 @@ struct SmartAddView: View {
         
         if lowercasedFileName.hasSuffix(".pdf") {
             return "doc.fill"
-        } else if lowercasedFileName.hasSuffix(".jpg") || 
-                  lowercasedFileName.hasSuffix(".jpeg") || 
-                  lowercasedFileName.hasSuffix(".png") || 
-                  lowercasedFileName.hasSuffix(".heic") || 
-                  lowercasedFileName.hasSuffix(".heif") {
+        } else if lowercasedFileName.hasSuffix(".jpg") ||
+                    lowercasedFileName.hasSuffix(".jpeg") ||
+                    lowercasedFileName.hasSuffix(".png") ||
+                    lowercasedFileName.hasSuffix(".heic") ||
+                    lowercasedFileName.hasSuffix(".heif") {
             return "photo.fill"
         } else {
             return "doc.fill"
