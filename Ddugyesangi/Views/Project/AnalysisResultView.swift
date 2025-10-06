@@ -215,6 +215,11 @@ struct AnalysisResultView: View {
             
             isCreatingProject = false
             isPresented = false
+            
+            NotificationCenter.default.post(
+                name: NSNotification.Name(rawValue: "dismissSmartAddView"),
+                object: nil
+            )
         }
     }
 }

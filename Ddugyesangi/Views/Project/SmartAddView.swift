@@ -72,6 +72,9 @@ struct SmartAddView: View {
                 showingErrorAlert = true
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("dismissSmartAddView"))) { _ in
+            isPresented = false
+        }
     }
     
     // MARK: - View Components
