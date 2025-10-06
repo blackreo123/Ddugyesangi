@@ -18,7 +18,6 @@ extension CoreDataManager {
     func createSmartPart(
         name: String,
         targetRow: Int16,
-        stitchGuides: [StitchGuide],
         project: Project
     ) -> Part {
         let part = Part(context: context)
@@ -27,10 +26,8 @@ extension CoreDataManager {
         part.targetRow = targetRow
         part.currentRow = 0
         part.currentStitch = 0
-        part.targetStitch = 0
         part.isSmart = true
         part.project = project
-        part.stitchGuides = stitchGuides
         
         save()
         return part
@@ -45,8 +42,7 @@ extension CoreDataManager {
         for knittingPart in analysis.parts {
             _ = createSmartPart(
                 name: knittingPart.partName,
-                targetRow: Int16(knittingPart.targetRow ?? 0), // Optional 처리: nil이면 0
-                stitchGuides: knittingPart.stitchGuide,
+                targetRow: Int16(knittingPart.targetRow ?? 0),
                 project: project
             )
         }
@@ -82,32 +78,6 @@ extension CoreDataManager {
             print("❌ Error fetching regular parts: \(error)")
             return []
         }
-    }
-    
-    // MARK: - 스마트 파트 코수 업데이트
-    
-    /// 스마트 파트의 현재 코수 업데이트 (목표 코수 자동 조정)
-    func updateSmartPartStitch(of part: Part, to value: Int16) {
-        guard part.isSmart else {
-            // 일반 파트는 기존 방식 사용
-            updateCurrentStitch(of: part, to: value)
-            return
-        }
-        
-        part.currentStitch = value
-        
-        // 현재 단수의 목표 코수와 비교하여 자동으로 다음 단수로 진행할지 판단
-        let currentTargetStitch = part.getCurrentTargetStitch()
-        
-        if value >= currentTargetStitch && part.currentRow < part.targetRow {
-            // 목표 코수 달성시 자동으로 다음 단수로
-            part.currentRow += 1
-            part.currentStitch = 0
-            
-            print("🎉 \(part.name ?? "파트") - \(part.currentRow-1)단 완료! 다음 단수로 이동")
-        }
-        
-        save()
     }
     
     // MARK: - 디버깅 메서드

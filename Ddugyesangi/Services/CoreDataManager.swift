@@ -93,7 +93,6 @@ class CoreDataManager: ObservableObject {
         part.name = name
         part.targetRow = targetRow
         part.currentRow = 0
-        part.targetStitch = targetStitch
         part.currentStitch = 0
         part.project = project
         part.isSmart = false

@@ -178,10 +178,7 @@ struct AnalysisResultView: View {
         editedParts = analysisResult.parts.map { part in
             EditableKnittingPart(
                 partName: part.partName,
-                targetRow: part.targetRow ?? 0,
-                stitchGuide: part.stitchGuide.map { guide in
-                    EditableStitchGuide(row: guide.row ?? 0, targetStitch: guide.targetStitch ?? 0)
-                }
+                targetRow: part.targetRow ?? 0
             )
         }
     }
@@ -189,8 +186,7 @@ struct AnalysisResultView: View {
     private func addNewPart() {
         let newPart = EditableKnittingPart(
             partName: "새 파트 \(editedParts.count + 1)",
-            targetRow: 10,
-            stitchGuide: []
+            targetRow: 10
         )
         editedParts.append(newPart)
     }
@@ -221,9 +217,6 @@ struct AnalysisResultView: View {
             KnittingPart(
                 partName: editablePart.partName,
                 targetRow: editablePart.targetRow,
-                stitchGuide: editablePart.stitchGuide.map { editableGuide in
-                    StitchGuide(row: editableGuide.row, targetStitch: editableGuide.targetStitch)
-                }
             )
         }
         
@@ -244,12 +237,6 @@ struct AnalysisResultView: View {
 struct EditableKnittingPart {
     var partName: String
     var targetRow: Int
-    var stitchGuide: [EditableStitchGuide]
-}
-
-struct EditableStitchGuide {
-    var row: Int
-    var targetStitch: Int
 }
 
 // MARK: - Editable Part View
@@ -322,13 +309,6 @@ struct EditablePartView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .keyboardType(.numberPad)
                     }
-                    
-                    // 스티치 가이드 개수 표시
-                    if !part.stitchGuide.isEmpty {
-                        Text("스티치 가이드: \(part.stitchGuide.count)개")
-                            .font(.caption)
-                            .foregroundColor(themeManager.currentTheme.secondaryColor)
-                    }
                 }
                 .padding(.top, 8)
                 .padding(.horizontal, 16)
@@ -351,11 +331,7 @@ struct EditablePartView: View {
             parts: [
                 KnittingPart(
                     partName: "몸통",
-                    targetRow: 50,
-                    stitchGuide: [
-                        StitchGuide(row: 10, targetStitch: 20),
-                        StitchGuide(row: 25, targetStitch: 30)
-                    ]
+                    targetRow: 50
                 )
             ]
         ),
