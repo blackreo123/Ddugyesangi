@@ -342,8 +342,6 @@ struct SmartAddView: View {
     }
 }
 
-// MARK: - FilePickerView는 별도 파일에 정의됨 (FilePickerView.swift)
-
 #Preview {
     SmartAddView(isPresented: .constant(true))
         .environmentObject(ThemeManager())

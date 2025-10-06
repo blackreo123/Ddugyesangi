@@ -21,16 +21,7 @@ struct AnalysisResultView: View {
     @State private var alertMessage = ""
     @State private var showingDeleteConfirmation = false
     @State private var partToDelete: Int?
-    
-    // 키보드 관련 상태
-    @FocusState private var focusedField: FocusedField?
-    
-    enum FocusedField: Hashable {
-        case projectName
-        case partName(Int)
-        case targetRow(Int)
-    }
-    
+        
     var body: some View {
         NavigationView {
             ZStack {
@@ -129,14 +120,6 @@ struct AnalysisResultView: View {
                     }
                     .foregroundColor(themeManager.currentTheme.textColor)
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("프로젝트 생성") {
-                        createProjectFromAnalysis()
-                    }
-                    .foregroundColor(themeManager.currentTheme.primaryColor)
-                    .disabled(editedProjectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isCreatingProject)
-                }
             }
             .safeAreaInset(edge: .bottom) {
                 // 하단 프로젝트 생성 버튼
@@ -227,6 +210,9 @@ struct AnalysisResultView: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             _ = aiManager.createProjectFromAnalysis(finalAnalysis)
+            
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "projectDidCreateFromAnalysis"), object: nil)
+            
             isCreatingProject = false
             isPresented = false
         }

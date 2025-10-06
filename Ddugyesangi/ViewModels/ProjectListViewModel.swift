@@ -10,6 +10,24 @@ class ProjectListViewModel: ObservableObject {
     
     init() {
         loadProjects()
+        setupNotifications()
+    }
+    
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleProjectCreated),
+            name: NSNotification.Name(NSNotification.Name(rawValue: "projectDidCreateFromAnalysis").rawValue),
+            object: nil
+        )
+    }
+    
+    @objc private func handleProjectCreated() {
+        loadProjects()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Core Data Operations
@@ -47,22 +65,5 @@ class ProjectListViewModel: ObservableObject {
                 project.name?.localizedCaseInsensitiveContains(searchText) ?? false
             }
         }
-    }
-    
-    // MARK: - Utility Methods
-    
-    // 샘플 데이터 생성 (개발용)
-    func createSampleData() {
-        let sampleNames = ["겨울 스웨터", "봄 가디건", "여름 베레모", "가을 목도리", "크리스마스 장갑"]
-        
-        for name in sampleNames {
-            createProject(name: name)
-        }
-    }
-    
-    // 모든 데이터 삭제 (개발용)
-    func clearAllData() {
-        coreDataManager.clearAllData()
-        loadProjects()
     }
 } 
