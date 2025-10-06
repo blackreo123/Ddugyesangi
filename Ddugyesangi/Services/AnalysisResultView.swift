@@ -12,12 +12,24 @@ struct AnalysisResultView: View {
     @StateObject private var aiManager = AIAnalysisManager.shared
     @Binding var isPresented: Bool
     let analysisResult: KnittingAnalysis
-    let originalImage: UIImage
+    let originalFileName: String
     
     @State private var editedProjectName: String = ""
     @State private var editedParts: [EditableKnittingPart] = []
-    @State private var showingCreateProject = false
     @State private var isCreatingProject = false
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    @State private var showingDeleteConfirmation = false
+    @State private var partToDelete: Int?
+    
+    // 키보드 관련 상태
+    @FocusState private var focusedField: FocusedField?
+    
+    enum FocusedField: Hashable {
+        case projectName
+        case partName(Int)
+        case targetRow(Int)
+    }
     
     var body: some View {
         NavigationView {
@@ -27,21 +39,39 @@ struct AnalysisResultView: View {
                 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // 원본 이미지 표시
+                        // 분석된 파일 정보 표시
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("분석된 이미지")
+                            Text("분석된 파일")
                                 .font(.headline)
                                 .foregroundColor(themeManager.currentTheme.textColor)
                             
-                            Image(uiImage: originalImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(maxHeight: 200)
-                                .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(themeManager.currentTheme.primaryColor, lineWidth: 1)
-                                )
+                            HStack {
+                                Image(systemName: getFileIcon(for: originalFileName))
+                                    .font(.system(size: 32))
+                                    .foregroundColor(themeManager.currentTheme.primaryColor)
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(originalFileName)
+                                        .font(.body)
+                                        .foregroundColor(themeManager.currentTheme.textColor)
+                                        .lineLimit(2)
+                                    
+                                    Text("AI 분석 완료")
+                                        .font(.caption)
+                                        .foregroundColor(themeManager.currentTheme.secondaryColor)
+                                }
+                                
+                                Spacer()
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(themeManager.currentTheme.cardColor)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(themeManager.currentTheme.primaryColor, lineWidth: 1)
+                                    )
+                            )
                         }
                         .padding(.horizontal, 16)
                         
@@ -148,9 +178,9 @@ struct AnalysisResultView: View {
         editedParts = analysisResult.parts.map { part in
             EditableKnittingPart(
                 partName: part.partName,
-                targetRow: part.targetRow,
+                targetRow: part.targetRow ?? 0,
                 stitchGuide: part.stitchGuide.map { guide in
-                    EditableStitchGuide(row: guide.row, targetStitch: guide.targetStitch)
+                    EditableStitchGuide(row: guide.row ?? 0, targetStitch: guide.targetStitch ?? 0)
                 }
             )
         }
@@ -163,6 +193,22 @@ struct AnalysisResultView: View {
             stitchGuide: []
         )
         editedParts.append(newPart)
+    }
+    
+    private func getFileIcon(for fileName: String) -> String {
+        let lowercasedFileName = fileName.lowercased()
+        
+        if lowercasedFileName.hasSuffix(".pdf") {
+            return "doc.fill"
+        } else if lowercasedFileName.hasSuffix(".jpg") || 
+                  lowercasedFileName.hasSuffix(".jpeg") || 
+                  lowercasedFileName.hasSuffix(".png") || 
+                  lowercasedFileName.hasSuffix(".heic") || 
+                  lowercasedFileName.hasSuffix(".heif") {
+            return "photo.fill"
+        } else {
+            return "doc.fill"
+        }
     }
     
     private func createProjectFromAnalysis() {
@@ -313,7 +359,7 @@ struct EditablePartView: View {
                 )
             ]
         ),
-        originalImage: UIImage(systemName: "photo") ?? UIImage()
+        originalFileName: "test_pattern.jpg"
     )
     .environmentObject(ThemeManager())
 }

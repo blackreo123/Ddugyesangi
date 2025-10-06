@@ -45,7 +45,7 @@ extension CoreDataManager {
         for knittingPart in analysis.parts {
             _ = createSmartPart(
                 name: knittingPart.partName,
-                targetRow: Int16(knittingPart.targetRow),
+                targetRow: Int16(knittingPart.targetRow ?? 0), // Optional 처리: nil이면 0
                 stitchGuides: knittingPart.stitchGuide,
                 project: project
             )

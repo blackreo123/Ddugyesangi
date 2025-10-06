@@ -14,11 +14,11 @@ struct KnittingAnalysis: Codable, Equatable {
 
 struct KnittingPart: Codable, Equatable {
     let partName: String
-    let targetRow: Int
+    let targetRow: Int?     // Optional로 변경
     let stitchGuide: [StitchGuide]
 }
 
 struct StitchGuide: Codable, Equatable {
-    let row: Int
-    let targetStitch: Int
+    let row: Int?           // Optional로 변경
+    let targetStitch: Int?  // Optional로 변경
 }

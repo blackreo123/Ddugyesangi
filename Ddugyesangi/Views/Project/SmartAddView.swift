@@ -6,16 +6,15 @@
 //
 
 import SwiftUI
-import PhotosUI
+import UniformTypeIdentifiers
 
 struct SmartAddView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var aiManager = AIAnalysisManager.shared
     @Binding var isPresented: Bool
-    @State private var selectedImage: UIImage?
-    @State private var selectedPhotoItem: PhotosPickerItem?
-    @State private var showingCamera = false
-    @State private var showingPhotoPicker = false
+    @State private var selectedFileData: Data?
+    @State private var selectedFileName: String = ""
+    @State private var showingFilePicker = false
     @State private var showingAnalysisResult = false
     @State private var showingErrorAlert = false
     @State private var errorMessage = ""
@@ -26,181 +25,7 @@ struct SmartAddView: View {
                 themeManager.currentTheme.backgroundColor
                     .ignoresSafeArea()
                 
-                VStack(spacing: 20) {
-                    // 이미지 업로드 영역
-                    VStack(spacing: 16) {
-                        if let selectedImage = selectedImage {
-                            // 선택된 이미지 표시
-                            Image(uiImage: selectedImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(maxHeight: 300)
-                                .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(themeManager.currentTheme.primaryColor, lineWidth: 2)
-                                )
-                        } else {
-                            // 이미지 업로드 버튼 영역
-                            VStack(spacing: 16) {
-                                Button(action: {
-                                    showingPhotoPicker = true
-                                }) {
-                                    VStack(spacing: 12) {
-                                        Image(systemName: "photo.badge.plus")
-                                            .font(.system(size: 32))
-                                            .foregroundColor(themeManager.currentTheme.secondaryColor)
-                                        
-                                        Text("사진 라이브러리에서 선택")
-                                            .font(.headline)
-                                            .foregroundColor(themeManager.currentTheme.textColor)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 80)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(themeManager.currentTheme.cardColor)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(themeManager.currentTheme.primaryColor, lineWidth: 2)
-                                            )
-                                    )
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                
-                                Button(action: {
-                                    showingCamera = true
-                                }) {
-                                    VStack(spacing: 12) {
-                                        Image(systemName: "camera")
-                                            .font(.system(size: 32))
-                                            .foregroundColor(themeManager.currentTheme.secondaryColor)
-                                        
-                                        Text("카메라로 촬영")
-                                            .font(.headline)
-                                            .foregroundColor(themeManager.currentTheme.textColor)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 80)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(themeManager.currentTheme.cardColor)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(themeManager.currentTheme.primaryColor, lineWidth: 2)
-                                            )
-                                    )
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                
-                                Text("도안 분석을 위해 사진을 선택해 주세요.")
-                                    .font(.caption)
-                                    .foregroundColor(themeManager.currentTheme.secondaryColor)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.top, 8)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    
-                    // 이미지가 선택되었을 때 재선택 버튼
-                    if selectedImage != nil {
-                        HStack(spacing: 16) {
-                            Button(action: {
-                                showingPhotoPicker = true
-                            }) {
-                                HStack {
-                                    Image(systemName: "photo")
-                                    Text("라이브러리")
-                                }
-                                .foregroundColor(themeManager.currentTheme.primaryColor)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(themeManager.currentTheme.primaryColor, lineWidth: 1)
-                                )
-                            }
-                            
-                            Button(action: {
-                                showingCamera = true
-                            }) {
-                                HStack {
-                                    Image(systemName: "camera")
-                                    Text("카메라")
-                                }
-                                .foregroundColor(themeManager.currentTheme.primaryColor)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(themeManager.currentTheme.primaryColor, lineWidth: 1)
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                    }
-                    
-                    Spacer()
-                    
-                    // 도안 분석 버튼
-                    if selectedImage != nil {
-                        VStack(spacing: 12) {
-                            // 크레딧 정보 표시
-                            if !aiManager.canUseAIAnalysis() {
-                                VStack(spacing: 8) {
-                                    Text("AI 분석 크레딧이 부족합니다")
-                                        .font(.subheadline)
-                                        .foregroundColor(.red)
-                                    
-                                    Text("남은 크레딧: \(aiManager.remainingCredits)회")
-                                        .font(.caption)
-                                        .foregroundColor(themeManager.currentTheme.secondaryColor)
-                                    
-                                    if aiManager.getRemainingAdRewards() > 0 {
-                                        Text("광고 시청으로 크레딧 획득 가능: \(aiManager.getRemainingAdRewards())회")
-                                            .font(.caption)
-                                            .foregroundColor(themeManager.currentTheme.primaryColor)
-                                    }
-                                }
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.red.opacity(0.1))
-                                )
-                                .padding(.horizontal, 16)
-                            }
-                            
-                            Button(action: {
-                                analyzeDesign()
-                            }) {
-                                HStack {
-                                    if aiManager.isAnalyzing {
-                                        ProgressView()
-                                            .scaleEffect(0.8)
-                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    } else {
-                                        Image(systemName: "wand.and.rays")
-                                    }
-                                    
-                                    Text(aiManager.isAnalyzing ? "분석 중..." : "도안 분석 (\(aiManager.remainingCredits)회 남음)")
-                                        .fontWeight(.semibold)
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(aiManager.isAnalyzing || !aiManager.canUseAIAnalysis() ? 
-                                              themeManager.currentTheme.secondaryColor : themeManager.currentTheme.primaryColor)
-                                )
-                            }
-                            .disabled(aiManager.isAnalyzing || !aiManager.canUseAIAnalysis())
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 20)
-                        }
-                    }
-                }
+                mainContentView
             }
             .navigationTitle("스마트 추가")
             .navigationBarTitleDisplayMode(.inline)
@@ -212,16 +37,19 @@ struct SmartAddView: View {
                 }
             }
         }
-        .photosPicker(isPresented: $showingPhotoPicker, selection: $selectedPhotoItem, matching: .images)
-        .sheet(isPresented: $showingCamera) {
-            ImagePicker(selectedImage: $selectedImage, sourceType: .camera)
+        .sheet(isPresented: $showingFilePicker) {
+            FilePickerView(
+                selectedFileData: $selectedFileData,
+                selectedFileName: $selectedFileName,
+                isPresented: $showingFilePicker
+            )
         }
         .sheet(isPresented: $showingAnalysisResult) {
-            if let image = selectedImage, let result = aiManager.analysisResult {
+            if let result = aiManager.analysisResult {
                 AnalysisResultView(
                     isPresented: $showingAnalysisResult,
                     analysisResult: result,
-                    originalImage: image
+                    originalFileName: selectedFileName
                 )
             }
         }
@@ -229,17 +57,6 @@ struct SmartAddView: View {
             Button("확인", role: .cancel) { }
         } message: {
             Text(errorMessage)
-        }
-        .onChange(of: selectedPhotoItem) { _, newValue in
-            Task {
-                if let newValue = newValue {
-                    if let data = try? await newValue.loadTransferable(type: Data.self) {
-                        if let uiImage = UIImage(data: data) {
-                            selectedImage = uiImage
-                        }
-                    }
-                }
-            }
         }
         .onChange(of: aiManager.analysisResult) { _, newResult in
             if newResult != nil {
@@ -254,57 +71,248 @@ struct SmartAddView: View {
         }
     }
     
+    // MARK: - View Components
+    
+    private var mainContentView: some View {
+        VStack(spacing: 20) {
+            fileUploadSection
+            fileReselectionButton
+            Spacer()
+            analysisSection
+        }
+    }
+    
+    private var fileUploadSection: some View {
+        VStack(spacing: 16) {
+            if !selectedFileName.isEmpty {
+                selectedFileInfoView
+            } else {
+                fileSelectionButton
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+    
+    private var selectedFileInfoView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: getFileIcon(for: selectedFileName))
+                .font(.system(size: 48))
+                .foregroundColor(themeManager.currentTheme.primaryColor)
+            
+            fileInfoTextView
+        }
+        .padding()
+        .background(selectedFileCardBackground)
+    }
+    
+    private var fileInfoTextView: some View {
+        VStack(spacing: 4) {
+            Text("선택된 파일:")
+                .font(.headline)
+                .foregroundColor(themeManager.currentTheme.textColor)
+            
+            Text(selectedFileName)
+                .font(.body)
+                .foregroundColor(themeManager.currentTheme.secondaryColor)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+            
+            if let fileData = selectedFileData {
+                Text("크기: \(formatFileSize(fileData.count))")
+                    .font(.caption)
+                    .foregroundColor(themeManager.currentTheme.secondaryColor)
+            }
+        }
+    }
+    
+    private var selectedFileCardBackground: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(themeManager.currentTheme.cardColor)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(themeManager.currentTheme.primaryColor, lineWidth: 2)
+            )
+    }
+    
+    private var fileSelectionButton: some View {
+        Button(action: {
+            showingFilePicker = true
+        }) {
+            fileSelectionButtonContent
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private var fileSelectionButtonContent: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "doc.badge.plus")
+                .font(.system(size: 48))
+                .foregroundColor(themeManager.currentTheme.secondaryColor)
+            
+            fileSelectionTextView
+        }
+        .frame(maxWidth: .infinity)
+        .frame(minHeight: 200)
+        .background(fileSelectionButtonBackground)
+    }
+    
+    private var fileSelectionTextView: some View {
+        VStack(spacing: 8) {
+            Text("뜨개질 도안 파일 선택")
+                .font(.headline)
+                .foregroundColor(themeManager.currentTheme.textColor)
+            
+            Text("JPG, PNG, PDF, HEIC 파일\n(최대 20MB)")
+                .font(.caption)
+                .foregroundColor(themeManager.currentTheme.secondaryColor)
+                .multilineTextAlignment(.center)
+        }
+    }
+    
+    private var fileSelectionButtonBackground: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(themeManager.currentTheme.cardColor)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(themeManager.currentTheme.primaryColor, style: StrokeStyle(lineWidth: 2, dash: [5]))
+            )
+    }
+    
+    @ViewBuilder
+    private var fileReselectionButton: some View {
+        if !selectedFileName.isEmpty {
+            Button(action: {
+                showingFilePicker = true
+            }) {
+                HStack {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                    Text("다른 파일 선택")
+                }
+                .foregroundColor(themeManager.currentTheme.primaryColor)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(themeManager.currentTheme.primaryColor, lineWidth: 1)
+                )
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+    
+    @ViewBuilder
+    private var analysisSection: some View {
+        if !selectedFileName.isEmpty {
+            VStack(spacing: 12) {
+                creditInfoView
+                analysisButton
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var creditInfoView: some View {
+        if !aiManager.canUseAIAnalysis() {
+            VStack(spacing: 8) {
+                Text("AI 분석 크레딧이 부족합니다")
+                    .font(.subheadline)
+                    .foregroundColor(.red)
+                
+                Text("남은 크레딧: \(aiManager.remainingCredits)회")
+                    .font(.caption)
+                    .foregroundColor(themeManager.currentTheme.secondaryColor)
+                
+                if aiManager.getRemainingAdRewards() > 0 {
+                    Text("광고 시청으로 크레딧 획득 가능: \(aiManager.getRemainingAdRewards())회")
+                        .font(.caption)
+                        .foregroundColor(themeManager.currentTheme.primaryColor)
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.red.opacity(0.1))
+            )
+            .padding(.horizontal, 16)
+        }
+    }
+    
+    private var analysisButton: some View {
+        Button(action: {
+            analyzeDesign()
+        }) {
+            analysisButtonContent
+        }
+        .disabled(aiManager.isAnalyzing || !aiManager.canUseAIAnalysis())
+        .padding(.horizontal, 16)
+        .padding(.bottom, 20)
+    }
+    
+    private var analysisButtonContent: some View {
+        HStack {
+            if aiManager.isAnalyzing {
+                ProgressView()
+                    .scaleEffect(0.8)
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+            } else {
+                Image(systemName: "wand.and.rays")
+            }
+            
+            Text(aiManager.isAnalyzing ? "분석 중..." : "도안 분석 (\(aiManager.remainingCredits)회 남음)")
+                .fontWeight(.semibold)
+        }
+        .foregroundColor(.white)
+        .frame(maxWidth: .infinity)
+        .frame(height: 50)
+        .background(analysisButtonBackground)
+    }
+    
+    private var analysisButtonBackground: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(aiManager.isAnalyzing || !aiManager.canUseAIAnalysis() ? 
+                  themeManager.currentTheme.secondaryColor : themeManager.currentTheme.primaryColor)
+    }
+    
+    // MARK: - Helper Methods
+    
     private func analyzeDesign() {
-        guard let selectedImage = selectedImage else { return }
+        guard let selectedFileData = selectedFileData else { return }
         
         Task {
-            await aiManager.analyzeKnittingPattern(image: selectedImage)
+            // PDF 파일인 경우 전용 메서드 사용
+            if selectedFileName.lowercased().hasSuffix(".pdf") {
+                await aiManager.analyzePDFKnittingPattern(pdfData: selectedFileData, fileName: selectedFileName)
+            } else {
+                await aiManager.analyzeKnittingPatternFile(fileData: selectedFileData, fileName: selectedFileName)
+            }
         }
+    }
+    
+    private func getFileIcon(for fileName: String) -> String {
+        let lowercasedFileName = fileName.lowercased()
+        
+        if lowercasedFileName.hasSuffix(".pdf") {
+            return "doc.fill"
+        } else if lowercasedFileName.hasSuffix(".jpg") || 
+                  lowercasedFileName.hasSuffix(".jpeg") || 
+                  lowercasedFileName.hasSuffix(".png") || 
+                  lowercasedFileName.hasSuffix(".heic") || 
+                  lowercasedFileName.hasSuffix(".heif") {
+            return "photo.fill"
+        } else {
+            return "doc.fill"
+        }
+    }
+    
+    private func formatFileSize(_ bytes: Int) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = [.useMB, .useKB, .useBytes]
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: Int64(bytes))
     }
 }
 
-// MARK: - ImagePicker
-struct ImagePicker: UIViewControllerRepresentable {
-    @Binding var selectedImage: UIImage?
-    @Environment(\.presentationMode) var presentationMode
-    let sourceType: UIImagePickerController.SourceType
-    
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.delegate = context.coordinator
-        picker.sourceType = sourceType
-        picker.allowsEditing = true
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: ImagePicker
-        
-        init(_ parent: ImagePicker) {
-            self.parent = parent
-        }
-        
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let editedImage = info[.editedImage] as? UIImage {
-                parent.selectedImage = editedImage
-            } else if let originalImage = info[.originalImage] as? UIImage {
-                parent.selectedImage = originalImage
-            }
-            
-            parent.presentationMode.wrappedValue.dismiss()
-        }
-        
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.presentationMode.wrappedValue.dismiss()
-        }
-    }
-}
+// MARK: - FilePickerView는 별도 파일에 정의됨 (FilePickerView.swift)
 
 #Preview {
     SmartAddView(isPresented: .constant(true))

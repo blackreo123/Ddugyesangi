@@ -34,7 +34,10 @@ extension Part {
     func getTargetStitch(for row: Int) -> Int {
         if isSmart {
             // AI 분석 결과: 단수별 코수 정보에서 찾기
-            let guide = stitchGuides.first { $0.row == row }
+            let guide = stitchGuides.first { guide in
+                guard let guideRow = guide.row else { return false }
+                return guideRow == row
+            }
             return guide?.targetStitch ?? getCurrentTargetStitch()
         } else {
             // 일반 등록: 고정된 targetStitch 사용
@@ -46,7 +49,10 @@ extension Part {
     func getCurrentTargetStitch() -> Int {
         if isSmart {
             // 현재 단수보다 작거나 같은 단수 중 가장 큰 값
-            let currentRowGuides = stitchGuides.filter { $0.row <= currentRow }
+            let currentRowGuides: [(row: Int, targetStitch: Int)] = stitchGuides.compactMap { guide in
+                guard let row = guide.row, let targetStitch = guide.targetStitch else { return nil }
+                return row <= currentRow ? (row: row, targetStitch: targetStitch) : nil
+            }
             let closestGuide = currentRowGuides.max { $0.row < $1.row }
             return closestGuide?.targetStitch ?? Int(targetStitch)
         } else {
@@ -57,7 +63,10 @@ extension Part {
     /// 다음 단수의 목표 코수 미리보기
     func getNextTargetStitch() -> Int? {
         if isSmart {
-            let nextRowGuides = stitchGuides.filter { $0.row > currentRow }
+            let nextRowGuides: [(row: Int, targetStitch: Int)] = stitchGuides.compactMap { guide in
+                guard let row = guide.row, let targetStitch = guide.targetStitch else { return nil }
+                return row > currentRow ? (row: row, targetStitch: targetStitch) : nil
+            }
             let nextGuide = nextRowGuides.min { $0.row < $1.row }
             return nextGuide?.targetStitch
         } else {
