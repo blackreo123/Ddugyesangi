@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import PhotosUI
 
 struct SmartAddView: View {
     @EnvironmentObject var themeManager: ThemeManager
@@ -18,6 +19,8 @@ struct SmartAddView: View {
     @State private var showingAnalysisResult = false
     @State private var showingErrorAlert = false
     @State private var errorMessage = ""
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var showPhotoPicker = false
     
     var body: some View {
         NavigationView {
@@ -135,12 +138,39 @@ struct SmartAddView: View {
     }
     
     private var fileSelectionButton: some View {
-        Button(action: {
-            showingFilePicker = true
-        }) {
-            fileSelectionButtonContent
+        VStack(spacing: 12) {
+            Button(action: {
+                showingFilePicker = true
+            }) {
+                fileSelectionButtonContent
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            PhotosPicker(
+                selection: $selectedPhoto,
+                matching: .images,
+                photoLibrary: .shared()
+            ) {
+                HStack {
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.system(size: 24))
+                    Text("사진에서 선택")
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity)
+                .background(RoundedRectangle(cornerRadius: 10).fill(themeManager.currentTheme.cardColor))
+            }
+            .onChange(of: selectedPhoto) { _, newPhoto in
+                if let photo = newPhoto {
+                    Task {
+                        if let data = try? await photo.loadTransferable(type: Data.self) {
+                            selectedFileData = data
+                            selectedFileName = "photo_selected.jpg"
+                        }
+                    }
+                }
+            }
         }
-        .buttonStyle(PlainButtonStyle())
     }
     
     private var fileSelectionButtonContent: some View {
@@ -158,7 +188,7 @@ struct SmartAddView: View {
     
     private var fileSelectionTextView: some View {
         VStack(spacing: 8) {
-            Text("뜨개질 도안 파일 선택")
+            Text("도안 파일 또는 사진 선택")
                 .font(.headline)
                 .foregroundColor(themeManager.currentTheme.textColor)
             

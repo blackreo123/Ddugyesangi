@@ -95,7 +95,6 @@ class CoreDataManager: ObservableObject {
         part.currentRow = 0
         part.currentStitch = 0
         part.project = project
-        part.isSmart = false
         
         save()
         return part

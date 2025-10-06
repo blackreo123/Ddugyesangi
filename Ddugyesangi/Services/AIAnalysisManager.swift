@@ -302,7 +302,6 @@ class AIAnalysisManager: ObservableObject {
         let project = coreDataManager.createProjectFromAI(analysis: analysis)
         
         print("🎉 AI 분석 결과로 프로젝트 생성 완료: \(project.name ?? "Unknown")")
-        coreDataManager.printSmartPartsStatus()
         
         return project
     }
