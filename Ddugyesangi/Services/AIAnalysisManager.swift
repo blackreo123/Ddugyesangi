@@ -23,7 +23,7 @@ class AIAnalysisManager: ObservableObject {
     private let coreDataManager = CoreDataManager.shared
     
     // 사용량 제한 상수
-    private let monthlyFreeLimit = 10
+    private let monthlyFreeLimit = 5
     private let adRewardAmount = 5
     private let maxAdRewards = 3
     
