@@ -21,6 +21,7 @@ struct SmartAddView: View {
     @State private var errorMessage = ""
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var showPhotoPicker = false
+    @State private var remainingAdRewards: Int = 0
     
     var body: some View {
         NavigationView {
@@ -72,8 +73,21 @@ struct SmartAddView: View {
                 showingErrorAlert = true
             }
         }
+        .onChange(of: aiManager.remainingCredits) { _, _ in
+            loadAdRewards()
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("dismissSmartAddView"))) { _ in
             isPresented = false
+        }
+        // ✅ 추가: 뷰가 나타날 때 광고 보상 횟수 로드
+        .task {
+            loadAdRewards()
+        }
+    }
+    
+    private func loadAdRewards() {
+        Task {
+            remainingAdRewards = await aiManager.getRemainingAdRewards()
         }
     }
     
@@ -256,8 +270,8 @@ struct SmartAddView: View {
                     .font(.caption)
                     .foregroundColor(themeManager.currentTheme.secondaryColor)
                 
-                if aiManager.getRemainingAdRewards() > 0 {
-                    Text("광고 시청으로 크레딧 획득 가능: \(aiManager.getRemainingAdRewards())회")
+                if remainingAdRewards > 0 {
+                    Text("광고 시청으로 크레딧 획득 가능: \(remainingAdRewards)회")
                         .font(.caption)
                         .foregroundColor(themeManager.currentTheme.primaryColor)
                 }
@@ -353,6 +367,8 @@ struct SmartAddView: View {
             } else {
                 await aiManager.analyzeKnittingPatternFile(fileData: selectedFileData, fileName: selectedFileName)
             }
+            
+            loadAdRewards()
         }
     }
     

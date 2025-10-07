@@ -3,6 +3,7 @@
 //  Ddugyesangi
 //
 //  Created by JIHA YOON on 2025/10/03.
+//  Updated: Firebase Integration
 //
 
 import Foundation
@@ -17,9 +18,10 @@ class AIAnalysisManager: ObservableObject {
     @Published var isAnalyzing: Bool = false
     @Published var analysisResult: KnittingAnalysis?
     @Published var errorMessage: String?
+    @Published var isInitialized: Bool = false
     
     private let claudeService: ClaudeAPIService
-    private let userDefaults = UserDefaults.standard
+    private let usageTracker = FirebaseUsageTracker()
     private let coreDataManager = CoreDataManager.shared
     
     // 사용량 제한 상수
@@ -29,62 +31,179 @@ class AIAnalysisManager: ObservableObject {
     
     private init() {
         self.claudeService = ClaudeAPIService(apiKey: Constants.Claude.apiKey)
-        loadUserCredits()
+        
+        // Firebase 초기화 및 사용량 로드
+        Task {
+            await initializeFirebase()
+        }
+    }
+    
+    // MARK: - Firebase 초기화
+    
+    private func initializeFirebase() async {
+        do {
+            print("🔥 Firebase 초기화 시작...")
+            
+            // Firebase 인증 초기화
+            try await usageTracker.initialize()
+            
+            // 사용량 로드
+            let credits = try await usageTracker.getRemainingCredits()
+            
+            await MainActor.run {
+                remainingCredits = credits
+                lastResetDate = Date()
+                isInitialized = true
+                print("✅ Firebase 초기화 완료: \(credits)회 남음")
+            }
+            
+        } catch {
+            print("❌ Firebase 초기화 실패: \(error.localizedDescription)")
+            
+            // Fallback: 로컬 저장소 사용
+            await MainActor.run {
+                loadLocalCredits()
+                isInitialized = true
+                print("⚠️ 로컬 모드로 전환")
+            }
+        }
     }
     
     // MARK: - 크레딧 관리
-    private func loadUserCredits() {
-        let savedCredits = userDefaults.integer(forKey: "ai_analysis_credits")
-        let savedResetDate = userDefaults.object(forKey: "ai_analysis_reset_date") as? Date ?? Date()
+    
+    /// Fallback: 로컬 크레딧 로드 (Firebase 실패 시)
+    private func loadLocalCredits() {
+        let savedCredits = UserDefaults.standard.integer(forKey: "ai_analysis_credits")
+        let savedResetDate = UserDefaults.standard.object(forKey: "ai_analysis_reset_date") as? Date ?? Date()
         
         // 월이 바뀌었는지 확인
-        if Calendar.current.component(.month, from: savedResetDate) != Calendar.current.component(.month, from: Date()) {
-            resetMonthlyCredits()
+        let calendar = Calendar.current
+        if calendar.component(.month, from: savedResetDate) != calendar.component(.month, from: Date()) {
+            remainingCredits = monthlyFreeLimit
+            lastResetDate = Date()
+            UserDefaults.standard.set(0, forKey: "monthly_ad_rewards")
+            saveLocalCredits()
         } else {
             remainingCredits = savedCredits > 0 ? savedCredits : monthlyFreeLimit
             lastResetDate = savedResetDate
         }
+        
+        print("📦 로컬 크레딧 사용: \(remainingCredits)회")
     }
     
-    private func resetMonthlyCredits() {
-        remainingCredits = monthlyFreeLimit
-        lastResetDate = Date()
-        userDefaults.set(0, forKey: "monthly_ad_rewards") // 광고 보상도 리셋
-        saveUserCredits()
+    /// 로컬 크레딧 저장
+    private func saveLocalCredits() {
+        UserDefaults.standard.set(remainingCredits, forKey: "ai_analysis_credits")
+        UserDefaults.standard.set(lastResetDate, forKey: "ai_analysis_reset_date")
     }
     
-    private func saveUserCredits() {
-        userDefaults.set(remainingCredits, forKey: "ai_analysis_credits")
-        userDefaults.set(lastResetDate, forKey: "ai_analysis_reset_date")
-    }
-    
-    // MARK: - 크레딧 확인 및 관리
+    /// 크레딧 사용 가능 여부 확인
     func canUseAIAnalysis() -> Bool {
         return remainingCredits > 0
     }
     
-    private func useCredit() {
-        guard remainingCredits > 0 else { return }
-        remainingCredits -= 1
-        saveUserCredits()
-    }
-    
-    func addCreditsFromAd() {
-        let currentAdRewards = userDefaults.integer(forKey: "monthly_ad_rewards")
-        
-        if currentAdRewards < maxAdRewards {
-            remainingCredits += adRewardAmount
-            userDefaults.set(currentAdRewards + 1, forKey: "monthly_ad_rewards")
-            saveUserCredits()
+    /// 크레딧 차감 (Firebase 우선, 실패 시 로컬)
+    private func useCredit() async throws {
+        do {
+            // Firebase에서 크레딧 차감 시도
+            let success = try await usageTracker.consumeCredit()
+            
+            guard success else {
+                throw AIAnalysisError.insufficientCredits
+            }
+            
+            // UI 업데이트
+            await MainActor.run {
+                if remainingCredits > 0 {
+                    remainingCredits -= 1
+                }
+                print("💳 Firebase 크레딧 차감: \(remainingCredits)회 남음")
+            }
+            
+        } catch {
+            print("⚠️ Firebase 크레딧 차감 실패, 로컬로 대체: \(error)")
+            
+            // Fallback: 로컬 크레딧 차감
+            await MainActor.run {
+                guard remainingCredits > 0 else { return }
+                remainingCredits -= 1
+                saveLocalCredits()
+                print("💳 로컬 크레딧 차감: \(remainingCredits)회 남음")
+            }
         }
     }
     
-    func getRemainingAdRewards() -> Int {
-        let used = userDefaults.integer(forKey: "monthly_ad_rewards")
-        return max(0, maxAdRewards - used)
+    /// 광고 시청으로 크레딧 추가
+    func addCreditsFromAd() {
+        Task {
+            do {
+                // Firebase에서 광고 보상 추가
+                try await usageTracker.addCreditsFromAd(amount: adRewardAmount)
+                
+                // 최신 크레딧 가져오기
+                let credits = try await usageTracker.getRemainingCredits()
+                
+                await MainActor.run {
+                    remainingCredits = credits
+                    print("📺 광고 보상 완료: \(credits)회 남음")
+                }
+                
+            } catch UsageError.adRewardLimitReached {
+                await MainActor.run {
+                    errorMessage = "이번 달 광고 보상 한도에 도달했습니다."
+                    print("⚠️ 광고 보상 한도 초과")
+                }
+                
+            } catch {
+                await MainActor.run {
+                    errorMessage = "광고 보상 처리 중 오류가 발생했습니다."
+                    print("❌ 광고 보상 실패: \(error.localizedDescription)")
+                }
+                
+                // Fallback: 로컬 광고 보상
+                fallbackAddCreditsFromAd()
+            }
+        }
+    }
+    
+    /// Fallback: 로컬 광고 보상
+    private func fallbackAddCreditsFromAd() {
+        let currentAdRewards = UserDefaults.standard.integer(forKey: "monthly_ad_rewards")
+        
+        if currentAdRewards < maxAdRewards {
+            remainingCredits += adRewardAmount
+            UserDefaults.standard.set(currentAdRewards + 1, forKey: "monthly_ad_rewards")
+            saveLocalCredits()
+            print("📺 로컬 광고 보상: \(remainingCredits)회 남음")
+        }
+    }
+    
+    /// 남은 광고 보상 횟수 조회
+    func getRemainingAdRewards() async -> Int {
+        do {
+            return try await usageTracker.getRemainingAdRewards()
+        } catch {
+            print("⚠️ Firebase 광고 횟수 조회 실패, 로컬 사용")
+            let used = UserDefaults.standard.integer(forKey: "monthly_ad_rewards")
+            return max(0, maxAdRewards - used)
+        }
+    }
+    
+    /// 크레딧 수동 갱신 (Pull to Refresh 등에서 사용)
+    func refreshCredits() async {
+        do {
+            let credits = try await usageTracker.getRemainingCredits()
+            await MainActor.run {
+                remainingCredits = credits
+                print("🔄 크레딧 갱신: \(credits)회")
+            }
+        } catch {
+            print("⚠️ 크레딧 갱신 실패: \(error)")
+        }
     }
     
     // MARK: - AI 도안 분석
+    
     func analyzeKnittingPatternFile(fileData: Data, fileName: String) async {
         await MainActor.run {
             isAnalyzing = true
@@ -94,7 +213,7 @@ class AIAnalysisManager: ObservableObject {
         
         do {
             // 파일 크기 확인 (20MB 제한)
-            let maxFileSize = 20 * 1024 * 1024 // 20MB in bytes
+            let maxFileSize = 20 * 1024 * 1024
             guard fileData.count <= maxFileSize else {
                 throw AIAnalysisError.fileTooLarge
             }
@@ -110,20 +229,29 @@ class AIAnalysisManager: ObservableObject {
             }
             
             // AI 분석 실행
-            let result = try await claudeService.analyzeKnittingPattern(fileData: fileData, fileName: fileName)
+            let result = try await claudeService.analyzeKnittingPattern(
+                fileData: fileData,
+                fileName: fileName
+            )
             
-            // 성공시 크레딧 차감 및 결과 저장
+            // 성공시 크레딧 차감
+            try await useCredit()
+            
             await MainActor.run {
-                useCredit()
                 analysisResult = result
                 isAnalyzing = false
                 print("✅ AI 파일 분석 완료: \(result.projectName)")
                 print("🧶 파트 수: \(result.parts.count)")
+                print("💳 남은 크레딧: \(remainingCredits)")
             }
             
         } catch {
             await MainActor.run {
-                errorMessage = error.localizedDescription
+                if let analysisError = error as? AIAnalysisError {
+                    errorMessage = analysisError.localizedDescription
+                } else {
+                    errorMessage = "분석 중 오류가 발생했습니다: \(error.localizedDescription)"
+                }
                 isAnalyzing = false
                 print("❌ AI 파일 분석 실패: \(error)")
             }
@@ -150,12 +278,18 @@ class AIAnalysisManager: ObservableObject {
         do {
             // 파일 크기 및 크레딧 확인
             let maxFileSize = 20 * 1024 * 1024
-            guard pdfData.count <= maxFileSize else { throw AIAnalysisError.fileTooLarge }
-            guard canUseAIAnalysis() else { throw AIAnalysisError.insufficientCredits }
+            guard pdfData.count <= maxFileSize else {
+                throw AIAnalysisError.fileTooLarge
+            }
+            guard canUseAIAnalysis() else {
+                throw AIAnalysisError.insufficientCredits
+            }
             
             // 1단계: 페이지별 분석 시작
             let pageImages = convertPDFToMultipleImages(pdfData: pdfData)
-            guard !pageImages.isEmpty else { throw AIAnalysisError.imageProcessingFailed }
+            guard !pageImages.isEmpty else {
+                throw AIAnalysisError.imageProcessingFailed
+            }
             
             print("📄 PDF 페이지 수: \(pageImages.count)")
             print("🔍 1단계: 페이지별 분석 시작...")
@@ -197,26 +331,34 @@ class AIAnalysisManager: ObservableObject {
                 originalFileName: fileName
             )
             
-            // 성공시 크레딧 차감 및 결과 저장
+            // 성공시 크레딧 차감
+            try await useCredit()
+            
             await MainActor.run {
-                useCredit()
                 analysisResult = consolidatedResult
                 isAnalyzing = false
                 print("✅ PDF 2단계 분석 완료: \(consolidatedResult.projectName)")
                 print("🧶 최종 파트 수: \(consolidatedResult.parts.count)")
                 print("📊 통합 비율: \(pageAnalysisResults.count)페이지 → \(consolidatedResult.parts.count)파트")
+                print("💳 남은 크레딧: \(remainingCredits)")
             }
             
         } catch {
             await MainActor.run {
-                errorMessage = error.localizedDescription
+                if let analysisError = error as? AIAnalysisError {
+                    errorMessage = analysisError.localizedDescription
+                } else {
+                    errorMessage = "분석 중 오류가 발생했습니다: \(error.localizedDescription)"
+                }
                 isAnalyzing = false
                 print("❌ PDF AI 분석 실패: \(error)")
             }
         }
     }
     
-    // 분석 결과를 JSON 문자열로 변환
+    // MARK: - Helper Methods
+    
+    /// 분석 결과를 JSON 문자열로 변환
     private func convertAnalysisToJSONString(_ analysis: KnittingAnalysis) -> String {
         do {
             let encoder = JSONEncoder()
@@ -228,7 +370,7 @@ class AIAnalysisManager: ObservableObject {
         }
     }
     
-    // PDF를 여러 개의 개별 이미지로 변환 (5MB 이하로 최적화)
+    /// PDF를 여러 개의 개별 이미지로 변환 (5MB 이하로 최적화)
     private func convertPDFToMultipleImages(pdfData: Data) -> [Data] {
         guard let pdfDocument = PDFDocument(data: pdfData) else {
             return []
@@ -243,7 +385,7 @@ class AIAnalysisManager: ObservableObject {
             let pageRect = page.bounds(for: .mediaBox)
             
             // 이미지 크기 최적화 (5MB 제한 고려)
-            let maxDimension: CGFloat = 2048 // 적절한 해상도로 제한
+            let maxDimension: CGFloat = 2048
             let scale = min(maxDimension / pageRect.width, maxDimension / pageRect.height, 1.0)
             let scaledSize = CGSize(
                 width: pageRect.width * scale,
@@ -280,16 +422,15 @@ class AIAnalysisManager: ObservableObject {
         
         return imageDataArray
     }
-
     
-    // MARK: - 파일 유효성 검사
+    /// 파일 유효성 검사
     private func isValidFileType(fileName: String) -> Bool {
         let supportedExtensions = ["jpg", "jpeg", "png", "pdf", "heic", "heif"]
         let fileExtension = fileName.lowercased().components(separatedBy: ".").last ?? ""
         return supportedExtensions.contains(fileExtension)
     }
     
-    // 파일 크기 포맷팅 헬퍼 (AIAnalysisManager 내부용)
+    /// 파일 크기 포맷팅
     private func formatFileSize(_ bytes: Int) -> String {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useMB, .useKB, .useBytes]
@@ -298,17 +439,19 @@ class AIAnalysisManager: ObservableObject {
     }
     
     // MARK: - Core Data 연동
+    
     func createProjectFromAnalysis(_ analysis: KnittingAnalysis) -> Project {
         let project = coreDataManager.createProjectFromAI(analysis: analysis)
-        
         print("🎉 AI 분석 결과로 프로젝트 생성 완료: \(project.name ?? "Unknown")")
-        
         return project
     }
     
     // MARK: - 상태 정보
-    func getUsageStatus() -> String {
-        let usedAds = userDefaults.integer(forKey: "monthly_ad_rewards")
+    
+    func getUsageStatus() async -> String {
+        let adRewardsRemaining = await getRemainingAdRewards()
+        let usedAds = maxAdRewards - adRewardsRemaining
+        
         return """
         📊 이번 달 사용 현황
         🆓 남은 무료 분석: \(remainingCredits)회
@@ -319,11 +462,13 @@ class AIAnalysisManager: ObservableObject {
     
     private func getNextResetDateString() -> String {
         let calendar = Calendar.current
-        let nextMonth = calendar.date(byAdding: .month, value: 1, to: lastResetDate) ?? Date()
+        let nextMonth = calendar.date(byAdding: .month, value: 1, to: Date()) ?? Date()
         let components = calendar.dateComponents([.day], from: nextMonth)
         return "\(components.day ?? 1)일"
     }
 }
+
+// MARK: - Error Types
 
 enum AIAnalysisError: Error {
     case insufficientCredits
@@ -331,6 +476,7 @@ enum AIAnalysisError: Error {
     case analysisTimeout
     case fileTooLarge
     case unsupportedFileType
+    case firebaseError
     
     var localizedDescription: String {
         switch self {
@@ -344,7 +490,8 @@ enum AIAnalysisError: Error {
             return "파일 크기가 너무 큽니다. 20MB 이하의 파일을 선택해주세요."
         case .unsupportedFileType:
             return "지원하지 않는 파일 형식입니다. JPG, PNG, PDF, HEIC 파일만 지원합니다."
+        case .firebaseError:
+            return "서버 연결에 실패했습니다. 네트워크를 확인해주세요."
         }
     }
 }
-
