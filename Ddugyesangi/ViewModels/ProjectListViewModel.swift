@@ -2,7 +2,6 @@ import Foundation
 import CoreData
 
 class ProjectListViewModel: ObservableObject {
-    @Published var adService = AdService()
     @Published var projects: [Project] = []
     @Published var searchText = ""
     

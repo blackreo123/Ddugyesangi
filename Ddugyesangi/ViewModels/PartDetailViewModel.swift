@@ -8,7 +8,7 @@
 import Foundation
 
 class PartDetailViewModel: ObservableObject {
-    @Published var adService = AdService()
+    @Published var adService = AdService.shared
     private let coreDataManager = CoreDataManager.shared
     
     

@@ -3,13 +3,13 @@
 //  Ddugyesangi
 //
 //  Created by JIHA YOON on 2025/10/03.
-//  Updated: Firebase Integration
 //
 
 import Foundation
 import UIKit
 import PDFKit
 
+@MainActor
 class AIAnalysisManager: ObservableObject {
     static let shared = AIAnalysisManager()
     
@@ -50,22 +50,18 @@ class AIAnalysisManager: ObservableObject {
             // 사용량 로드
             let credits = try await usageTracker.getRemainingCredits()
             
-            await MainActor.run {
-                remainingCredits = credits
-                lastResetDate = Date()
-                isInitialized = true
-                print("✅ Firebase 초기화 완료: \(credits)회 남음")
-            }
+            remainingCredits = credits
+            lastResetDate = Date()
+            isInitialized = true
+            print("✅ Firebase 초기화 완료: \(credits)회 남음")
             
         } catch {
             print("❌ Firebase 초기화 실패: \(error.localizedDescription)")
             
             // Fallback: 로컬 저장소 사용
-            await MainActor.run {
-                loadLocalCredits()
-                isInitialized = true
-                print("⚠️ 로컬 모드로 전환")
-            }
+            loadLocalCredits()
+            isInitialized = true
+            print("⚠️ 로컬 모드로 전환")
         }
     }
     
@@ -112,57 +108,45 @@ class AIAnalysisManager: ObservableObject {
                 throw AIAnalysisError.insufficientCredits
             }
             
-            // UI 업데이트
-            await MainActor.run {
-                if remainingCredits > 0 {
-                    remainingCredits -= 1
-                }
-                print("💳 Firebase 크레딧 차감: \(remainingCredits)회 남음")
+            // @MainActor 클래스 안이므로 직접 수정
+            if remainingCredits > 0 {
+                remainingCredits -= 1
             }
+            print("💳 Firebase 크레딧 차감: \(remainingCredits)회 남음")
             
         } catch {
             print("⚠️ Firebase 크레딧 차감 실패, 로컬로 대체: \(error)")
             
             // Fallback: 로컬 크레딧 차감
-            await MainActor.run {
-                guard remainingCredits > 0 else { return }
-                remainingCredits -= 1
-                saveLocalCredits()
-                print("💳 로컬 크레딧 차감: \(remainingCredits)회 남음")
-            }
+            guard remainingCredits > 0 else { return }
+            remainingCredits -= 1
+            saveLocalCredits()
+            print("💳 로컬 크레딧 차감: \(remainingCredits)회 남음")
         }
     }
     
     /// 광고 시청으로 크레딧 추가
-    func addCreditsFromAd() {
-        Task {
-            do {
-                // Firebase에서 광고 보상 추가
-                try await usageTracker.addCreditsFromAd(amount: adRewardAmount)
-                
-                // 최신 크레딧 가져오기
-                let credits = try await usageTracker.getRemainingCredits()
-                
-                await MainActor.run {
-                    remainingCredits = credits
-                    print("📺 광고 보상 완료: \(credits)회 남음")
-                }
-                
-            } catch UsageError.adRewardLimitReached {
-                await MainActor.run {
-                    errorMessage = "이번 달 광고 보상 한도에 도달했습니다."
-                    print("⚠️ 광고 보상 한도 초과")
-                }
-                
-            } catch {
-                await MainActor.run {
-                    errorMessage = "광고 보상 처리 중 오류가 발생했습니다."
-                    print("❌ 광고 보상 실패: \(error.localizedDescription)")
-                }
-                
-                // Fallback: 로컬 광고 보상
-                fallbackAddCreditsFromAd()
-            }
+    func addCreditsFromAd() async {
+        do {
+            // Firebase에서 광고 보상 추가
+            try await usageTracker.addCreditsFromAd(amount: adRewardAmount)
+            
+            // 최신 크레딧 가져오기
+            let credits = try await usageTracker.getRemainingCredits()
+            
+            remainingCredits = credits
+            errorMessage = nil
+            print("📺 광고 보상 완료: \(credits)회 남음 (추가: \(adRewardAmount)회)")
+            
+        } catch UsageError.adRewardLimitReached {
+            errorMessage = "이번 달 광고 보상 한도에 도달했습니다."
+            print("⚠️ 광고 보상 한도 초과")
+            
+        } catch {
+            print("⚠️ Firebase 광고 보상 실패, 로컬로 대체: \(error)")
+            
+            // Fallback: 로컬 광고 보상
+            fallbackAddCreditsFromAd()
         }
     }
     
@@ -174,7 +158,10 @@ class AIAnalysisManager: ObservableObject {
             remainingCredits += adRewardAmount
             UserDefaults.standard.set(currentAdRewards + 1, forKey: "monthly_ad_rewards")
             saveLocalCredits()
-            print("📺 로컬 광고 보상: \(remainingCredits)회 남음")
+            errorMessage = nil
+            print("📺 로컬 광고 보상: \(remainingCredits)회 남음 (추가: \(adRewardAmount)회)")
+        } else {
+            errorMessage = "이번 달 광고 보상 한도에 도달했습니다."
         }
     }
     
@@ -193,10 +180,8 @@ class AIAnalysisManager: ObservableObject {
     func refreshCredits() async {
         do {
             let credits = try await usageTracker.getRemainingCredits()
-            await MainActor.run {
-                remainingCredits = credits
-                print("🔄 크레딧 갱신: \(credits)회")
-            }
+            remainingCredits = credits
+            print("🔄 크레딧 갱신: \(credits)회")
         } catch {
             print("⚠️ 크레딧 갱신 실패: \(error)")
         }
@@ -205,11 +190,12 @@ class AIAnalysisManager: ObservableObject {
     // MARK: - AI 도안 분석
     
     func analyzeKnittingPatternFile(fileData: Data, fileName: String) async {
-        await MainActor.run {
-            isAnalyzing = true
-            errorMessage = nil
-            analysisResult = nil
-        }
+        // @MainActor 클래스 안이므로 직접 수정
+        isAnalyzing = true
+        errorMessage = nil
+        analysisResult = nil
+        
+        print("🔍 [분석 시작] isAnalyzing = \(isAnalyzing)")
         
         do {
             // 파일 크기 확인 (20MB 제한)
@@ -228,33 +214,37 @@ class AIAnalysisManager: ObservableObject {
                 throw AIAnalysisError.insufficientCredits
             }
             
+            print("🔍 [Claude API 호출 시작]")
+            
             // AI 분석 실행
             let result = try await claudeService.analyzeKnittingPattern(
                 fileData: fileData,
                 fileName: fileName
             )
             
+            print("✅ [API 응답 받음]")
+            
             // 성공시 크레딧 차감
             try await useCredit()
             
-            await MainActor.run {
-                analysisResult = result
-                isAnalyzing = false
-                print("✅ AI 파일 분석 완료: \(result.projectName)")
-                print("🧶 파트 수: \(result.parts.count)")
-                print("💳 남은 크레딧: \(remainingCredits)")
-            }
+            // @MainActor 클래스 안이므로 직접 할당
+            analysisResult = result
+            isAnalyzing = false
+            
+            print("✅ AI 파일 분석 완료: \(result.projectName)")
+            print("🧶 파트 수: \(result.parts.count)")
+            print("💳 남은 크레딧: \(remainingCredits)")
+            print("🔍 [분석 완료] isAnalyzing = \(isAnalyzing)")
             
         } catch {
-            await MainActor.run {
-                if let analysisError = error as? AIAnalysisError {
-                    errorMessage = analysisError.localizedDescription
-                } else {
-                    errorMessage = "분석 중 오류가 발생했습니다: \(error.localizedDescription)"
-                }
-                isAnalyzing = false
-                print("❌ AI 파일 분석 실패: \(error)")
+            if let analysisError = error as? AIAnalysisError {
+                errorMessage = analysisError.localizedDescription
+            } else {
+                errorMessage = "분석 중 오류가 발생했습니다: \(error.localizedDescription)"
             }
+            isAnalyzing = false
+            print("❌ AI 파일 분석 실패: \(error)")
+            print("🔍 [오류 발생] isAnalyzing = \(isAnalyzing)")
         }
     }
     
@@ -269,11 +259,12 @@ class AIAnalysisManager: ObservableObject {
          각 페이지 분석 실패 시 빈 분석 JSON을 추가하여 통합 분석에서 누락되지 않도록 보완
          */
         
-        await MainActor.run {
-            isAnalyzing = true
-            errorMessage = nil
-            analysisResult = nil
-        }
+        // @MainActor 클래스 안이므로 직접 수정
+        isAnalyzing = true
+        errorMessage = nil
+        analysisResult = nil
+        
+        print("🔍 [PDF 분석 시작] isAnalyzing = \(isAnalyzing)")
         
         do {
             // 파일 크기 및 크레딧 확인
@@ -334,25 +325,25 @@ class AIAnalysisManager: ObservableObject {
             // 성공시 크레딧 차감
             try await useCredit()
             
-            await MainActor.run {
-                analysisResult = consolidatedResult
-                isAnalyzing = false
-                print("✅ PDF 2단계 분석 완료: \(consolidatedResult.projectName)")
-                print("🧶 최종 파트 수: \(consolidatedResult.parts.count)")
-                print("📊 통합 비율: \(pageAnalysisResults.count)페이지 → \(consolidatedResult.parts.count)파트")
-                print("💳 남은 크레딧: \(remainingCredits)")
-            }
+            // @MainActor 클래스 안이므로 직접 할당
+            analysisResult = consolidatedResult
+            isAnalyzing = false
+            
+            print("✅ PDF 2단계 분석 완료: \(consolidatedResult.projectName)")
+            print("🧶 최종 파트 수: \(consolidatedResult.parts.count)")
+            print("📊 통합 비율: \(pageAnalysisResults.count)페이지 → \(consolidatedResult.parts.count)파트")
+            print("💳 남은 크레딧: \(remainingCredits)")
+            print("🔍 [PDF 분석 완료] isAnalyzing = \(isAnalyzing)")
             
         } catch {
-            await MainActor.run {
-                if let analysisError = error as? AIAnalysisError {
-                    errorMessage = analysisError.localizedDescription
-                } else {
-                    errorMessage = "분석 중 오류가 발생했습니다: \(error.localizedDescription)"
-                }
-                isAnalyzing = false
-                print("❌ PDF AI 분석 실패: \(error)")
+            if let analysisError = error as? AIAnalysisError {
+                errorMessage = analysisError.localizedDescription
+            } else {
+                errorMessage = "분석 중 오류가 발생했습니다: \(error.localizedDescription)"
             }
+            isAnalyzing = false
+            print("❌ PDF AI 분석 실패: \(error)")
+            print("🔍 [PDF 오류 발생] isAnalyzing = \(isAnalyzing)")
         }
     }
     

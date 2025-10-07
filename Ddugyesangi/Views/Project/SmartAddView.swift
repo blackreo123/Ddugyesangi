@@ -1,93 +1,39 @@
-//
-//  SmartAddView.swift
-//  Ddugyesangi
-//
-//  Created by JIHA YOON on 2025/10/04.
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 import PhotosUI
 
 struct SmartAddView: View {
     @EnvironmentObject var themeManager: ThemeManager
-    @StateObject private var aiManager = AIAnalysisManager.shared
+    @StateObject private var viewModel = SmartAddViewModel()
+    @ObservedObject private var aiManager = AIAnalysisManager.shared
     @Binding var isPresented: Bool
-    @State private var selectedFileData: Data?
-    @State private var selectedFileName: String = ""
-    @State private var showingFilePicker = false
-    @State private var showingAnalysisResult = false
-    @State private var showingErrorAlert = false
-    @State private var errorMessage = ""
-    @State private var selectedPhoto: PhotosPickerItem?
-    @State private var showPhotoPicker = false
-    @State private var remainingAdRewards: Int = 0
+    
+    // 재선택용 PhotosPicker를 위한 별도 State
+    @State private var reselectedPhoto: PhotosPickerItem?
     
     var body: some View {
         NavigationView {
-            ZStack {
-                themeManager.currentTheme.backgroundColor
-                    .ignoresSafeArea()
-                
-                mainContentView
-            }
-            .navigationTitle("스마트 추가")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("취소") {
-                        isPresented = false
-                    }
-                }
-            }
+            mainNavigationContent
         }
-        .sheet(isPresented: $showingFilePicker) {
-            FilePickerView(
-                selectedFileData: $selectedFileData,
-                selectedFileName: $selectedFileName,
-                isPresented: $showingFilePicker
-            )
-        }
-        .sheet(isPresented: $showingAnalysisResult) {
-            if let result = aiManager.analysisResult {
-                AnalysisResultView(
-                    isPresented: $showingAnalysisResult,
-                    analysisResult: result,
-                    originalFileName: selectedFileName
-                )
-            }
-        }
-        .alert("분석 실패", isPresented: $showingErrorAlert) {
-            Button("확인", role: .cancel) { }
-        } message: {
-            Text(errorMessage)
-        }
-        .onChange(of: aiManager.analysisResult) { _, newResult in
-            if newResult != nil {
-                showingAnalysisResult = true
-            }
-        }
-        .onChange(of: aiManager.errorMessage) { _, newError in
-            if let error = newError, !error.isEmpty {
-                errorMessage = error
-                showingErrorAlert = true
-            }
-        }
-        .onChange(of: aiManager.remainingCredits) { _, _ in
-            loadAdRewards()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("dismissSmartAddView"))) { _ in
-            isPresented = false
-        }
-        // ✅ 추가: 뷰가 나타날 때 광고 보상 횟수 로드
-        .task {
-            loadAdRewards()
-        }
+        .modifier(SheetsModifier(viewModel: viewModel))
+        .modifier(AlertsModifier(viewModel: viewModel))
+        .modifier(ListenersModifier(viewModel: viewModel, isPresented: $isPresented))
     }
     
-    private func loadAdRewards() {
-        Task {
-            remainingAdRewards = await aiManager.getRemainingAdRewards()
+    private var mainNavigationContent: some View {
+        ZStack {
+            themeManager.currentTheme.backgroundColor
+                .ignoresSafeArea()
+            mainContentView
+        }
+        .navigationTitle("스마트 추가")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("취소") {
+                    isPresented = false
+                }
+            }
         }
     }
     
@@ -96,7 +42,7 @@ struct SmartAddView: View {
     private var mainContentView: some View {
         VStack(spacing: 20) {
             fileUploadSection
-            fileReselectionButton
+            fileReselectionButtons
             Spacer()
             analysisSection
             noticeSection
@@ -105,7 +51,7 @@ struct SmartAddView: View {
     
     private var fileUploadSection: some View {
         VStack(spacing: 16) {
-            if !selectedFileName.isEmpty {
+            if !viewModel.selectedFileName.isEmpty {
                 selectedFileInfoView
             } else {
                 fileSelectionButton
@@ -116,14 +62,34 @@ struct SmartAddView: View {
     
     private var selectedFileInfoView: some View {
         VStack(spacing: 12) {
-            Image(systemName: getFileIcon(for: selectedFileName))
-                .font(.system(size: 48))
-                .foregroundColor(themeManager.currentTheme.primaryColor)
-            
+            filePreviewView
             fileInfoTextView
         }
         .padding()
         .background(selectedFileCardBackground)
+    }
+    
+    @ViewBuilder
+    private var filePreviewView: some View {
+        if let fileData = viewModel.selectedFileData,
+           let uiImage = UIImage(data: fileData) {
+            // 이미지 미리보기
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+                .frame(maxHeight: 200)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(themeManager.currentTheme.primaryColor.opacity(0.3), lineWidth: 1)
+                )
+        } else {
+            // 파일 아이콘 (이미지가 아닌 경우)
+            Image(systemName: viewModel.getFileIcon(for: viewModel.selectedFileName))
+                .font(.system(size: 48))
+                .foregroundColor(themeManager.currentTheme.primaryColor)
+        }
     }
     
     private var fileInfoTextView: some View {
@@ -132,14 +98,14 @@ struct SmartAddView: View {
                 .font(.headline)
                 .foregroundColor(themeManager.currentTheme.textColor)
             
-            Text(selectedFileName)
+            Text(viewModel.selectedFileName)
                 .font(.body)
                 .foregroundColor(themeManager.currentTheme.secondaryColor)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
             
-            if let fileData = selectedFileData {
-                Text("크기: \(formatFileSize(fileData.count))")
+            if let fileData = viewModel.selectedFileData {
+                Text("크기: \(viewModel.formatFileSize(fileData.count))")
                     .font(.caption)
                     .foregroundColor(themeManager.currentTheme.secondaryColor)
             }
@@ -157,37 +123,37 @@ struct SmartAddView: View {
     
     private var fileSelectionButton: some View {
         VStack(spacing: 12) {
-            Button(action: {
-                showingFilePicker = true
-            }) {
-                fileSelectionButtonContent
+            documentPickerButton
+            photoPickerButton
+        }
+    }
+    
+    private var documentPickerButton: some View {
+        Button(action: {
+            viewModel.showingFilePicker = true
+        }) {
+            fileSelectionButtonContent
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private var photoPickerButton: some View {
+        PhotosPicker(
+            selection: $viewModel.selectedPhoto,
+            matching: .images,
+            photoLibrary: .shared()
+        ) {
+            HStack {
+                Image(systemName: "photo.on.rectangle")
+                    .font(.system(size: 24))
+                Text("사진에서 선택")
             }
-            .buttonStyle(PlainButtonStyle())
-            
-            PhotosPicker(
-                selection: $selectedPhoto,
-                matching: .images,
-                photoLibrary: .shared()
-            ) {
-                HStack {
-                    Image(systemName: "photo.on.rectangle")
-                        .font(.system(size: 24))
-                    Text("사진에서 선택")
-                }
-                .padding(12)
-                .frame(maxWidth: .infinity)
-                .background(RoundedRectangle(cornerRadius: 10).fill(themeManager.currentTheme.cardColor))
-            }
-            .onChange(of: selectedPhoto) { _, newPhoto in
-                if let photo = newPhoto {
-                    Task {
-                        if let data = try? await photo.loadTransferable(type: Data.self) {
-                            selectedFileData = data
-                            selectedFileName = "photo_selected.jpg"
-                        }
-                    }
-                }
-            }
+            .padding(12)
+            .frame(maxWidth: .infinity)
+            .background(RoundedRectangle(cornerRadius: 10).fill(themeManager.currentTheme.cardColor))
+        }
+        .onChange(of: viewModel.selectedPhoto) { _, newPhoto in
+            handlePhotoSelection(newPhoto)
         }
     }
     
@@ -227,22 +193,49 @@ struct SmartAddView: View {
     }
     
     @ViewBuilder
-    private var fileReselectionButton: some View {
-        if !selectedFileName.isEmpty {
-            Button(action: {
-                showingFilePicker = true
-            }) {
-                HStack {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                    Text("다른 파일 선택")
+    private var fileReselectionButtons: some View {
+        if !viewModel.selectedFileName.isEmpty {
+            HStack(spacing: 12) {
+                // 다른 파일 선택 버튼
+                Button(action: {
+                    viewModel.showingFilePicker = true
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                        Text("다른 파일 선택")
+                    }
+                    .font(.system(size: 14))
+                    .foregroundColor(themeManager.currentTheme.primaryColor)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(themeManager.currentTheme.primaryColor, lineWidth: 1)
+                    )
                 }
-                .foregroundColor(themeManager.currentTheme.primaryColor)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(themeManager.currentTheme.primaryColor, lineWidth: 1)
-                )
+                
+                // 다른 사진 선택 버튼 (별도 바인딩 사용)
+                PhotosPicker(
+                    selection: $reselectedPhoto,
+                    matching: .images,
+                    photoLibrary: .shared()
+                ) {
+                    HStack {
+                        Image(systemName: "photo")
+                        Text("다른 사진 선택")
+                    }
+                    .font(.system(size: 14))
+                    .foregroundColor(themeManager.currentTheme.primaryColor)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(themeManager.currentTheme.primaryColor, lineWidth: 1)
+                    )
+                }
+                .onChange(of: reselectedPhoto) { _, newPhoto in
+                    handlePhotoReselection(newPhoto)
+                }
             }
             .padding(.horizontal, 16)
         }
@@ -250,7 +243,7 @@ struct SmartAddView: View {
     
     @ViewBuilder
     private var analysisSection: some View {
-        if !selectedFileName.isEmpty {
+        if !viewModel.selectedFileName.isEmpty {
             VStack(spacing: 12) {
                 creditInfoView
                 analysisButton
@@ -261,19 +254,15 @@ struct SmartAddView: View {
     @ViewBuilder
     private var creditInfoView: some View {
         if !aiManager.canUseAIAnalysis() {
-            VStack(spacing: 8) {
-                Text("AI 분석 크레딧이 부족합니다")
-                    .font(.subheadline)
-                    .foregroundColor(.red)
+            VStack(spacing: 12) {
+                creditInfoText
                 
-                Text("남은 크레딧: \(aiManager.remainingCredits)회")
-                    .font(.caption)
-                    .foregroundColor(themeManager.currentTheme.secondaryColor)
-                
-                if remainingAdRewards > 0 {
-                    Text("광고 시청으로 크레딧 획득 가능: \(remainingAdRewards)회")
-                        .font(.caption)
-                        .foregroundColor(themeManager.currentTheme.primaryColor)
+                if viewModel.remainingAdRewards > 0 {
+                    adRewardButton
+                    
+                    if !viewModel.adService.isRewardedAdLoaded {
+                        loadingIndicator
+                    }
                 }
             }
             .padding()
@@ -285,9 +274,55 @@ struct SmartAddView: View {
         }
     }
     
+    private var creditInfoText: some View {
+        VStack(spacing: 8) {
+            Text("AI 분석 크레딧이 부족합니다")
+                .font(.subheadline)
+                .foregroundColor(.red)
+            
+            if viewModel.remainingAdRewards > 0 {
+                Text("광고 시청으로 크레딧 획득 가능: \(viewModel.remainingAdRewards)회")
+                    .font(.caption)
+                    .foregroundColor(themeManager.currentTheme.primaryColor)
+            }
+        }
+    }
+    
+    private var adRewardButton: some View {
+        Button(action: {
+            showRewardedAd()
+        }) {
+            HStack(spacing: 8) {
+                Image(systemName: "play.rectangle.fill")
+                Text("광고 보고 크레딧 받기")
+                    .fontWeight(.medium)
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(adRewardButtonBackground)
+        }
+        .disabled(!viewModel.adService.isRewardedAdLoaded || viewModel.adService.isShowingRewardedAd)
+    }
+    
+    private var adRewardButtonBackground: some View {
+        RoundedRectangle(cornerRadius: 10)
+            .fill(viewModel.adService.isRewardedAdLoaded ? Color.green : Color.gray)
+    }
+    
+    private var loadingIndicator: some View {
+        HStack(spacing: 4) {
+            ProgressView()
+                .scaleEffect(0.8)
+            Text("광고 로딩 중...")
+                .font(.caption)
+                .foregroundColor(themeManager.currentTheme.secondaryColor)
+        }
+    }
+    
     private var analysisButton: some View {
         Button(action: {
-            analyzeDesign()
+            viewModel.analyzeDesign()
         }) {
             analysisButtonContent
         }
@@ -316,83 +351,198 @@ struct SmartAddView: View {
     }
     
     private var analysisButtonBackground: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(aiManager.isAnalyzing || !aiManager.canUseAIAnalysis() ?
-                  themeManager.currentTheme.secondaryColor : themeManager.currentTheme.primaryColor)
+        let isDisabled = aiManager.isAnalyzing || !aiManager.canUseAIAnalysis()
+        return RoundedRectangle(cornerRadius: 12)
+            .fill(isDisabled ? themeManager.currentTheme.secondaryColor : themeManager.currentTheme.primaryColor)
     }
     
     private var noticeSection: some View {
         VStack(spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: "info.circle.fill")
-                    .font(.system(size: 14))
-                Text("주의사항")
-                    .font(.system(size: 14, weight: .semibold))
-            }
-            .foregroundColor(themeManager.currentTheme.secondaryColor)
-            
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .top, spacing: 6) {
-                    Text("•")
-                    Text("AI를 사용한 도안 분석은 정확하지 않을 수 있습니다. 분석이 완료되면 반드시 확인해 주세요.")
-                }
-                
-                HStack(alignment: .top, spacing: 6) {
-                    Text("•")
-                    Text("파일이 단순하고 정확한 숫자가 나와 있을수록 분석 정확도가 올라갑니다.")
-                }
-            }
-            .font(.system(size: 12))
-            .foregroundColor(themeManager.currentTheme.secondaryColor)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            noticeHeader
+            noticeContent
         }
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(themeManager.currentTheme.secondaryColor.opacity(0.1))
-        )
+        .background(noticeBackground)
         .padding(.horizontal, 16)
         .padding(.bottom, 20)
     }
     
+    private var noticeHeader: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "info.circle.fill")
+                .font(.system(size: 14))
+            Text("주의사항")
+                .font(.system(size: 14, weight: .semibold))
+        }
+        .foregroundColor(themeManager.currentTheme.secondaryColor)
+    }
+    
+    private var noticeBackground: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(themeManager.currentTheme.secondaryColor.opacity(0.1))
+    }
+    
+    private var noticeContent: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            noticeItem1
+            noticeItem2
+        }
+        .font(.system(size: 12))
+        .foregroundColor(themeManager.currentTheme.secondaryColor)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private var noticeItem1: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Text("•")
+            Text("AI를 사용한 도안 분석은 정확하지 않을 수 있습니다. 분석이 완료되면 반드시 확인해 주세요.")
+        }
+    }
+    
+    private var noticeItem2: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Text("•")
+            Text("파일이 단순하고 정확한 숫자가 나와 있을수록 분석 정확도가 올라갑니다.")
+        }
+    }
+    
     // MARK: - Helper Methods
     
-    private func analyzeDesign() {
-        guard let selectedFileData = selectedFileData else { return }
-        
-        Task {
-            // PDF 파일인 경우 전용 메서드 사용
-            if selectedFileName.lowercased().hasSuffix(".pdf") {
-                await aiManager.analyzePDFKnittingPattern(pdfData: selectedFileData, fileName: selectedFileName)
-            } else {
-                await aiManager.analyzeKnittingPatternFile(fileData: selectedFileData, fileName: selectedFileName)
+    private func handlePhotoSelection(_ photo: PhotosPickerItem?) {
+        if let photo = photo {
+            Task {
+                if let data = try? await photo.loadTransferable(type: Data.self) {
+                    await MainActor.run {
+                        viewModel.selectedFileData = data
+                        
+                        // 파일명을 타임스탬프로 고유하게 생성
+                        let timestamp = Date().timeIntervalSince1970
+                        viewModel.selectedFileName = "photo_\(Int(timestamp)).jpg"
+                        
+                        // PhotosPicker 바인딩 초기화 (다음 선택을 위해)
+                        viewModel.selectedPhoto = nil
+                    }
+                }
             }
-            
-            loadAdRewards()
         }
     }
     
-    private func getFileIcon(for fileName: String) -> String {
-        let lowercasedFileName = fileName.lowercased()
+    private func handlePhotoReselection(_ photo: PhotosPickerItem?) {
+        if let photo = photo {
+            Task {
+                if let data = try? await photo.loadTransferable(type: Data.self) {
+                    await MainActor.run {
+                        viewModel.selectedFileData = data
+                        
+                        // 파일명을 타임스탬프로 고유하게 생성
+                        let timestamp = Date().timeIntervalSince1970
+                        viewModel.selectedFileName = "photo_\(Int(timestamp)).jpg"
+                        
+                        // PhotosPicker 바인딩 초기화 (다음 선택을 위해)
+                        reselectedPhoto = nil
+                    }
+                }
+            }
+        }
+    }
+    
+    private func showRewardedAd() {
+        guard let topViewController = getTopViewController() else {
+            print("❌ 최상위 ViewController를 찾을 수 없음")
+            viewModel.errorMessage = "광고를 표시할 수 없습니다."
+            viewModel.showingErrorAlert = true
+            return
+        }
         
-        if lowercasedFileName.hasSuffix(".pdf") {
-            return "doc.fill"
-        } else if lowercasedFileName.hasSuffix(".jpg") ||
-                    lowercasedFileName.hasSuffix(".jpeg") ||
-                    lowercasedFileName.hasSuffix(".png") ||
-                    lowercasedFileName.hasSuffix(".heic") ||
-                    lowercasedFileName.hasSuffix(".heif") {
-            return "photo.fill"
-        } else {
-            return "doc.fill"
-        }
+        print("✅ 광고를 표시할 ViewController: \(type(of: topViewController))")
+        viewModel.showRewardedAd(from: topViewController)
     }
     
-    private func formatFileSize(_ bytes: Int) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useMB, .useKB, .useBytes]
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: Int64(bytes))
+    private func getTopViewController() -> UIViewController? {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first(where: { $0.isKeyWindow }),
+              var topController = window.rootViewController else {
+            return nil
+        }
+        
+        while let presentedViewController = topController.presentedViewController {
+            topController = presentedViewController
+        }
+        
+        return topController
+    }
+}
+
+// MARK: - View Modifiers
+
+private struct SheetsModifier: ViewModifier {
+    @ObservedObject var viewModel: SmartAddViewModel
+    
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: $viewModel.showingFilePicker) {
+                FilePickerView(
+                    selectedFileData: $viewModel.selectedFileData,
+                    selectedFileName: $viewModel.selectedFileName,
+                    isPresented: $viewModel.showingFilePicker
+                )
+            }
+            .sheet(isPresented: $viewModel.showingAnalysisResult) {
+                if let result = viewModel.aiManager.analysisResult {
+                    AnalysisResultView(
+                        isPresented: $viewModel.showingAnalysisResult,
+                        analysisResult: result,
+                        originalFileName: viewModel.selectedFileName
+                    )
+                }
+            }
+    }
+}
+
+private struct AlertsModifier: ViewModifier {
+    @ObservedObject var viewModel: SmartAddViewModel
+    
+    func body(content: Content) -> some View {
+        content
+            .alert("분석 실패", isPresented: $viewModel.showingErrorAlert) {
+                Button("확인", role: .cancel) { }
+            } message: {
+                Text(viewModel.errorMessage)
+            }
+            .alert("광고 시청 완료!", isPresented: $viewModel.showingAdRewardAlert) {
+                Button("확인", role: .cancel) { }
+            } message: {
+                Text("크레딧 5회가 추가되었습니다.")
+            }
+    }
+}
+
+private struct ListenersModifier: ViewModifier {
+    @ObservedObject var viewModel: SmartAddViewModel
+    @Binding var isPresented: Bool
+    
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: viewModel.aiManager.analysisResult) { _, newResult in
+                if newResult != nil {
+                    viewModel.showingAnalysisResult = true
+                }
+            }
+            .onChange(of: viewModel.aiManager.errorMessage) { _, newError in
+                if let error = newError, !error.isEmpty {
+                    viewModel.errorMessage = error
+                    viewModel.showingErrorAlert = true
+                }
+            }
+            .onChange(of: viewModel.aiManager.remainingCredits) { _, _ in
+                viewModel.loadAdRewards()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("dismissSmartAddView"))) { _ in
+                isPresented = false
+            }
+            .task {
+                viewModel.loadAdRewards()
+            }
     }
 }
 
