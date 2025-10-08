@@ -65,12 +65,23 @@ class SmartAddViewModel: ObservableObject {
     func analyzeDesign() {
         guard let selectedFileData = selectedFileData else { return }
         
+        print("🎬 [analyzeDesign] 분석 시작")
+        print("📊 [analyzeDesign] showingAnalysisResult = \(showingAnalysisResult)")
+        
+        // 분석 시작 전 결과 화면 상태 초기화
+        showingAnalysisResult = false
+        
         Task {
+            print("🔄 [Task 시작] PDF 여부: \(selectedFileName.lowercased().hasSuffix(".pdf"))")
+            
             if selectedFileName.lowercased().hasSuffix(".pdf") {
                 await aiManager.analyzePDFKnittingPattern(pdfData: selectedFileData, fileName: selectedFileName)
             } else {
                 await aiManager.analyzeKnittingPatternFile(fileData: selectedFileData, fileName: selectedFileName)
             }
+            
+            print("✅ [Task 완료] analysisResult = \(String(describing: aiManager.analysisResult?.projectName))")
+            print("📊 [Task 완료] showingAnalysisResult = \(showingAnalysisResult)")
             
             loadAdRewards()
         }

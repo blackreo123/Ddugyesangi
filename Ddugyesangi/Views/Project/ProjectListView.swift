@@ -47,13 +47,13 @@ struct ProjectListView: View {
                     Button(action: {
                         showingSmartAdd = true
                     }) {
-                        Label("스마트 추가", systemImage: "wand.and.rays")
+                        Label(NSLocalizedString("smart_add_menu", comment: ""), systemImage: "wand.and.rays")
                     }
                     
                     Button(action: {
                         showingAddProject = true
                     }) {
-                        Label("일반 추가", systemImage: "plus.circle")
+                        Label(NSLocalizedString("normal_add_menu", comment: ""), systemImage: "plus.circle")
                     }
                 } label: {
                     Image(systemName: "plus")

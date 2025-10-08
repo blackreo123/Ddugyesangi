@@ -5,3 +5,53 @@
   Created by JIHA YOON on 2025/08/21.
   
 */
+"smart_add" = "Smart Add";
+"selected_file" = "Selected File:";
+"file_size_format" = "Size: %@";
+"select_from_photos" = "Select from Photos";
+"select_pattern_or_photo" = "Select Pattern File or Photo";
+"supported_file_formats" = "JPG, PNG, PDF, HEIC files\n(Max 20MB)";
+"select_different_file" = "Select Different File";
+"select_different_photo" = "Select Different Photo";
+"insufficient_ai_credits" = "Insufficient AI Credits";
+"ad_rewards_available" = "Credits available through ads: %d times";
+"watch_ad_for_credits" = "Watch Ad to Get Credits";
+"loading_ad" = "Loading Ad...";
+"analyzing" = "Analyzing...";
+"analyze_pattern_credits" = "Analyze Pattern (%d left)";
+"notice" = "Notice";
+"ai_accuracy_notice" = "AI pattern analysis may not be accurate. Please verify the results after analysis.";
+"analysis_tip" = "Simpler files with clear numbers improve analysis accuracy.";
+"cannot_display_ad" = "Cannot display ad.";
+"analysis_failed" = "Analysis Failed";
+"ad_watch_complete" = "Ad Completed!";
+"credits_added" = "5 credits added.";
+
+"ad_load_failed" = "Failed to load ad. Please try again later.";
+"insufficient_credits" = "Insufficient AI analysis credits. Watch an ad to earn credits.";
+"image_process_failed" = "Failed to process image.";
+"analysis_timeout" = "Analysis timed out. Please try again.";
+"file_too_large" = "File size is too large. Please select a file under 20MB.";
+"unsupported_format" = "Unsupported file format. Only JPG, PNG, PDF, and HEIC files are supported.";
+"server_connection_failed" = "Failed to connect to server. Please check your network.";
+"no_available_models" = "No available models.";
+"invalid_ai_response" = "Invalid AI response format.";
+"cannot_parse_response" = "Unable to parse AI response.";
+
+"cancel" = "Cancel";
+"row_unit" = " rows";
+"analyzed_file" = "Analyzed File";
+"ai_analysis_complete" = "AI Analysis Complete";
+"enter_project_name" = "Enter project name";
+"analyzed_parts_count" = "Analyzed Parts (%d)";
+"analysis_result" = "Analysis Result";
+"creating_project" = "Creating Project...";
+"create_project" = "Create Project";
+"new_part_number" = "New Part %d";
+"target_rows_format" = "Target: %d rows";
+"part_name_label" = "Part Name:";
+"target_row_label" = "Target Row:";
+"ad_reward_limit_reached" = "You have reached the maximum ad rewards for this month.";
+
+"smart_add_menu" = "Smart Add";
+"normal_add_menu" = "Normal Add";

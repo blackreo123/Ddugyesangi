@@ -26,11 +26,11 @@ struct SmartAddView: View {
                 .ignoresSafeArea()
             mainContentView
         }
-        .navigationTitle("스마트 추가")
+        .navigationTitle(NSLocalizedString("smart_add", comment: ""))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("취소") {
+                Button("Cancel") {
                     isPresented = false
                 }
             }
@@ -94,7 +94,7 @@ struct SmartAddView: View {
     
     private var fileInfoTextView: some View {
         VStack(spacing: 4) {
-            Text("선택된 파일:")
+            Text(NSLocalizedString("selected_file", comment: ""))
                 .font(.headline)
                 .foregroundColor(themeManager.currentTheme.textColor)
             
@@ -105,7 +105,7 @@ struct SmartAddView: View {
                 .lineLimit(2)
             
             if let fileData = viewModel.selectedFileData {
-                Text("크기: \(viewModel.formatFileSize(fileData.count))")
+                Text(String(format: NSLocalizedString("file_size_format", comment: ""), viewModel.formatFileSize(fileData.count)))
                     .font(.caption)
                     .foregroundColor(themeManager.currentTheme.secondaryColor)
             }
@@ -146,7 +146,7 @@ struct SmartAddView: View {
             HStack {
                 Image(systemName: "photo.on.rectangle")
                     .font(.system(size: 24))
-                Text("사진에서 선택")
+                Text(NSLocalizedString("select_from_photos", comment: ""))
             }
             .padding(12)
             .frame(maxWidth: .infinity)
@@ -172,11 +172,11 @@ struct SmartAddView: View {
     
     private var fileSelectionTextView: some View {
         VStack(spacing: 8) {
-            Text("도안 파일 또는 사진 선택")
+            Text(NSLocalizedString("select_pattern_or_photo", comment: ""))
                 .font(.headline)
                 .foregroundColor(themeManager.currentTheme.textColor)
             
-            Text("JPG, PNG, PDF, HEIC 파일\n(최대 20MB)")
+            Text(NSLocalizedString("supported_file_formats", comment: ""))
                 .font(.caption)
                 .foregroundColor(themeManager.currentTheme.secondaryColor)
                 .multilineTextAlignment(.center)
@@ -202,7 +202,7 @@ struct SmartAddView: View {
                 }) {
                     HStack {
                         Image(systemName: "arrow.triangle.2.circlepath")
-                        Text("다른 파일 선택")
+                        Text(NSLocalizedString("select_different_file", comment: ""))
                     }
                     .font(.system(size: 14))
                     .foregroundColor(themeManager.currentTheme.primaryColor)
@@ -222,7 +222,7 @@ struct SmartAddView: View {
                 ) {
                     HStack {
                         Image(systemName: "photo")
-                        Text("다른 사진 선택")
+                        Text(NSLocalizedString("select_different_photo", comment: ""))
                     }
                     .font(.system(size: 14))
                     .foregroundColor(themeManager.currentTheme.primaryColor)
@@ -276,12 +276,12 @@ struct SmartAddView: View {
     
     private var creditInfoText: some View {
         VStack(spacing: 8) {
-            Text("AI 분석 크레딧이 부족합니다")
+            Text(NSLocalizedString("insufficient_ai_credits", comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.red)
             
             if viewModel.remainingAdRewards > 0 {
-                Text("광고 시청으로 크레딧 획득 가능: \(viewModel.remainingAdRewards)회")
+                Text(String(format: NSLocalizedString("ad_rewards_available", comment: ""), viewModel.remainingAdRewards))
                     .font(.caption)
                     .foregroundColor(themeManager.currentTheme.primaryColor)
             }
@@ -294,7 +294,7 @@ struct SmartAddView: View {
         }) {
             HStack(spacing: 8) {
                 Image(systemName: "play.rectangle.fill")
-                Text("광고 보고 크레딧 받기")
+                Text(NSLocalizedString("watch_ad_for_credits", comment: ""))
                     .fontWeight(.medium)
             }
             .foregroundColor(.white)
@@ -314,7 +314,7 @@ struct SmartAddView: View {
         HStack(spacing: 4) {
             ProgressView()
                 .scaleEffect(0.8)
-            Text("광고 로딩 중...")
+            Text(NSLocalizedString("loading_ad", comment: ""))
                 .font(.caption)
                 .foregroundColor(themeManager.currentTheme.secondaryColor)
         }
@@ -341,7 +341,10 @@ struct SmartAddView: View {
                 Image(systemName: "wand.and.rays")
             }
             
-            Text(aiManager.isAnalyzing ? "분석 중..." : "도안 분석 (\(aiManager.remainingCredits)회 남음)")
+            Text(aiManager.isAnalyzing
+                ? NSLocalizedString("analyzing", comment: "")
+                : String(format: NSLocalizedString("analyze_pattern_credits", comment: ""),
+                         aiManager.remainingCredits))
                 .fontWeight(.semibold)
         }
         .foregroundColor(.white)
@@ -371,7 +374,7 @@ struct SmartAddView: View {
         HStack(spacing: 6) {
             Image(systemName: "info.circle.fill")
                 .font(.system(size: 14))
-            Text("주의사항")
+            Text(NSLocalizedString("notice", comment: ""))
                 .font(.system(size: 14, weight: .semibold))
         }
         .foregroundColor(themeManager.currentTheme.secondaryColor)
@@ -395,14 +398,14 @@ struct SmartAddView: View {
     private var noticeItem1: some View {
         HStack(alignment: .top, spacing: 6) {
             Text("•")
-            Text("AI를 사용한 도안 분석은 정확하지 않을 수 있습니다. 분석이 완료되면 반드시 확인해 주세요.")
+            Text(NSLocalizedString("ai_accuracy_notice", comment: ""))
         }
     }
     
     private var noticeItem2: some View {
         HStack(alignment: .top, spacing: 6) {
             Text("•")
-            Text("파일이 단순하고 정확한 숫자가 나와 있을수록 분석 정확도가 올라갑니다.")
+            Text(NSLocalizedString("analysis_tip", comment: ""))
         }
     }
     
@@ -449,7 +452,7 @@ struct SmartAddView: View {
     private func showRewardedAd() {
         guard let topViewController = getTopViewController() else {
             print("❌ 최상위 ViewController를 찾을 수 없음")
-            viewModel.errorMessage = "광고를 표시할 수 없습니다."
+            viewModel.errorMessage = NSLocalizedString("cannot_display_ad", comment: "")
             viewModel.showingErrorAlert = true
             return
         }
@@ -504,13 +507,13 @@ private struct AlertsModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .alert("분석 실패", isPresented: $viewModel.showingErrorAlert) {
-                Button("확인", role: .cancel) { }
+            .alert(NSLocalizedString("analysis_failed", comment: ""), isPresented: $viewModel.showingErrorAlert) {
+                Button("OK", role: .cancel) { }
             } message: {
                 Text(viewModel.errorMessage)
             }
             .alert("광고 시청 완료!", isPresented: $viewModel.showingAdRewardAlert) {
-                Button("확인", role: .cancel) { }
+                Button("OK", role: .cancel) { }
             } message: {
                 Text("크레딧 5회가 추가되었습니다.")
             }
@@ -542,6 +545,9 @@ private struct ListenersModifier: ViewModifier {
             }
             .task {
                 viewModel.loadAdRewards()
+            }
+            .onAppear {
+                viewModel.aiManager.resetAnalysisState()
             }
     }
 }

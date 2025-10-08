@@ -17,6 +17,7 @@
 "New Project" = "新しい編み物";
 "Cancel" = "キャンセル";
 "Save" = "保存";
+"OK" = "OK";
 "Project List" = "編み物リスト";
 "Search Projects" = "編み物検索";
 "Part Name" = "パート名";
@@ -35,3 +36,53 @@
 "Reset" = "リセット";
 "Reset Stitch Count" = "目数をリセット";
 "Are you sure you want to reset the stitch count to 0?" = "目数を０にリセットしますか？";
+
+"smart_add" = "スマート追加";
+"selected_file" = "選択されたファイル:";
+"file_size_format" = "サイズ: %@";
+"select_from_photos" = "写真から選択";
+"select_pattern_or_photo" = "編み図ファイルまたは写真を選択";
+"supported_file_formats" = "JPG、PNG、PDF、HEICファイル\n(最大20MB)";
+"select_different_file" = "別のファイルを選択";
+"select_different_photo" = "別の写真を選択";
+"insufficient_ai_credits" = "AI分析クレジットが不足しています";
+"ad_rewards_available" = "広告視聴でクレジット獲得可能: %d回";
+"watch_ad_for_credits" = "広告を見てクレジットを獲得";
+"loading_ad" = "広告読み込み中...";
+"analyzing" = "分析中...";
+"analyze_pattern_credits" = "編み図分析 (残り%d回)";
+"notice" = "注意事項";
+"ai_accuracy_notice" = "AIを使用した編み図分析は正確でない場合があります。分析完了後、必ず確認してください。";
+"analysis_tip" = "ファイルがシンプルで正確な数字が記載されているほど、分析精度が向上します。";
+"cannot_display_ad" = "広告を表示できません。";
+"analysis_failed" = "分析失敗";
+"ad_watch_complete" = "広告視聴完了！";
+"credits_added" = "クレジット5回が追加されました。";
+
+"ad_load_failed" = "広告の読み込みに失敗しました。しばらくしてからもう一度お試しください。";
+"insufficient_credits" = "AI分析クレジットが不足しています。広告を視聴してクレジットを獲得してください。";
+"image_process_failed" = "画像処理に失敗しました。";
+"analysis_timeout" = "分析がタイムアウトしました。もう一度お試しください。";
+"file_too_large" = "ファイルサイズが大きすぎます。20MB以下のファイルを選択してください。";
+"unsupported_format" = "サポートされていないファイル形式です。JPG、PNG、PDF、HEICファイルのみ対応しています。";
+"server_connection_failed" = "サーバー接続に失敗しました。ネットワークを確認してください。";
+"no_available_models" = "利用可能なモデルがありません。";
+"invalid_ai_response" = "AI応答形式が正しくありません。";
+"cannot_parse_response" = "AI応答を解析できません。";
+
+"cancel" = "キャンセル";
+"row_unit" = "段";
+"analyzed_file" = "分析済みファイル";
+"ai_analysis_complete" = "AI分析完了";
+"enter_project_name" = "編み物名を入力";
+"analyzed_parts_count" = "分析済みパート (%d個)";
+"analysis_result" = "分析結果";
+"creating_project" = "編み物作成中...";
+"create_project" = "編み物作成";
+"new_part_number" = "新しいパート %d";
+"target_rows_format" = "目標: %d段";
+"part_name_label" = "パート名:";
+"target_row_label" = "目標段数:";
+
+"smart_add_menu" = "スマート追加";
+"normal_add_menu" = "一般追加";

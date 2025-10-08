@@ -139,7 +139,7 @@ class AIAnalysisManager: ObservableObject {
             print("📺 광고 보상 완료: \(credits)회 남음 (추가: \(adRewardAmount)회)")
             
         } catch UsageError.adRewardLimitReached {
-            errorMessage = "이번 달 광고 보상 한도에 도달했습니다."
+            errorMessage = NSLocalizedString("ad_reward_limit_reached", comment: "")
             print("⚠️ 광고 보상 한도 초과")
             
         } catch {
@@ -161,7 +161,7 @@ class AIAnalysisManager: ObservableObject {
             errorMessage = nil
             print("📺 로컬 광고 보상: \(remainingCredits)회 남음 (추가: \(adRewardAmount)회)")
         } else {
-            errorMessage = "이번 달 광고 보상 한도에 도달했습니다."
+            errorMessage = NSLocalizedString("ad_reward_limit_reached", comment: "")
         }
     }
     
@@ -190,7 +190,7 @@ class AIAnalysisManager: ObservableObject {
     // MARK: - AI 도안 분석
     
     func analyzeKnittingPatternFile(fileData: Data, fileName: String) async {
-        // @MainActor 클래스 안이므로 직접 수정
+        
         isAnalyzing = true
         errorMessage = nil
         analysisResult = nil
@@ -227,7 +227,6 @@ class AIAnalysisManager: ObservableObject {
             // 성공시 크레딧 차감
             try await useCredit()
             
-            // @MainActor 클래스 안이므로 직접 할당
             analysisResult = result
             isAnalyzing = false
             
@@ -238,9 +237,9 @@ class AIAnalysisManager: ObservableObject {
             
         } catch {
             if let analysisError = error as? AIAnalysisError {
-                errorMessage = analysisError.localizedDescription
+                errorMessage = NSLocalizedString(analysisError.localizedDescription, comment: "")
             } else {
-                errorMessage = "분석 중 오류가 발생했습니다: \(error.localizedDescription)"
+                errorMessage = NSLocalizedString("analysis_failed", comment: "")
             }
             isAnalyzing = false
             print("❌ AI 파일 분석 실패: \(error)")
@@ -337,9 +336,9 @@ class AIAnalysisManager: ObservableObject {
             
         } catch {
             if let analysisError = error as? AIAnalysisError {
-                errorMessage = analysisError.localizedDescription
+                errorMessage = NSLocalizedString(analysisError.localizedDescription, comment: "")
             } else {
-                errorMessage = "분석 중 오류가 발생했습니다: \(error.localizedDescription)"
+                errorMessage = NSLocalizedString("analysis_failed", comment: "")
             }
             isAnalyzing = false
             print("❌ PDF AI 분석 실패: \(error)")
@@ -457,6 +456,13 @@ class AIAnalysisManager: ObservableObject {
         let components = calendar.dateComponents([.day], from: nextMonth)
         return "\(components.day ?? 1)일"
     }
+    
+    func resetAnalysisState() {
+        analysisResult = nil
+        errorMessage = nil
+        isAnalyzing = false
+        print("🔄 분석 상태 초기화 완료")
+    }
 }
 
 // MARK: - Error Types
@@ -472,17 +478,17 @@ enum AIAnalysisError: Error {
     var localizedDescription: String {
         switch self {
         case .insufficientCredits:
-            return "AI 분석 크레딧이 부족합니다. 광고를 시청하여 크레딧을 얻으세요."
+            return "insufficient_credits"
         case .imageProcessingFailed:
-            return "이미지 처리에 실패했습니다."
+            return "image_process_failed"
         case .analysisTimeout:
-            return "분석 시간이 초과되었습니다. 다시 시도해주세요."
+            return "analysis_timeout"
         case .fileTooLarge:
-            return "파일 크기가 너무 큽니다. 20MB 이하의 파일을 선택해주세요."
+            return "file_too_large"
         case .unsupportedFileType:
-            return "지원하지 않는 파일 형식입니다. JPG, PNG, PDF, HEIC 파일만 지원합니다."
+            return "unsupported_format"
         case .firebaseError:
-            return "서버 연결에 실패했습니다. 네트워크를 확인해주세요."
+            return "server_connection_failed"
         }
     }
 }

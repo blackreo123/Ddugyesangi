@@ -32,7 +32,7 @@ struct AnalysisResultView: View {
                     VStack(spacing: 20) {
                         // 분석된 파일 정보 표시
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("분석된 파일")
+                            Text(NSLocalizedString("analyzed_file", comment: ""))
                                 .font(.headline)
                                 .foregroundColor(themeManager.currentTheme.textColor)
                             
@@ -47,7 +47,7 @@ struct AnalysisResultView: View {
                                         .foregroundColor(themeManager.currentTheme.textColor)
                                         .lineLimit(2)
                                     
-                                    Text("AI 분석 완료")
+                                    Text(NSLocalizedString("ai_analysis_complete", comment: ""))
                                         .font(.caption)
                                         .foregroundColor(themeManager.currentTheme.secondaryColor)
                                 }
@@ -68,11 +68,11 @@ struct AnalysisResultView: View {
                         
                         // 프로젝트 이름 편집
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("프로젝트 이름")
+                            Text(NSLocalizedString("Project Name", comment: ""))
                                 .font(.headline)
                                 .foregroundColor(themeManager.currentTheme.textColor)
                             
-                            TextField("프로젝트 이름을 입력하세요", text: $editedProjectName)
+                            TextField(NSLocalizedString("enter_project_name", comment: ""), text: $editedProjectName)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .font(.body)
                         }
@@ -80,7 +80,7 @@ struct AnalysisResultView: View {
                         
                         // 분석된 파트들
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("분석된 파트 (\(editedParts.count)개)")
+                            Text(String(format: NSLocalizedString("analyzed_parts_count", comment: ""), editedParts.count))
                                 .font(.headline)
                                 .foregroundColor(themeManager.currentTheme.textColor)
                             
@@ -97,7 +97,7 @@ struct AnalysisResultView: View {
                             Button(action: addNewPart) {
                                 HStack {
                                     Image(systemName: "plus.circle")
-                                    Text("새 파트 추가")
+                                    Text(NSLocalizedString("Add New Part", comment: ""))
                                 }
                                 .foregroundColor(themeManager.currentTheme.primaryColor)
                                 .padding(.vertical, 8)
@@ -111,11 +111,11 @@ struct AnalysisResultView: View {
                     .padding(.bottom, 20)
                 }
             }
-            .navigationTitle("분석 결과")
+            .navigationTitle(NSLocalizedString("analysis_result", comment: ""))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("취소") {
+                    Button(NSLocalizedString("cancel", comment: "")) {
                         isPresented = false
                     }
                     .foregroundColor(themeManager.currentTheme.textColor)
@@ -133,7 +133,7 @@ struct AnalysisResultView: View {
                             Image(systemName: "plus.app")
                         }
                         
-                        Text(isCreatingProject ? "프로젝트 생성 중..." : "프로젝트 생성")
+                        Text(isCreatingProject ? NSLocalizedString("creating_project", comment: "") : NSLocalizedString("create_project", comment: ""))
                             .fontWeight(.semibold)
                     }
                     .foregroundColor(.white)
@@ -168,7 +168,7 @@ struct AnalysisResultView: View {
     
     private func addNewPart() {
         let newPart = EditableKnittingPart(
-            partName: "새 파트 \(editedParts.count + 1)",
+            partName: String(format: NSLocalizedString("new_part_number", comment: ""), editedParts.count + 1),
             targetRow: 10
         )
         editedParts.append(newPart)
@@ -256,7 +256,7 @@ struct EditablePartView: View {
                                 .font(.headline)
                                 .foregroundColor(themeManager.currentTheme.textColor)
                             
-                            Text("목표: \(part.targetRow)단")
+                            Text("\(NSLocalizedString("target_row_label", comment: "")): \(part.targetRow)\(NSLocalizedString("row_unit", comment: ""))")
                                 .font(.caption)
                                 .foregroundColor(themeManager.currentTheme.secondaryColor)
                         }
@@ -282,21 +282,21 @@ struct EditablePartView: View {
                 VStack(spacing: 12) {
                     // 파트 이름 편집
                     HStack {
-                        Text("파트 이름:")
+                        Text(NSLocalizedString("part_name_label", comment: ""))
                             .font(.subheadline)
                             .foregroundColor(themeManager.currentTheme.textColor)
                         
-                        TextField("파트 이름", text: $part.partName)
+                        TextField(NSLocalizedString("part_name_label", comment: ""), text: $part.partName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                     
                     // 목표 단 편집
                     HStack {
-                        Text("목표 단:")
+                        Text(NSLocalizedString("target_row_label", comment: ""))
                             .font(.subheadline)
                             .foregroundColor(themeManager.currentTheme.textColor)
                         
-                        TextField("목표 단", value: $part.targetRow, format: .number)
+                        TextField(NSLocalizedString("target_row_label", comment: ""), value: $part.targetRow, format: .number)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .keyboardType(.numberPad)
                     }
