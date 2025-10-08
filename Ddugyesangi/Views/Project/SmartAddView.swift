@@ -389,6 +389,7 @@ struct SmartAddView: View {
         VStack(alignment: .leading, spacing: 6) {
             noticeItem1
             noticeItem2
+            noticeItem3
         }
         .font(.system(size: 12))
         .foregroundColor(themeManager.currentTheme.secondaryColor)
@@ -406,6 +407,15 @@ struct SmartAddView: View {
         HStack(alignment: .top, spacing: 6) {
             Text("•")
             Text(NSLocalizedString("analysis_tip", comment: ""))
+        }
+    }
+    
+    private var noticeItem3: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Text("⚠️")
+            Text(NSLocalizedString("credit_will_be_used", comment: ""))
+                .fontWeight(.medium)
+                .foregroundColor(Color.orange)
         }
     }
     

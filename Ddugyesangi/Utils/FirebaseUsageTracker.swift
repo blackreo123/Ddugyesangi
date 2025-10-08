@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
+import CryptoKit
 
 class FirebaseUsageTracker: ObservableObject {
     
@@ -19,6 +20,15 @@ class FirebaseUsageTracker: ObservableObject {
     // 현재 인증된 사용자 UID
     private var currentUID: String? {
         Auth.auth().currentUser?.uid
+    }
+    
+    // MARK: - 분석 기록 구조체
+    
+    struct AnalysisAttempt: Codable {
+        let fileHash: String
+        let timestamp: Date
+        let fileName: String
+        let success: Bool
     }
     
     // MARK: - 초기화
@@ -37,8 +47,6 @@ class FirebaseUsageTracker: ObservableObject {
         // Keychain에서 이전 UID 확인 (앱 재설치 대비)
         if let savedUID = KeychainHelper.load(key: "firebase_uid") {
             print("📦 Keychain에서 이전 UID 발견: \(savedUID)")
-            // 실제로는 Custom Token 방식으로 복원해야 하지만
-            // 지금은 새로 생성 (고급 기능은 서버 구현 필요)
         }
         
         // 새 익명 사용자 생성
@@ -60,7 +68,162 @@ class FirebaseUsageTracker: ObservableObject {
         }
     }
     
-    // MARK: - 사용량 관리
+    // MARK: - 파일 해시 계산
+    
+    /// 파일 해시 계산
+    func calculateFileHash(_ data: Data) -> String {
+        let hash = SHA256.hash(data: data)
+        return hash.compactMap { String(format: "%02x", $0) }.joined()
+    }
+    
+    // MARK: - 분석 기록 관리
+    
+    /// 분석 시도 기록
+    func recordAnalysisAttempt(fileHash: String, fileName: String, success: Bool) async throws {
+        guard let uid = currentUID else {
+            throw UsageError.notAuthenticated
+        }
+        
+        let attemptData: [String: Any] = [
+            "fileHash": fileHash,
+            "fileName": fileName,
+            "timestamp": Timestamp(),
+            "success": success,
+            "creditUsed": true  // 크레딧 사용 여부 추가
+        ]
+        
+        let docRef = db.collection("usage").document(uid)
+            .collection("attempts").document()
+        
+        try await docRef.setData(attemptData)
+        
+        print("📝 분석 시도 기록: \(success ? "성공" : "실패") - \(fileName)")
+        
+        // 통계 업데이트
+        await updateStatistics(success: success)
+        
+        // 오래된 기록 정리 (30일 이상)
+        await cleanOldAttempts()
+    }
+    
+    /// 사용자 통계 업데이트
+    private func updateStatistics(success: Bool) async {
+        guard let uid = currentUID else { return }
+        
+        let statsRef = db.collection("usage").document(uid)
+        
+        do {
+            let document = try await statsRef.getDocument()
+            
+            if document.exists, var data = document.data() {
+                // 기존 통계 업데이트
+                let totalAttempts = (data["totalAttempts"] as? Int ?? 0) + 1
+                let successCount = (data["successCount"] as? Int ?? 0) + (success ? 1 : 0)
+                let failureCount = (data["failureCount"] as? Int ?? 0) + (success ? 0 : 1)
+                
+                data["totalAttempts"] = totalAttempts
+                data["successCount"] = successCount
+                data["failureCount"] = failureCount
+                data["successRate"] = Double(successCount) / Double(totalAttempts)
+                data["lastAnalysis"] = Timestamp()
+                
+                try await statsRef.updateData(data)
+                
+                print("📊 통계 업데이트: 총 \(totalAttempts)회, 성공 \(successCount)회, 실패 \(failureCount)회")
+            } else {
+                // 첫 통계 생성
+                let initialStats: [String: Any] = [
+                    "totalAttempts": 1,
+                    "successCount": success ? 1 : 0,
+                    "failureCount": success ? 0 : 1,
+                    "successRate": success ? 1.0 : 0.0,
+                    "lastAnalysis": Timestamp()
+                ]
+                
+                try await statsRef.setData(initialStats, merge: true)
+            }
+        } catch {
+            print("⚠️ 통계 업데이트 실패: \(error)")
+        }
+    }
+    
+    /// 오래된 시도 기록 정리
+    private func cleanOldAttempts() async {
+        guard let uid = currentUID else { return }
+        
+        let cutoffTime = Date().addingTimeInterval(-30 * 24 * 3600) // 30일
+        let attemptsRef = db.collection("usage").document(uid).collection("attempts")
+        
+        do {
+            let query = attemptsRef.whereField("timestamp", isLessThan: Timestamp(date: cutoffTime))
+            let snapshot = try await query.getDocuments()
+            
+            for document in snapshot.documents {
+                try await document.reference.delete()
+            }
+            
+            if !snapshot.documents.isEmpty {
+                print("🗑 \(snapshot.documents.count)개의 오래된 시도 기록 삭제")
+            }
+        } catch {
+            print("⚠️ 오래된 기록 정리 실패: \(error)")
+        }
+    }
+    
+    /// 특정 파일의 시도 기록 조회
+    func getAttemptHistory(fileHash: String) async throws -> [AnalysisAttempt] {
+        guard let uid = currentUID else {
+            throw UsageError.notAuthenticated
+        }
+        
+        let attemptsRef = db.collection("usage").document(uid).collection("attempts")
+        let query = attemptsRef
+            .whereField("fileHash", isEqualTo: fileHash)
+            .order(by: "timestamp", descending: true)
+            .limit(to: 10)
+        
+        let snapshot = try await query.getDocuments()
+        
+        return snapshot.documents.compactMap { doc in
+            let data = doc.data()
+            guard let fileHash = data["fileHash"] as? String,
+                  let timestamp = (data["timestamp"] as? Timestamp)?.dateValue(),
+                  let fileName = data["fileName"] as? String,
+                  let success = data["success"] as? Bool else {
+                return nil
+            }
+            
+            return AnalysisAttempt(
+                fileHash: fileHash,
+                timestamp: timestamp,
+                fileName: fileName,
+                success: success
+            )
+        }
+    }
+    
+    /// 사용자 통계 조회
+    func getUserStatistics() async throws -> (totalAttempts: Int, successCount: Int, failureCount: Int, successRate: Double) {
+        guard let uid = currentUID else {
+            throw UsageError.notAuthenticated
+        }
+        
+        let statsRef = db.collection("usage").document(uid)
+        let document = try await statsRef.getDocument()
+        
+        guard document.exists, let data = document.data() else {
+            return (0, 0, 0, 0.0)
+        }
+        
+        let totalAttempts = data["totalAttempts"] as? Int ?? 0
+        let successCount = data["successCount"] as? Int ?? 0
+        let failureCount = data["failureCount"] as? Int ?? 0
+        let successRate = data["successRate"] as? Double ?? 0.0
+        
+        return (totalAttempts, successCount, failureCount, successRate)
+    }
+    
+    // MARK: - 사용량 관리 (기존 코드)
     
     /// 현재 남은 크레딧 조회
     func getRemainingCredits() async throws -> Int {
@@ -241,7 +404,11 @@ class FirebaseUsageTracker: ObservableObject {
             "lastResetDate": Timestamp(),
             "createdAt": Timestamp(),
             "updatedAt": Timestamp(),
-            "adRewardsUsed": 0
+            "adRewardsUsed": 0,
+            "totalAttempts": 0,
+            "successCount": 0,
+            "failureCount": 0,
+            "successRate": 0.0
         ]
         
         try await db.collection("usage").document(uid).setData(initialData)
@@ -268,7 +435,8 @@ class FirebaseUsageTracker: ObservableObject {
             "credits": monthlyLimit,
             "lastResetDate": Timestamp(),
             "updatedAt": Timestamp(),
-            "adRewardsUsed": 0  // 광고 보상도 리셋
+            "adRewardsUsed": 0,  // 광고 보상도 리셋
+            // 통계는 리셋하지 않음 (누적 통계)
         ])
         
         print("🔄 월별 크레딧 리셋 완료: \(monthlyLimit)크레딧")

@@ -86,3 +86,10 @@
 
 "smart_add_menu" = "スマート追加";
 "normal_add_menu" = "一般追加";
+
+"analysis_failed_credit_used" = "分析に失敗しました。（クレジット1回使用済み）\nより鮮明な画像で再度お試しください。";
+"analysis_failed_no_credit" = "分析を開始できません。（クレジット未使用）";
+"network_error" = "ネットワーク接続エラーが発生しました。（クレジット未使用）";
+"bonus_credit_provided" = "連続失敗によりボーナスクレジット1回が提供されました。";
+"credit_will_be_used" = "分析を開始すると、成功/失敗に関わらずクレジットが消費されます。";
+"analysis_warning" = "注意：API呼び出しが開始されると、失敗してもクレジットが消費されます。";

@@ -55,3 +55,10 @@
 
 "smart_add_menu" = "Smart Add";
 "normal_add_menu" = "Normal Add";
+
+"analysis_failed_credit_used" = "Analysis failed. (1 credit used)\nPlease try again with a clearer image.";
+"analysis_failed_no_credit" = "Cannot start analysis. (No credit used)";
+"network_error" = "Network connection error occurred. (No credit used)";
+"bonus_credit_provided" = "1 bonus credit provided due to consecutive failures.";
+"credit_will_be_used" = "Credit will be deducted regardless of success or failure once analysis starts.";
+"analysis_warning" = "Warning: Credit will be deducted even if analysis fails once API call begins.";

@@ -29,6 +29,9 @@ class AIAnalysisManager: ObservableObject {
     private let adRewardAmount = 5
     private let maxAdRewards = 3
     
+    // 실패 통계 추적
+    private var consecutiveFailures = 0
+    
     private init() {
         self.claudeService = ClaudeAPIService(apiKey: Constants.Claude.apiKey)
         
@@ -118,7 +121,9 @@ class AIAnalysisManager: ObservableObject {
             print("⚠️ Firebase 크레딧 차감 실패, 로컬로 대체: \(error)")
             
             // Fallback: 로컬 크레딧 차감
-            guard remainingCredits > 0 else { return }
+            guard remainingCredits > 0 else {
+                throw AIAnalysisError.insufficientCredits
+            }
             remainingCredits -= 1
             saveLocalCredits()
             print("💳 로컬 크레딧 차감: \(remainingCredits)회 남음")
@@ -187,7 +192,7 @@ class AIAnalysisManager: ObservableObject {
         }
     }
     
-    // MARK: - AI 도안 분석
+    // MARK: - AI 도안 분석 (크레딧 선차감 방식)
     
     func analyzeKnittingPatternFile(fileData: Data, fileName: String) async {
         
@@ -201,54 +206,84 @@ class AIAnalysisManager: ObservableObject {
             // 파일 크기 확인 (20MB 제한)
             let maxFileSize = 20 * 1024 * 1024
             guard fileData.count <= maxFileSize else {
+                print("❌ 파일 크기 초과 - 크레딧 미차감")
                 throw AIAnalysisError.fileTooLarge
             }
             
             // 지원하는 파일 형식 확인
             guard isValidFileType(fileName: fileName) else {
+                print("❌ 지원하지 않는 파일 형식 - 크레딧 미차감")
                 throw AIAnalysisError.unsupportedFileType
             }
             
             // 크레딧 확인
             guard canUseAIAnalysis() else {
+                print("❌ 크레딧 부족 - 분석 불가")
                 throw AIAnalysisError.insufficientCredits
             }
             
+            try await useCredit()
+            print("✅ 크레딧 차감 완료 (남은 크레딧: \(remainingCredits))")
             print("🔍 [Claude API 호출 시작]")
             
-            // AI 분석 실행
-            let result = try await claudeService.analyzeKnittingPattern(
-                fileData: fileData,
-                fileName: fileName
-            )
+            do {
+                let result = try await claudeService.analyzeKnittingPattern(
+                    fileData: fileData,
+                    fileName: fileName
+                )
+                
+                print("✅ [API 응답 받음]")
+                
+                // 분석 성공
+                analysisResult = result
+                isAnalyzing = false
+                consecutiveFailures = 0  // 연속 실패 카운터 리셋
+                
+                // 성공 기록
+                if let fileHash = try? usageTracker.calculateFileHash(fileData) {
+                    try? await usageTracker.recordAnalysisAttempt(
+                        fileHash: fileHash,
+                        fileName: fileName,
+                        success: true
+                    )
+                }
+                
+                print("✅ AI 파일 분석 완료: \(result.projectName)")
+                print("🧶 파트 수: \(result.parts.count)")
+                print("💳 남은 크레딧: \(remainingCredits)")
+                
+            } catch {
+                // API 호출 후 실패 (크레딧은 이미 차감됨)
+                consecutiveFailures += 1
+                
+                // 실패 기록
+                if let fileHash = try? usageTracker.calculateFileHash(fileData) {
+                    try? await usageTracker.recordAnalysisAttempt(
+                        fileHash: fileHash,
+                        fileName: fileName,
+                        success: false
+                    )
+                }
+                
+                print("❌ API 호출 실패 (크레딧 소모됨): \(error)")
+                throw AIAnalysisError.analysisFailedWithCreditUsed
+            }
             
-            print("✅ [API 응답 받음]")
-            
-            // 성공시 크레딧 차감
-            try await useCredit()
-            
-            analysisResult = result
+        } catch AIAnalysisError.analysisFailedWithCreditUsed {
+            // 크레딧이 소모된 실패
+            errorMessage = NSLocalizedString("analysis_failed_credit_used", comment: "")
             isAnalyzing = false
-            
-            print("✅ AI 파일 분석 완료: \(result.projectName)")
-            print("🧶 파트 수: \(result.parts.count)")
-            print("💳 남은 크레딧: \(remainingCredits)")
-            print("🔍 [분석 완료] isAnalyzing = \(isAnalyzing)")
+            print("⚠️ 분석 실패 - 크레딧 1회 사용됨")
             
         } catch {
             let errorKey: String
             if let analysisError = error as? AIAnalysisError {
-                errorKey = analysisError.localizedDescription
+                errorMessage = NSLocalizedString(analysisError.localizedDescription, comment: "")
             } else {
-                errorKey = "analysis_failed"
+                errorMessage = NSLocalizedString("analysis_failed_no_credit", comment: "")
             }
-            
-            let uniqueId = UUID().uuidString
-            errorMessage = "\(errorKey)##\(uniqueId)"
-            
             isAnalyzing = false
-            print("❌ AI 파일 분석 실패: \(error)")
-            print("🔍 [오류 발생] isAnalyzing = \(isAnalyzing)")
+            print("❌ AI 파일 분석 실패 (크레딧 미소모): \(error)")
         }
     }
     
@@ -274,17 +309,23 @@ class AIAnalysisManager: ObservableObject {
             // 파일 크기 및 크레딧 확인
             let maxFileSize = 20 * 1024 * 1024
             guard pdfData.count <= maxFileSize else {
+                print("❌ PDF 파일 크기 초과 - 크레딧 미차감")
                 throw AIAnalysisError.fileTooLarge
             }
             guard canUseAIAnalysis() else {
+                print("❌ 크레딧 부족 - 분석 불가")
                 throw AIAnalysisError.insufficientCredits
             }
             
-            // 1단계: 페이지별 분석 시작
+            // PDF를 이미지로 변환
             let pageImages = convertPDFToMultipleImages(pdfData: pdfData)
             guard !pageImages.isEmpty else {
+                print("❌ PDF 이미지 변환 실패 - 크레딧 미차감")
                 throw AIAnalysisError.imageProcessingFailed
             }
+
+            try await useCredit()
+            print("✅ 크레딧 차감 완료 (남은 크레딧: \(remainingCredits))")
             
             print("📄 PDF 페이지 수: \(pageImages.count)")
             print("🔍 1단계: 페이지별 분석 시작...")
@@ -321,38 +362,64 @@ class AIAnalysisManager: ObservableObject {
             
             // 2단계: 페이지별 결과 통합 분석 시작
             print("🔗 2단계: 결과 통합 분석 중...")
-            let consolidatedResult = try await claudeService.consolidatePageResults(
-                pageResults: pageAnalysisResults,
-                originalFileName: fileName
-            )
             
-            // 성공시 크레딧 차감
-            try await useCredit()
-            
-            // @MainActor 클래스 안이므로 직접 할당
-            analysisResult = consolidatedResult
-            isAnalyzing = false
-            
-            print("✅ PDF 2단계 분석 완료: \(consolidatedResult.projectName)")
-            print("🧶 최종 파트 수: \(consolidatedResult.parts.count)")
-            print("📊 통합 비율: \(pageAnalysisResults.count)페이지 → \(consolidatedResult.parts.count)파트")
-            print("💳 남은 크레딧: \(remainingCredits)")
-            print("🔍 [PDF 분석 완료] isAnalyzing = \(isAnalyzing)")
-            
-        } catch {
-            let errorKey: String
-            if let analysisError = error as? AIAnalysisError {
-                errorKey = analysisError.localizedDescription
-            } else {
-                errorKey = "analysis_failed"
+            do {
+                let consolidatedResult = try await claudeService.consolidatePageResults(
+                    pageResults: pageAnalysisResults,
+                    originalFileName: fileName
+                )
+                
+                // 분석 성공
+                analysisResult = consolidatedResult
+                isAnalyzing = false
+                consecutiveFailures = 0  // 연속 실패 카운터 리셋
+                
+                // 성공 기록
+                if let fileHash = try? usageTracker.calculateFileHash(pdfData) {
+                    try? await usageTracker.recordAnalysisAttempt(
+                        fileHash: fileHash,
+                        fileName: fileName,
+                        success: true
+                    )
+                }
+                
+                print("✅ PDF 2단계 분석 완료: \(consolidatedResult.projectName)")
+                print("🧶 최종 파트 수: \(consolidatedResult.parts.count)")
+                print("📊 통합 비율: \(pageAnalysisResults.count)페이지 → \(consolidatedResult.parts.count)파트")
+                print("💳 남은 크레딧: \(remainingCredits)")
+                
+            } catch {
+                // 통합 분석 실패 (크레딧은 이미 차감됨)
+                consecutiveFailures += 1
+                
+                // 실패 기록
+                if let fileHash = try? usageTracker.calculateFileHash(pdfData) {
+                    try? await usageTracker.recordAnalysisAttempt(
+                        fileHash: fileHash,
+                        fileName: fileName,
+                        success: false
+                    )
+                }
+                
+                print("❌ PDF 통합 분석 실패 (크레딧 소모됨): \(error)")
+                throw AIAnalysisError.analysisFailedWithCreditUsed
             }
             
-            let uniqueId = UUID().uuidString
-            errorMessage = "\(errorKey)##\(uniqueId)"
-            
+        } catch AIAnalysisError.analysisFailedWithCreditUsed {
+            // 크레딧이 소모된 실패
+            errorMessage = NSLocalizedString("analysis_failed_credit_used", comment: "")
             isAnalyzing = false
-            print("❌ PDF AI 분석 실패: \(error)")
-            print("🔍 [PDF 오류 발생] isAnalyzing = \(isAnalyzing)")
+            print("⚠️ PDF 분석 실패 - 크레딧 1회 사용됨")
+            
+        } catch {
+            // 크레딧이 소모되지 않은 실패
+            if let analysisError = error as? AIAnalysisError {
+                errorMessage = NSLocalizedString(analysisError.localizedDescription, comment: "")
+            } else {
+                errorMessage = NSLocalizedString("analysis_failed_no_credit", comment: "")
+            }
+            isAnalyzing = false
+            print("❌ PDF AI 분석 실패 (크레딧 미소모): \(error)")
         }
     }
     
@@ -456,7 +523,8 @@ class AIAnalysisManager: ObservableObject {
         📊 이번 달 사용 현황
         🆓 남은 무료 분석: \(remainingCredits)회
         📺 사용한 광고 보상: \(usedAds)/\(maxAdRewards)회
-        📅 다음 리셋: \(getNextResetDateString())
+        🔄 다음 리셋: \(getNextResetDateString())
+        ⚠️ 연속 실패: \(consecutiveFailures)회
         """
     }
     
@@ -471,7 +539,24 @@ class AIAnalysisManager: ObservableObject {
         analysisResult = nil
         errorMessage = nil
         isAnalyzing = false
+        consecutiveFailures = 0
         print("🔄 분석 상태 초기화 완료")
+    }
+    
+    /// 연속 실패에 대한 보너스 크레딧 제공 (옵션)
+    func checkBonusCredit() async {
+        // 3회 연속 실패 시 1크레딧 보너스 (월 1회 제한)
+        if consecutiveFailures >= 3 {
+            let bonusGiven = UserDefaults.standard.bool(forKey: "monthly_bonus_given")
+            if !bonusGiven {
+                remainingCredits += 1
+                saveLocalCredits()
+                UserDefaults.standard.set(true, forKey: "monthly_bonus_given")
+                errorMessage = "연속 실패로 인해 보너스 크레딧 1회가 제공되었습니다."
+                consecutiveFailures = 0
+                print("🎁 보너스 크레딧 제공: \(remainingCredits)회")
+            }
+        }
     }
 }
 
@@ -484,6 +569,8 @@ enum AIAnalysisError: Error {
     case fileTooLarge
     case unsupportedFileType
     case firebaseError
+    case networkError
+    case analysisFailedWithCreditUsed  // 크레딧 소모된 실패
     
     var localizedDescription: String {
         switch self {
@@ -499,6 +586,10 @@ enum AIAnalysisError: Error {
             return "unsupported_format"
         case .firebaseError:
             return "server_connection_failed"
+        case .networkError:
+            return "network_error"
+        case .analysisFailedWithCreditUsed:
+            return "analysis_failed_credit_used"
         }
     }
 }
