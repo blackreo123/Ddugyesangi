@@ -236,11 +236,16 @@ class AIAnalysisManager: ObservableObject {
             print("🔍 [분석 완료] isAnalyzing = \(isAnalyzing)")
             
         } catch {
+            let errorKey: String
             if let analysisError = error as? AIAnalysisError {
-                errorMessage = NSLocalizedString(analysisError.localizedDescription, comment: "")
+                errorKey = analysisError.localizedDescription
             } else {
-                errorMessage = NSLocalizedString("analysis_failed", comment: "")
+                errorKey = "analysis_failed"
             }
+            
+            let uniqueId = UUID().uuidString
+            errorMessage = "\(errorKey)##\(uniqueId)"
+            
             isAnalyzing = false
             print("❌ AI 파일 분석 실패: \(error)")
             print("🔍 [오류 발생] isAnalyzing = \(isAnalyzing)")
@@ -335,11 +340,16 @@ class AIAnalysisManager: ObservableObject {
             print("🔍 [PDF 분석 완료] isAnalyzing = \(isAnalyzing)")
             
         } catch {
+            let errorKey: String
             if let analysisError = error as? AIAnalysisError {
-                errorMessage = NSLocalizedString(analysisError.localizedDescription, comment: "")
+                errorKey = analysisError.localizedDescription
             } else {
-                errorMessage = NSLocalizedString("analysis_failed", comment: "")
+                errorKey = "analysis_failed"
             }
+            
+            let uniqueId = UUID().uuidString
+            errorMessage = "\(errorKey)##\(uniqueId)"
+            
             isAnalyzing = false
             print("❌ PDF AI 분석 실패: \(error)")
             print("🔍 [PDF 오류 발생] isAnalyzing = \(isAnalyzing)")

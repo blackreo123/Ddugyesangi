@@ -512,10 +512,10 @@ private struct AlertsModifier: ViewModifier {
             } message: {
                 Text(viewModel.errorMessage)
             }
-            .alert("광고 시청 완료!", isPresented: $viewModel.showingAdRewardAlert) {
+            .alert(NSLocalizedString("ad_watch_complete", comment: ""), isPresented: $viewModel.showingAdRewardAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("크레딧 5회가 추가되었습니다.")
+                Text(NSLocalizedString("credits_added", comment: ""))
             }
     }
 }
@@ -533,7 +533,7 @@ private struct ListenersModifier: ViewModifier {
             }
             .onChange(of: viewModel.aiManager.errorMessage) { _, newError in
                 if let error = newError, !error.isEmpty {
-                    viewModel.errorMessage = error
+                    viewModel.errorMessage = extractDisplayError(from: error)
                     viewModel.showingErrorAlert = true
                 }
             }
@@ -549,6 +549,14 @@ private struct ListenersModifier: ViewModifier {
             .onAppear {
                 viewModel.aiManager.resetAnalysisState()
             }
+    }
+    
+    private func extractDisplayError(from errorMessage: String) -> String {
+        if let separatorIndex = errorMessage.firstIndex(of: "#") {
+            let displayPart = String(errorMessage[..<separatorIndex])
+            return NSLocalizedString(displayPart, comment: "")
+        }
+        return NSLocalizedString(errorMessage, comment: "")
     }
 }
 

@@ -56,7 +56,7 @@ class SmartAddViewModel: ObservableObject {
                     self.loadAdRewards()
                 }
             } else {
-                self.errorMessage = "광고를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요."
+                self.errorMessage = NSLocalizedString("ad_load_failed", comment: "")
                 self.showingErrorAlert = true
             }
         }
@@ -85,6 +85,15 @@ class SmartAddViewModel: ObservableObject {
             
             loadAdRewards()
         }
+    }
+    
+    private func extractDisplayError(from errorMessage: String) -> String {
+        if let separatorIndex = errorMessage.firstIndex(of: "#") {
+            let displayPart = String(errorMessage[..<separatorIndex])
+            // 로컬라이제이션 키를 실제 메시지로 변환
+            return NSLocalizedString(displayPart, comment: "")
+        }
+        return NSLocalizedString(errorMessage, comment: "")
     }
     
     func getFileIcon(for fileName: String) -> String {
