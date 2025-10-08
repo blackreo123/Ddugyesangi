@@ -24,7 +24,7 @@ struct PartDetailView: View {
             
             Spacer()
             
-//            bannerAdView
+            bannerAdView
         }
         .background(themeManager.currentTheme.backgroundColor)
         .onAppear {
