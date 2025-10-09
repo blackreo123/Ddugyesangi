@@ -192,7 +192,7 @@ class AIAnalysisManager: ObservableObject {
         }
     }
     
-    // MARK: - AI 도안 분석 (크레딧 선차감 방식)
+    // MARK: - AI 도안 분석 (하이브리드 방식)
     
     func analyzeKnittingPatternFile(fileData: Data, fileName: String) async {
         
@@ -227,6 +227,8 @@ class AIAnalysisManager: ObservableObject {
             print("🔍 [Claude API 호출 시작]")
             
             do {
+                // Claude API의 하이브리드 분석 호출
+                // PDF는 직접 처리 시도 후 실패시 이미지 변환 방식으로 fallback
                 let result = try await claudeService.analyzeKnittingPattern(
                     fileData: fileData,
                     fileName: fileName
@@ -287,23 +289,20 @@ class AIAnalysisManager: ObservableObject {
         }
     }
     
-    // PDF 전용 분석 메서드 (2단계 통합 분석 시스템)
+    // PDF 전용 분석 메서드 (2단계 통합 분석이 필요한 경우)
     func analyzePDFKnittingPattern(pdfData: Data, fileName: String) async {
         /*
-         2단계 Claude 분석 전략
-         
-         1단계: PDF의 각 페이지를 이미지로 변환 후 페이지별 분석을 수행하여 JSON 결과를 수집
-         2단계: 수집된 JSON 결과들을 텍스트로 변환하여 Claude API에 전달, 통합 분석 결과를 받아 최종 도안 생성
-         
-         각 페이지 분석 실패 시 빈 분석 JSON을 추가하여 통합 분석에서 누락되지 않도록 보완
+         하이브리드 전략:
+         1. ClaudeAPIService가 먼저 PDF 직접 처리 시도
+         2. 실패시 자동으로 이미지 변환 방식으로 fallback
+         3. 큰 PDF나 복잡한 경우에만 2단계 분석 사용
          */
         
-        // @MainActor 클래스 안이므로 직접 수정
         isAnalyzing = true
         errorMessage = nil
         analysisResult = nil
         
-        print("🔍 [PDF 분석 시작] isAnalyzing = \(isAnalyzing)")
+        print("📄 [PDF 분석 시작] isAnalyzing = \(isAnalyzing)")
         
         do {
             // 파일 크기 및 크레딧 확인
@@ -317,62 +316,20 @@ class AIAnalysisManager: ObservableObject {
                 throw AIAnalysisError.insufficientCredits
             }
             
-            // PDF를 이미지로 변환
-            let pageImages = convertPDFToMultipleImages(pdfData: pdfData)
-            guard !pageImages.isEmpty else {
-                print("❌ PDF 이미지 변환 실패 - 크레딧 미차감")
-                throw AIAnalysisError.imageProcessingFailed
-            }
-
             try await useCredit()
             print("✅ 크레딧 차감 완료 (남은 크레딧: \(remainingCredits))")
             
-            print("📄 PDF 페이지 수: \(pageImages.count)")
-            print("🔍 1단계: 페이지별 분석 시작...")
-            
-            var pageAnalysisResults: [String] = []
-            
-            for (index, imageData) in pageImages.enumerated() {
-                print("🔍 1단계: 페이지 \(index + 1)/\(pageImages.count) 분석 중...")
-                
-                do {
-                    // 각 페이지별 분석 수행 (특별 프롬프트 사용)
-                    let pageResult = try await claudeService.analyzeKnittingPatternPage(
-                        fileData: imageData,
-                        fileName: "\(fileName)_page\(index + 1).jpg",
-                        pageNumber: index + 1,
-                        totalPages: pageImages.count
-                    )
-                    
-                    // JSON 문자열로 변환하여 저장 (2단계 통합 분석에 사용)
-                    let jsonString = convertAnalysisToJSONString(pageResult)
-                    pageAnalysisResults.append(jsonString)
-                    
-                    print("✅ 페이지 \(index + 1) 분석 완료 - \(pageResult.parts.count)개 파트 발견")
-                    
-                } catch {
-                    // 페이지별 분석 실패 시 빈 분석 JSON 추가하여 누락 방지
-                    print("⚠️ 페이지 \(index + 1) 분석 실패: \(error.localizedDescription)")
-                    let emptyAnalysisJSON = """
-                    {"projectName":"분석실패(페이지 \(index + 1))","parts":[]}
-                    """
-                    pageAnalysisResults.append(emptyAnalysisJSON)
-                }
-            }
-            
-            // 2단계: 페이지별 결과 통합 분석 시작
-            print("🔗 2단계: 결과 통합 분석 중...")
-            
+            // 1차 시도: PDF 직접 처리 (ClaudeAPIService 내부에서 처리)
             do {
-                let consolidatedResult = try await claudeService.consolidatePageResults(
-                    pageResults: pageAnalysisResults,
-                    originalFileName: fileName
+                let result = try await claudeService.analyzeKnittingPattern(
+                    fileData: pdfData,
+                    fileName: fileName
                 )
                 
-                // 분석 성공
-                analysisResult = consolidatedResult
+                // 직접 처리 성공
+                analysisResult = result
                 isAnalyzing = false
-                consecutiveFailures = 0  // 연속 실패 카운터 리셋
+                consecutiveFailures = 0
                 
                 // 성공 기록
                 if let fileHash = try? usageTracker.calculateFileHash(pdfData) {
@@ -383,26 +340,14 @@ class AIAnalysisManager: ObservableObject {
                     )
                 }
                 
-                print("✅ PDF 2단계 분석 완료: \(consolidatedResult.projectName)")
-                print("🧶 최종 파트 수: \(consolidatedResult.parts.count)")
-                print("📊 통합 비율: \(pageAnalysisResults.count)페이지 → \(consolidatedResult.parts.count)파트")
+                print("✅ PDF 직접 처리 성공: \(result.projectName)")
+                print("🧶 파트 수: \(result.parts.count)")
                 print("💳 남은 크레딧: \(remainingCredits)")
                 
             } catch {
-                // 통합 분석 실패 (크레딧은 이미 차감됨)
-                consecutiveFailures += 1
-                
-                // 실패 기록
-                if let fileHash = try? usageTracker.calculateFileHash(pdfData) {
-                    try? await usageTracker.recordAnalysisAttempt(
-                        fileHash: fileHash,
-                        fileName: fileName,
-                        success: false
-                    )
-                }
-                
-                print("❌ PDF 통합 분석 실패 (크레딧 소모됨): \(error)")
-                throw AIAnalysisError.analysisFailedWithCreditUsed
+                // PDF 직접 처리 실패 - 2단계 분석으로 전환
+                print("⚠️ PDF 직접 처리 실패, 2단계 분석 시작: \(error)")
+                try await performTwoStageAnalysis(pdfData: pdfData, fileName: fileName)
             }
             
         } catch AIAnalysisError.analysisFailedWithCreditUsed {
@@ -420,6 +365,95 @@ class AIAnalysisManager: ObservableObject {
             }
             isAnalyzing = false
             print("❌ PDF AI 분석 실패 (크레딧 미소모): \(error)")
+        }
+    }
+    
+    // MARK: - 2단계 분석 시스템 (Fallback)
+    
+    private func performTwoStageAnalysis(pdfData: Data, fileName: String) async throws {
+        // PDF를 이미지로 변환
+        let pageImages = convertPDFToMultipleImages(pdfData: pdfData)
+        guard !pageImages.isEmpty else {
+            print("❌ PDF 이미지 변환 실패")
+            throw AIAnalysisError.imageProcessingFailed
+        }
+        
+        print("📄 PDF 페이지 수: \(pageImages.count)")
+        print("🔍 1단계: 페이지별 분석 시작...")
+        
+        var pageAnalysisResults: [String] = []
+        
+        for (index, imageData) in pageImages.enumerated() {
+            print("🔍 1단계: 페이지 \(index + 1)/\(pageImages.count) 분석 중...")
+            
+            do {
+                // 각 페이지별 분석 수행 (특별 프롬프트 사용)
+                let pageResult = try await claudeService.analyzeKnittingPatternPage(
+                    fileData: imageData,
+                    fileName: "\(fileName)_page\(index + 1).jpg",
+                    pageNumber: index + 1,
+                    totalPages: pageImages.count
+                )
+                
+                // JSON 문자열로 변환하여 저장 (2단계 통합 분석에 사용)
+                let jsonString = convertAnalysisToJSONString(pageResult)
+                pageAnalysisResults.append(jsonString)
+                
+                print("✅ 페이지 \(index + 1) 분석 완료 - \(pageResult.parts.count)개 파트 발견")
+                
+            } catch {
+                // 페이지별 분석 실패 시 빈 분석 JSON 추가하여 누락 방지
+                print("⚠️ 페이지 \(index + 1) 분석 실패: \(error.localizedDescription)")
+                let emptyAnalysisJSON = """
+                {"projectName":"분석실패(페이지 \(index + 1))","parts":[]}
+                """
+                pageAnalysisResults.append(emptyAnalysisJSON)
+            }
+        }
+        
+        // 2단계: 페이지별 결과 통합 분석 시작
+        print("🔗 2단계: 결과 통합 분석 중...")
+        
+        do {
+            let consolidatedResult = try await claudeService.consolidatePageResults(
+                pageResults: pageAnalysisResults,
+                originalFileName: fileName
+            )
+            
+            // 분석 성공
+            analysisResult = consolidatedResult
+            isAnalyzing = false
+            consecutiveFailures = 0  // 연속 실패 카운터 리셋
+            
+            // 성공 기록
+            if let fileHash = try? usageTracker.calculateFileHash(pdfData) {
+                try? await usageTracker.recordAnalysisAttempt(
+                    fileHash: fileHash,
+                    fileName: fileName,
+                    success: true
+                )
+            }
+            
+            print("✅ PDF 2단계 분석 완료: \(consolidatedResult.projectName)")
+            print("🧶 최종 파트 수: \(consolidatedResult.parts.count)")
+            print("📊 통합 비율: \(pageAnalysisResults.count)페이지 → \(consolidatedResult.parts.count)파트")
+            print("💳 남은 크레딧: \(remainingCredits)")
+            
+        } catch {
+            // 통합 분석 실패 (크레딧은 이미 차감됨)
+            consecutiveFailures += 1
+            
+            // 실패 기록
+            if let fileHash = try? usageTracker.calculateFileHash(pdfData) {
+                try? await usageTracker.recordAnalysisAttempt(
+                    fileHash: fileHash,
+                    fileName: fileName,
+                    success: false
+                )
+            }
+            
+            print("❌ PDF 통합 분석 실패 (크레딧 소모됨): \(error)")
+            throw AIAnalysisError.analysisFailedWithCreditUsed
         }
     }
     

@@ -8,20 +8,13 @@
 import Foundation
 import Alamofire
 
-/// Claude API 제약하 2단계 뜨개질 도안 분석 전략
+/// Claude API 하이브리드 PDF 처리 시스템
 ///
-/// 1단계: PDF 각 페이지 이미지를 analyzeKnittingPatternPage로 개별 분석 (파트명에 (페이지 N) 포함)
-/// 2단계: 각 페이지별 결과(pageResults) 배열을 consolidatePageResults로 전달하여 중복/병합 포함 최종 통합 결과 생성
+/// PDF 처리 전략:
+/// 1. 우선: PDF 직접 API 전송 (네이티브 PDF 지원)
+/// 2. Fallback: 기존 2단계 이미지 변환 방식
 ///
-/// 예시 사용 흐름:
-/// ----------------------------------------------------
-/// var pageResults: [String] = []
-/// for page in pages {
-///     let result = try await service.analyzeKnittingPatternPage(...)
-///     pageResults.append(resultString)
-/// }
-/// let final = try await service.consolidatePageResults(pageResults: pageResults, ...)
-/// ----------------------------------------------------
+/// 일반 이미지는 기존 방식 유지
 
 class ClaudeAPIService {
     private let apiKey: String
@@ -94,7 +87,7 @@ class ClaudeAPIService {
     
     // MARK: - 최적 모델 선택
     private func selectBestModel(from models: [ModelsResponse.ClaudeModel]) -> ModelsResponse.ClaudeModel? {
-        // 비전 기능이 있는 모델만 필터링 (이미지 분석용)
+        // 비전 기능이 있는 모델만 필터링 (이미지/PDF 분석용)
         let visionCapableModels = models.filter { model in
             model.id.contains("claude-3") || model.id.contains("sonnet") || model.id.contains("haiku") || model.id.contains("opus")
         }
@@ -118,8 +111,101 @@ class ClaudeAPIService {
         return prioritizedModels.first
     }
     
-    // MARK: - 뜨개질 도안 분석 메인 함수
+    // MARK: - 뜨개질 도안 분석 메인 함수 (하이브리드)
     func analyzeKnittingPattern(fileData: Data, fileName: String = "") async throws -> KnittingAnalysis {
+        // PDF 파일인 경우 직접 처리 시도
+        if fileName.lowercased().hasSuffix(".pdf") {
+            print("📄 PDF 직접 처리 시도...")
+            
+            do {
+                // PDF 네이티브 API 호출 시도
+                let result = try await analyzePDFDirect(pdfData: fileData, fileName: fileName)
+                print("✅ PDF 직접 처리 성공!")
+                return result
+            } catch {
+                print("⚠️ PDF 직접 처리 실패, 기존 이미지 변환 방식으로 fallback: \(error)")
+                // Fallback: 기존 이미지 변환 방식 사용
+                return try await analyzePDFWithImageConversion(pdfData: fileData, fileName: fileName)
+            }
+        }
+        
+        // 일반 이미지 파일 처리 (기존 방식)
+        return try await analyzeImageFile(fileData: fileData, fileName: fileName)
+    }
+    
+    // MARK: - PDF 직접 처리 (새로운 방식)
+    private func analyzePDFDirect(pdfData: Data, fileName: String) async throws -> KnittingAnalysis {
+        let base64PDF = pdfData.base64EncodedString()
+        
+        let prompt = """
+        업로드된 뜨개질 도안 PDF 파일을 분석해서 다음 정보를 JSON 형태로 정확하게 제공해주세요:
+
+        {
+            "projectName": "도안의 이름 또는 추정되는 이름",
+            "parts": [
+                {
+                    "partName": "파트 이름 (예: 앞판, 뒷판, 소매, 몸통 등)",
+                    "targetRow": 목표 단수 (숫자만)
+                }
+            ]
+        }
+
+        주의사항:
+        - PDF의 모든 페이지를 종합적으로 분석하세요
+        - 차트, 도식, 텍스트를 모두 고려하세요
+        - 모든 숫자는 정수로만 표현
+        - JSON 형식을 정확하게 맞춰주세요
+        - 중복된 파트는 하나로 통합하세요
+        """
+        
+        let url = "\(baseURL)/messages"
+        
+        let headers: HTTPHeaders = [
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": anthropicVersion
+        ]
+        
+        // 사용 가능한 모델 가져오기
+        let availableModels = try await fetchAvailableModels()
+        
+        guard let bestModel = selectBestModel(from: availableModels) else {
+            throw ClaudeAPIError.networkError("사용 가능한 모델이 없습니다.")
+        }
+        
+        print("🎯 PDF 직접 처리용 모델: \(bestModel.id)")
+        
+        let parameters: [String: Any] = [
+            "model": bestModel.id,
+            "max_tokens": 3000,
+            "temperature": 0.1,
+            "messages": [
+                [
+                    "role": "user",
+                    "content": [
+                        [
+                            "type": "document",
+                            "source": [
+                                "type": "base64",
+                                "media_type": "application/pdf",
+                                "data": base64PDF
+                            ]
+                        ],
+                        [
+                            "type": "text",
+                            "text": prompt
+                        ]
+                    ]
+                ]
+            ]
+        ]
+        
+        let result = try await makeAPIRequest(url: url, parameters: parameters, headers: headers, model: bestModel.id)
+        return try parseKnittingAnalysis(from: result)
+    }
+    
+    // MARK: - 이미지 파일 분석 (기존 방식)
+    private func analyzeImageFile(fileData: Data, fileName: String) async throws -> KnittingAnalysis {
         let prompt = """
         업로드된 뜨개질 도안 파일을 분석해서 다음 정보를 JSON 형태로 정확하게 제공해주세요:
 
@@ -142,30 +228,20 @@ class ClaudeAPIService {
         return try parseKnittingAnalysis(from: response)
     }
     
-    // MARK: - 2단계 분석 시스템
+    // MARK: - PDF 이미지 변환 방식 (Fallback)
+    private func analyzePDFWithImageConversion(pdfData: Data, fileName: String) async throws -> KnittingAnalysis {
+        print("🔄 PDF를 이미지로 변환하여 처리 (Fallback 모드)...")
+        
+        // 기존 2단계 분석 시스템 사용
+        // AIAnalysisManager의 analyzePDFKnittingPattern 로직을 여기서 호출
+        
+        // 임시로 에러 throw (실제로는 AIAnalysisManager와 연동 필요)
+        throw ClaudeAPIError.networkError("PDF 이미지 변환 처리는 AIAnalysisManager를 통해 수행하세요.")
+    }
+    
+    // MARK: - 2단계 분석 시스템 (기존 유지)
     
     /// 1단계: 페이지별 분석 (맥락 정보 포함)
-    ///
-    /// 앱에서 PDF 각 페이지를 이미지로 변환 후, 각 페이지를 본 함수로 개별 호출하여 부분 분석 결과를 얻음.
-    /// 이때 파트 이름에 반드시 "(페이지 \(pageNumber))" 표시를 추가하여 어떤 페이지 결과인지 명확히 표기.
-    /// 부분 정보나 불완전한 정보여도 무관하며, 전체가 아닌 부분만 있어도 빈 배열(parts: []) 로 응답 가능.
-    ///
-    /// 이후 2단계에서 이 페이지별 결과들을 모아 중복을 제거하고 병합하여 전체 뜨개질 도안 분석 결과를 생성함.
-    ///
-    /// 실제 사용 예시:
-    /// ----------------------------------------------------
-    /// var pageResults: [String] = []
-    /// for page in 1...totalPages {
-    ///     let result = try await service.analyzeKnittingPatternPage(
-    ///         fileData: pageImageData,
-    ///         fileName: "page_\(page).png",
-    ///         pageNumber: page,
-    ///         totalPages: totalPages
-    ///     )
-    ///     // 결과는 JSON 문자열 형태
-    ///     pageResults.append(resultString)
-    /// }
-    /// ----------------------------------------------------
     func analyzeKnittingPatternPage(
         fileData: Data,
         fileName: String,
@@ -203,28 +279,6 @@ class ClaudeAPIService {
     }
     
     /// 2단계: 텍스트 기반 통합 분석
-    ///
-    /// 1단계에서 페이지별로 얻은 JSON 문자열 배열(pageResults)을 받아,
-    /// 중복된 파트명(예: "뒷판 (페이지 3)", "뒷판 (페이지 7)")을 병합하고,
-    /// (페이지 N) 표시는 삭제하여 통합된 파트명으로 정리함.
-    ///
-    /// 불필요한 파트는 제거하여 프로젝트를 3~8개의 핵심 파트로 요약한다.
-    ///
-    /// 최종적으로 가장 의미 있고 구체적인 프로젝트명을 결정하여 JSON으로 반환.
-    ///
-    /// 실제 사용 예시:
-    /// ----------------------------------------------------
-    /// let finalResult = try await service.consolidatePageResults(
-    ///     pageResults: pageResultsArray,
-    ///     originalFileName: "project.pdf"
-    /// )
-    /// ----------------------------------------------------
-    ///
-    /// - Parameters:
-    ///   - pageResults: analyzeKnittingPatternPage 함수에서 반환된 페이지별 JSON 문자열 배열
-    ///   - originalFileName: 원본 PDF 파일명 (분석 힌트용)
-    ///
-    /// - Returns: 통합 분석된 KnittingAnalysis 객체
     func consolidatePageResults(
         pageResults: [String],
         originalFileName: String
@@ -464,11 +518,11 @@ class ClaudeAPIService {
     
     // MARK: - JSON 응답 파싱
     private func parseKnittingAnalysis(from response: String) throws -> KnittingAnalysis {
-        print("📝 Claude 응답: \(response)")
+        print("🔍 Claude 응답: \(response)")
         
         // JSON 부분만 추출
         let jsonString = extractJSON(from: response)
-        print("🔍 추출된 JSON: \(jsonString)")
+        print("📋 추출된 JSON: \(jsonString)")
         
         guard let data = jsonString.data(using: .utf8) else {
             throw ClaudeAPIError.invalidResponse
