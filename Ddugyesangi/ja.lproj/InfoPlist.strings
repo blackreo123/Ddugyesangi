@@ -6,3 +6,14 @@
   
 */
 CFBundleDisplayName = "いまなんだんめ";
+/* カメラ権限 */
+"NSCameraUsageDescription" = "編み図を分析するためにカメラへのアクセスが必要です。";
+
+/* 写真ライブラリ権限 */
+"NSPhotoLibraryUsageDescription" = "編み図を選択して分析するために写真ライブラリへのアクセスが必要です。";
+
+/* アプリトラッキング権限 (ATT) */
+"NSUserTrackingUsageDescription" = "より関連性の高い広告を提供するために使用されます。";
+
+/* 追加権限（必要な場合） */
+"NSPhotoLibraryAddUsageDescription" = "分析済みの編み図を保存するために写真ライブラリへのアクセスが必要です。";

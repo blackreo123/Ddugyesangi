@@ -6,3 +6,14 @@
   
 */
 CFBundleDisplayName = "Don't Lose Count";
+/* Camera Permission */
+"NSCameraUsageDescription" = "Camera access is required to analyze knitting patterns.";
+
+/* Photo Library Permission */
+"NSPhotoLibraryUsageDescription" = "Photo library access is required to select and analyze knitting patterns.";
+
+/* App Tracking Permission (ATT) */
+"NSUserTrackingUsageDescription" = "This will be used to provide more relevant ads.";
+
+/* Additional Permissions (if needed) */
+"NSPhotoLibraryAddUsageDescription" = "Photo library access is required to save analyzed patterns.";

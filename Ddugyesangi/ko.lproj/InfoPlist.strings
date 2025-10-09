@@ -6,3 +6,14 @@
   
 */
 CFBundleDisplayName = "지금몇단";
+/* 카메라 권한 */
+"NSCameraUsageDescription" = "도안 분석을 위해 카메라 접근이 필요합니다.";
+
+/* 사진 라이브러리 권한 */
+"NSPhotoLibraryUsageDescription" = "도안 분석을 위해 사진 라이브러리 접근이 필요합니다.";
+
+/* 앱 추적 권한 (ATT) */
+"NSUserTrackingUsageDescription" = "관련성 높은 광고 제공을 위해 사용됩니다.";
+
+/* 추가 권한 (필요시) */
+"NSPhotoLibraryAddUsageDescription" = "분석된 도안을 저장하기 위해 사진 라이브러리 접근이 필요합니다.";

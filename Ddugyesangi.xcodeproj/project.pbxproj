@@ -318,8 +318,11 @@
 				DEVELOPMENT_TEAM = 789YC4G9T9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ddugyesangi/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(CFBundleDisplayName)";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is required to analyze knitting patterns.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo library access is required to select and analyze knitting patterns.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This will be used to provide more relevant ads.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
@@ -330,7 +333,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6.1;
+				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jihayoon.ddugyesangi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -355,8 +358,11 @@
 				DEVELOPMENT_TEAM = 789YC4G9T9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ddugyesangi/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(CFBundleDisplayName)";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is required to analyze knitting patterns.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo library access is required to select and analyze knitting patterns.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This will be used to provide more relevant ads.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
@@ -367,7 +373,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6.1;
+				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jihayoon.ddugyesangi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
