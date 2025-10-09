@@ -6,7 +6,6 @@ class LifecycleManager: ObservableObject {
     @Published var appState: AppState = .background
     private var cancellables = Set<AnyCancellable>()
     private var hasRequestedATT = false
-    private var lastAdRetryTime: Date?
     
     enum AppState {
         case background
@@ -28,14 +27,7 @@ class LifecycleManager: ObservableObject {
         // 앱이 백그라운드로 갈 때
         NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)
             .sink { [weak self] _ in
-                self?.appWillResignActive()
-            }
-            .store(in: &cancellables)
-        
-        // 앱이 포그라운드로 돌아올 때
-        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
-            .sink { [weak self] _ in
-                self?.appWillEnterForeground()
+                self?.appState = .background
             }
             .store(in: &cancellables)
     }
@@ -51,50 +43,6 @@ class LifecycleManager: ObservableObject {
                 self.hasRequestedATT = true
             }
         }
-        
-        // 실제 광고 재시도 (5분마다)
-        retryRealAdsIfNeeded()
-    }
-    
-    private func appWillResignActive() {
-        appState = .background
-    }
-    
-    private func appWillEnterForeground() {
-        print("📱 앱이 포그라운드로 돌아옴")
-        
-        // 백그라운드에서 돌아올 때도 광고 재시도
-        retryRealAdsIfNeeded()
-    }
-    
-    // MARK: - 광고 재시도 로직
-    private func retryRealAdsIfNeeded() {
-        // 마지막 재시도로부터 5분이 지났는지 확인
-        let minimumInterval: TimeInterval = 300 // 5분
-        
-        if let lastRetry = lastAdRetryTime {
-            let timeSinceLastRetry = Date().timeIntervalSince(lastRetry)
-            guard timeSinceLastRetry >= minimumInterval else {
-                print("⏱️ 광고 재시도 대기 중... (\(Int(minimumInterval - timeSinceLastRetry))초 후 재시도)")
-                return
-            }
-        }
-        
-        // AdService가 테스트 모드일 때만 재시도
-        if AdService.shared.isInTestMode {
-            print("🔄 실제 광고로 재시도 시도...")
-            AdService.shared.retryRealAds()
-            lastAdRetryTime = Date()
-        } else {
-            print("✅ 이미 실제 광고 사용 중")
-        }
-    }
-    
-    // MARK: - 수동 광고 재시도
-    func manualRetryRealAds() {
-        print("👆 수동으로 실제 광고 재시도 요청")
-        lastAdRetryTime = nil // 즉시 재시도 허용
-        retryRealAdsIfNeeded()
     }
     
     private func requestATTPermissionIfNeeded() {
@@ -105,8 +53,6 @@ class LifecycleManager: ObservableObject {
                     switch status {
                     case .authorized:
                         print("✅ ATT 권한이 허용되었습니다 - Google Ads SDK가 자동으로 개인화된 광고를 제공합니다")
-                        // 권한 허용 시 즉시 실제 광고 재시도
-                        AdService.shared.retryRealAds()
                     case .denied:
                         print("❌ ATT 권한이 거부되었습니다 - Google Ads SDK가 자동으로 비개인화된 광고를 제공합니다")
                     case .restricted:
