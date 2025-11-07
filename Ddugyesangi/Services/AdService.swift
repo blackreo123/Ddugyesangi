@@ -1,4 +1,4 @@
-// AdService.swift - 30일 대기 전략
+// AdService.swift - 정식 광고 서비스
 
 import Foundation
 import GoogleMobileAds
@@ -9,171 +9,76 @@ class AdService: NSObject, ObservableObject, GADBannerViewDelegate, GADFullScree
     @Published var isRewardedAdLoaded = false
     @Published var isShowingRewardedAd = false
     @Published var adError: String?
-    @Published var isUsingTestAds = false
     
     private var bannerView: GADBannerView?
     private var rewardedAd: GADRewardedAd?
     
-    // 30일 대기 기간
-    private let retryIntervalDays = 30
-    
     override init() {
         super.init()
         
-        // 광고 모드 결정
-        determineAdMode()
+        // 이전 정책 관련 데이터 정리
+        cleanupOldPolicy()
         
         setupBannerAd()
         loadRewardedAd()
     }
     
-    // MARK: - 광고 모드 결정 (핵심 로직)
+    // MARK: - 이전 정책 데이터 정리
     
-    private func determineAdMode() {
-        // 마지막 실패 날짜 확인
-        if let lastFailureDate = UserDefaults.standard.object(forKey: "last_real_ad_failure") as? Date {
-            let daysSinceFailure = Calendar.current.dateComponents([.day], from: lastFailureDate, to: Date()).day ?? 0
-            
-            print("📅 마지막 실제 광고 실패로부터 \(daysSinceFailure)일 경과")
-            
-            if daysSinceFailure < retryIntervalDays {
-                // 30일 이내: 테스트 광고 사용
-                isUsingTestAds = true
-                let remainingDays = retryIntervalDays - daysSinceFailure
-                print("🧪 테스트 광고 모드 (남은 기간: \(remainingDays)일)")
-                
-                // TODO: 제한 해제되면 이 부분 수정
-                // UserDefaults.standard.removeObject(forKey: "last_real_ad_failure")
-                // isUsingTestAds = false
-                
-            } else {
-                // 30일 경과: 다시 실제 광고 시도
-                isUsingTestAds = false
-                print("🔄 30일 경과 - 실제 광고 재시도")
-                
-                // 재시도 표시 제거 (새로운 주기 시작)
-                UserDefaults.standard.removeObject(forKey: "last_real_ad_failure")
-            }
-        } else {
-            // 첫 실행 또는 기록 없음: 실제 광고 시도
-            isUsingTestAds = false
-            print("🚀 첫 실행 - 실제 광고 시도")
+    private func cleanupOldPolicy() {
+        // 한 번만 실행되도록
+        if !UserDefaults.standard.bool(forKey: "policy_cleaned_up") {
+            UserDefaults.standard.removeObject(forKey: "last_real_ad_failure")
+            UserDefaults.standard.removeObject(forKey: "policy_migrated_to_7days")
+            UserDefaults.standard.set(true, forKey: "policy_cleaned_up")
+            UserDefaults.standard.synchronize()
+            print("🧹 이전 정책 데이터 정리 완료")
         }
     }
     
     // MARK: - Rewarded Ad
     
     func loadRewardedAd() {
-        let adUnitID: String
-        
-        if isUsingTestAds {
-            adUnitID = Constants.AdIDs.rewardedTest
-            print("🧪 테스트 보상형 광고 로드")
-        } else {
-            #if DEBUG
-            adUnitID = Constants.AdIDs.rewardedTest
-            #else
-            adUnitID = Constants.AdIDs.rewarded
-            print("💰 실제 보상형 광고 시도")
-            #endif
-        }
+        #if DEBUG
+        let adUnitID = Constants.AdIDs.rewardedTest
+        print("🧪 테스트 보상형 광고 로드 (DEBUG)")
+        #else
+        let adUnitID = Constants.AdIDs.rewarded
+        print("💰 실제 보상형 광고 로드")
+        #endif
         
         let request = GADRequest()
         
         GADRewardedAd.load(withAdUnitID: adUnitID, request: request) { [weak self] ad, error in
-            if let error = error {
-                DispatchQueue.main.async {
-                    self?.handleRewardedAdFailure(error: error, adUnitID: adUnitID)
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.isRewardedAdLoaded = false
+                    self?.adError = error.localizedDescription
+                    print("❌ 보상형 광고 로드 실패: \(error.localizedDescription)")
+                    return
                 }
-                return
-            }
-            
-            DispatchQueue.main.async {
-                self?.handleRewardedAdSuccess(ad: ad, adUnitID: adUnitID)
-            }
-        }
-    }
-    
-    private func handleRewardedAdFailure(error: Error, adUnitID: String) {
-        self.isRewardedAdLoaded = false
-        self.adError = error.localizedDescription
-        print("❌ 보상형 광고 로드 실패: \(error.localizedDescription)")
-        
-        // 실제 광고 실패 시
-        if !isUsingTestAds && adUnitID == Constants.AdIDs.rewarded {
-            print("📝 실제 광고 실패 - 30일 테스트 모드 시작")
-            
-            // 실패 날짜 기록
-            UserDefaults.standard.set(Date(), forKey: "last_real_ad_failure")
-            
-            // 테스트 광고로 전환
-            isUsingTestAds = true
-            
-            // 테스트 광고 로드
-            loadTestRewardedAd()
-            
-            // 알림 (선택사항)
-            logFailureInfo()
-        } else if adUnitID == Constants.AdIDs.rewardedTest {
-            // 테스트 광고도 실패 (네트워크 문제 등)
-            print("❌ 테스트 광고도 실패 - 네트워크 확인 필요")
-        }
-    }
-    
-    private func handleRewardedAdSuccess(ad: GADRewardedAd?, adUnitID: String) {
-        self.rewardedAd = ad
-        self.isRewardedAdLoaded = true
-        self.adError = nil
-        ad?.fullScreenContentDelegate = self
-        
-        if adUnitID == Constants.AdIDs.rewarded {
-            print("✅ 실제 광고 로드 성공! - AdMob 제한 해제됨")
-            
-            // 성공 시 기록 삭제
-            UserDefaults.standard.removeObject(forKey: "last_real_ad_failure")
-            UserDefaults.standard.set(Date(), forKey: "last_real_ad_success")
-            
-            isUsingTestAds = false
-        } else {
-            print("✅ 테스트 광고 로드 성공")
-        }
-    }
-    
-    private func loadTestRewardedAd() {
-        let request = GADRequest()
-        GADRewardedAd.load(withAdUnitID: Constants.AdIDs.rewardedTest, request: request) { [weak self] ad, error in
-            if error != nil {
-                print("❌ 테스트 광고 로드 실패")
-                self?.isRewardedAdLoaded = false
-                return
-            }
-            
-            DispatchQueue.main.async {
+                
                 self?.rewardedAd = ad
                 self?.isRewardedAdLoaded = true
+                self?.adError = nil
                 ad?.fullScreenContentDelegate = self
-                print("✅ 테스트 보상형 광고 로드 성공")
+                print("✅ 보상형 광고 로드 성공")
             }
         }
     }
     
-    // MARK: - Banner Ad (동일한 로직)
+    // MARK: - Banner Ad
     
     private func setupBannerAd() {
         let bannerView = GADBannerView(adSize: GADAdSizeBanner)
         
-        let adUnitID: String
-        if isUsingTestAds {
-            adUnitID = Constants.AdIDs.bannerTest
-            print("🧪 테스트 배너 설정")
-        } else {
-            #if DEBUG
-            adUnitID = Constants.AdIDs.bannerTest
-            #else
-            adUnitID = Constants.AdIDs.banner
-            print("💰 실제 배너 설정")
-            #endif
-        }
+        #if DEBUG
+        let adUnitID = Constants.AdIDs.bannerTest
+        print("🧪 테스트 배너 설정 (DEBUG)")
+        #else
+        let adUnitID = Constants.AdIDs.banner
+        print("💰 실제 배너 설정")
+        #endif
         
         bannerView.adUnitID = adUnitID
         bannerView.delegate = self
@@ -196,55 +101,17 @@ class AdService: NSObject, ObservableObject, GADBannerViewDelegate, GADFullScree
         bannerView.load(request)
     }
     
-    private func loadTestBannerAd() {
-        guard let bannerView = bannerView else { return }
-        
-        bannerView.adUnitID = Constants.AdIDs.bannerTest
-        let request = GADRequest()
-        bannerView.load(request)
-        print("🧪 테스트 배너 광고로 전환")
-    }
-    
-    // MARK: - 유틸리티
-    
-    private func logFailureInfo() {
-        print("""
-        ⚠️ AdMob 제한 감지됨
-        📅 현재 시각: \(Date())
-        📅 다음 재시도: \(Date().addingTimeInterval(Double(retryIntervalDays) * 86400))
-        💡 TODO: 제한 해제되면 다음 코드 실행
-           - UserDefaults.standard.removeObject(forKey: "last_real_ad_failure")
-           - isUsingTestAds = false
-           - loadRewardedAd()
-        """)
-    }
-    
-    // 상태 확인 (디버그용)
-    func getAdModeStatus() -> String {
-        if isUsingTestAds {
-            if let failureDate = UserDefaults.standard.object(forKey: "last_real_ad_failure") as? Date {
-                let daysSince = Calendar.current.dateComponents([.day], from: failureDate, to: Date()).day ?? 0
-                let remaining = max(0, retryIntervalDays - daysSince)
-                return "테스트 광고 (남은 기간: \(remaining)일)"
-            }
-            return "테스트 광고"
-        } else {
-            return "실제 광고"
-        }
-    }
-    
-    // MARK: - 개발/테스트용 (선택사항)
+    // MARK: - 개발/테스트용
     
     #if DEBUG
-    // 개발 모드에서만 사용 가능한 수동 리셋
-    func manualResetToRealAds() {
-        print("🔧 [DEBUG] 수동으로 실제 광고로 리셋")
-        UserDefaults.standard.removeObject(forKey: "last_real_ad_failure")
-        isUsingTestAds = false
-        
-        setupBannerAd()
-        loadBannerAd()
-        loadRewardedAd()
+    func getDebugInfo() -> String {
+        return """
+        🔧 AdService 디버그 정보
+        - 배너 로드 상태: \(isBannerAdLoaded ? "✅" : "❌")
+        - 보상형 로드 상태: \(isRewardedAdLoaded ? "✅" : "❌")
+        - 광고 표시 중: \(isShowingRewardedAd ? "예" : "아니오")
+        - 에러: \(adError ?? "없음")
+        """
     }
     #endif
     
@@ -296,15 +163,8 @@ class AdService: NSObject, ObservableObject, GADBannerViewDelegate, GADFullScree
     func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
         DispatchQueue.main.async {
             self.isBannerAdLoaded = false
-            print("❌ 배너 광고 실패: \(error)")
-            
-            // 실제 광고 실패 시
-            if !self.isUsingTestAds && bannerView.adUnitID == Constants.AdIDs.banner {
-                // 보상형과 동일하게 30일 대기
-                UserDefaults.standard.set(Date(), forKey: "last_real_ad_failure")
-                self.isUsingTestAds = true
-                self.loadTestBannerAd()
-            }
+            self.adError = error.localizedDescription
+            print("❌ 배너 광고 실패: \(error.localizedDescription)")
         }
     }
     
