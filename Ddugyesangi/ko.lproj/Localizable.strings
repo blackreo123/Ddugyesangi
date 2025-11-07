@@ -35,6 +35,7 @@
 "pink" = "핑크";
 "Reset" = "리셋";
 "Reset Stitch Count" = "코수 리셋";
+"Are you sure you want to reset the stitch count to 0?" = "코수를 0으로 리셋하시겠습니까?";
 "smart_add" = "스마트 추가";
 "selected_file" = "선택된 파일:";
 "file_size_format" = "크기: %@";
