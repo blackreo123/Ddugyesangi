@@ -72,13 +72,10 @@ class SmartAddViewModel: ObservableObject {
         showingAnalysisResult = false
         
         Task {
-            print("🔄 [Task 시작] PDF 여부: \(selectedFileName.lowercased().hasSuffix(".pdf"))")
+            print("🔄 [Task 시작] 파일: \(selectedFileName)")
             
-            if selectedFileName.lowercased().hasSuffix(".pdf") {
-                await aiManager.analyzePDFKnittingPattern(pdfData: selectedFileData, fileName: selectedFileName)
-            } else {
-                await aiManager.analyzeKnittingPatternFile(fileData: selectedFileData, fileName: selectedFileName)
-            }
+            // 모든 파일 형식을 통합된 메서드로 처리
+            await aiManager.analyzeKnittingPatternFile(fileData: selectedFileData, fileName: selectedFileName)
             
             print("✅ [Task 완료] analysisResult = \(String(describing: aiManager.analysisResult?.projectName))")
             print("📊 [Task 완료] showingAnalysisResult = \(showingAnalysisResult)")

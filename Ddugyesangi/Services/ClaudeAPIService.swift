@@ -8,13 +8,9 @@
 import Foundation
 import Alamofire
 
-/// Claude API 하이브리드 PDF 처리 시스템
+/// Claude API 파일 분석 서비스
 ///
-/// PDF 처리 전략:
-/// 1. 우선: PDF 직접 API 전송 (네이티브 PDF 지원)
-/// 2. Fallback: 기존 2단계 이미지 변환 방식
-///
-/// 일반 이미지는 기존 방식 유지
+/// PDF와 이미지 파일을 직접 분석하여 뜨개질 도안 정보를 추출합니다.
 
 class ClaudeAPIService {
     private let apiKey: String
@@ -111,29 +107,19 @@ class ClaudeAPIService {
         return prioritizedModels.first
     }
     
-    // MARK: - 뜨개질 도안 분석 메인 함수 (하이브리드)
+    // MARK: - 뜨개질 도안 분석 메인 함수
     func analyzeKnittingPattern(fileData: Data, fileName: String = "") async throws -> KnittingAnalysis {
-        // PDF 파일인 경우 직접 처리 시도
+        // PDF 파일인 경우 직접 처리
         if fileName.lowercased().hasSuffix(".pdf") {
-            print("📄 PDF 직접 처리 시도...")
-            
-            do {
-                // PDF 네이티브 API 호출 시도
-                let result = try await analyzePDFDirect(pdfData: fileData, fileName: fileName)
-                print("✅ PDF 직접 처리 성공!")
-                return result
-            } catch {
-                print("⚠️ PDF 직접 처리 실패, 기존 이미지 변환 방식으로 fallback: \(error)")
-                // Fallback: 기존 이미지 변환 방식 사용
-                return try await analyzePDFWithImageConversion(pdfData: fileData, fileName: fileName)
-            }
+            print("📄 PDF 직접 처리 시작...")
+            return try await analyzePDFDirect(pdfData: fileData, fileName: fileName)
         }
         
-        // 일반 이미지 파일 처리 (기존 방식)
+        // 일반 이미지 파일 처리
         return try await analyzeImageFile(fileData: fileData, fileName: fileName)
     }
     
-    // MARK: - PDF 직접 처리 (새로운 방식)
+    // MARK: - PDF 직접 처리
     private func analyzePDFDirect(pdfData: Data, fileName: String) async throws -> KnittingAnalysis {
         let base64PDF = pdfData.base64EncodedString()
         
@@ -204,7 +190,7 @@ class ClaudeAPIService {
         return try parseKnittingAnalysis(from: result)
     }
     
-    // MARK: - 이미지 파일 분석 (기존 방식)
+    // MARK: - 이미지 파일 분석
     private func analyzeImageFile(fileData: Data, fileName: String) async throws -> KnittingAnalysis {
         let prompt = """
         업로드된 뜨개질 도안 파일을 분석해서 다음 정보를 JSON 형태로 정확하게 제공해주세요:
@@ -228,143 +214,7 @@ class ClaudeAPIService {
         return try parseKnittingAnalysis(from: response)
     }
     
-    // MARK: - PDF 이미지 변환 방식 (Fallback)
-    private func analyzePDFWithImageConversion(pdfData: Data, fileName: String) async throws -> KnittingAnalysis {
-        print("🔄 PDF를 이미지로 변환하여 처리 (Fallback 모드)...")
-        
-        // 기존 2단계 분석 시스템 사용
-        // AIAnalysisManager의 analyzePDFKnittingPattern 로직을 여기서 호출
-        
-        // 임시로 에러 throw (실제로는 AIAnalysisManager와 연동 필요)
-        throw ClaudeAPIError.networkError("PDF 이미지 변환 처리는 AIAnalysisManager를 통해 수행하세요.")
-    }
-    
-    // MARK: - 2단계 분석 시스템 (기존 유지)
-    
-    /// 1단계: 페이지별 분석 (맥락 정보 포함)
-    func analyzeKnittingPatternPage(
-        fileData: Data,
-        fileName: String,
-        pageNumber: Int,
-        totalPages: Int
-    ) async throws -> KnittingAnalysis {
-        
-        let pagePrompt = """
-        이것은 뜨개질 도안의 페이지 \(pageNumber)/\(totalPages) 입니다.
-
-        **중요 지침**:
-        1. 이 페이지에서 보이는 파트만 추출하세요
-        2. 파트 이름에 반드시 "(페이지 \(pageNumber))" 표시를 추가하세요
-        3. 부분 정보만 있어도 괜찮습니다
-        4. 단순 사진/재료 설명만 있으면 parts: [] 빈 배열로 응답하세요
-        5. 차트나 도식이 있으면 최대한 정확히 분석하세요
-        6. "targetRow" 값은 반드시 Int(정수) 한 개만 넣으세요. 만약 '34~37단', '50~51단'처럼 범위로 표기되어 있다면, 해당 파트에 대해 가능한 한 구체적이고 합리적인 정수 단위 목표 단수를 하나로만 제공하세요. 숫자가 아닌 구간 표기/문자열 등은 절대 사용하지 마세요.
-
-        JSON 형식으로 출력:
-        {
-            "projectName": "전체 프로젝트 추정 이름",
-            "parts": [
-                {
-                    "partName": "파트이름 (페이지 \(pageNumber))",
-                    "targetRow": 목표단수또는null
-                }
-            ]
-        }
-
-        주의: null 값도 허용하되, 가능한 한 구체적인 정보를 추출하세요.
-        """
-        
-        let response = try await sendMessage(fileData: fileData, fileName: fileName, prompt: pagePrompt)
-        return try parseKnittingAnalysis(from: response)
-    }
-    
-    /// 2단계: 텍스트 기반 통합 분석
-    func consolidatePageResults(
-        pageResults: [String],
-        originalFileName: String
-    ) async throws -> KnittingAnalysis {
-        
-        let consolidatedText = pageResults.joined(separator: "\n\n")
-        
-        let consolidationPrompt = """
-        다음은 뜨개질 도안 PDF의 각 페이지별 분석 결과입니다:
-
-        \(consolidatedText)
-
-        **통합 작업을 수행하세요**:
-        1. 같은 파트 병합 (예: "뒷판 (페이지 3)" + "뒷판 (페이지 7)" → "뒷판")
-        2. 중복된 파트 제거하고 정보 통합
-        3. "(페이지 X)" 표시 제거
-        4. 핵심 파트만 선별 (불필요한 파트 제거)
-        5. 프로젝트명을 가장 구체적이고 의미있는 이름으로 결정
-        6. null 값들을 합리적인 기본값으로 대체
-
-        **품질 기준**:
-        - 최종 파트는 3-8개 정도가 적절
-        - 각 파트는 명확한 목적을 가져야 함
-        - 중복 정보는 철저히 제거
-
-        최종 JSON 출력:
-        {
-            "projectName": "최종 프로젝트명",
-            "parts": [
-                {
-                    "partName": "통합된 파트명",
-                    "targetRow": 목표단수
-                }
-            ]
-        }
-        """
-        
-        // 텍스트 전용으로 Claude API 호출
-        let response = try await sendTextMessage(prompt: consolidationPrompt)
-        return try parseKnittingAnalysis(from: response)
-    }
-    
     // MARK: - Claude API 호출
-    
-    /// 텍스트 전용 메시지 전송
-    private func sendTextMessage(prompt: String) async throws -> String {
-        let url = "\(baseURL)/messages"
-        
-        let headers: HTTPHeaders = [
-            "Content-Type": "application/json",
-            "x-api-key": apiKey,
-            "anthropic-version": anthropicVersion
-        ]
-        
-        print("🔗 텍스트 전용 API 호출")
-        print("📝 프롬프트 길이: \(prompt.count) characters")
-        
-        // 사용 가능한 모델 리스트 가져오기
-        let availableModels = try await fetchAvailableModels()
-        
-        // 최적 모델 선택
-        guard let bestModel = selectBestModel(from: availableModels) else {
-            throw ClaudeAPIError.networkError("사용 가능한 모델이 없습니다.")
-        }
-        
-        print("🎯 통합 분석용 모델: \(bestModel.id)")
-        
-        let parameters: [String: Any] = [
-            "model": bestModel.id,
-            "max_tokens": 3000,
-            "temperature": 0.1,
-            "messages": [
-                [
-                    "role": "user",
-                    "content": [
-                        [
-                            "type": "text",
-                            "text": prompt
-                        ]
-                    ]
-                ]
-            ]
-        ]
-        
-        return try await makeAPIRequest(url: url, parameters: parameters, headers: headers, model: bestModel.id)
-    }
     
     private func sendMessage(fileData: Data, fileName: String, prompt: String) async throws -> String {
         let url = "\(baseURL)/messages"
