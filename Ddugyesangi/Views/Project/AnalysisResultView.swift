@@ -25,7 +25,7 @@ struct AnalysisResultView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                themeManager.currentTheme.backgroundColor
+                ThemedBackgroundView()
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -148,7 +148,7 @@ struct AnalysisResultView: View {
                 .disabled(editedProjectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isCreatingProject)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 20)
-                .background(themeManager.currentTheme.backgroundColor)
+                .background(themeManager.currentTheme.backgroundColor) // 하단 버튼 배경은 단색 유지
             }
         }
         .onAppear {

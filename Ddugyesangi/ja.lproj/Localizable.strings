@@ -33,6 +33,12 @@
 "red" = "赤";
 "blue" = "青";
 "pink" = "ピンク";
+"spring" = "春";
+"summer" = "夏";
+"autumn" = "秋";
+"winter" = "冬";
+"basic_themes" = "基本テーマ";
+"seasonal_themes" = "季節テーマ";
 "Reset" = "リセット";
 "Reset Stitch Count" = "目数をリセット";
 "Are you sure you want to reset the stitch count to 0?" = "目数を０にリセットしますか？";

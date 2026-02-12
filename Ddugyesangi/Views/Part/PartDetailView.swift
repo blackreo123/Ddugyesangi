@@ -26,7 +26,7 @@ struct PartDetailView: View {
             
             bannerAdView
         }
-        .background(themeManager.currentTheme.backgroundColor)
+        .themedBackground()
         .onAppear {
             // onAppear에서 광고 로드
             viewModel.adService.loadBannerAd()

@@ -1,47 +1,46 @@
-//
-//  ThemeSelector.swift
-//  Ddugyesangi
-//
-//  Created by JIHA YOON on 2025/08/18.
-//
-
 import Foundation
 import SwiftUI
 
 struct ThemeSelector: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Binding var isPresented: Bool
-    
+
     var body: some View {
         NavigationView {
             ZStack {
-                themeManager.currentTheme.backgroundColor.ignoresSafeArea()
-                VStack(spacing: 20) {
-                    Text("Select a theme")
-                        .font(.title)
-                        .foregroundStyle(themeManager.currentTheme.textColor)
-                    
-                    LazyVGrid(columns: [GridItem(), GridItem()], spacing: 10) {
-                        ForEach(ThemeType.allCases, id: \.self) { themeType in
-                            Button(themeType.localizedName) {
-                                themeManager.changeTheme(to: themeType)
+                ThemedBackgroundView().ignoresSafeArea()
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // 기본 테마 섹션
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(NSLocalizedString("basic_themes", comment: ""))
+                                .font(.headline)
+                                .foregroundStyle(themeManager.currentTheme.textColor)
+                                .padding(.horizontal)
+
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                                ForEach(ThemeType.basicCases, id: \.self) { themeType in
+                                    basicThemeButton(for: themeType)
+                                }
                             }
-                            .frame(width: 100, height: 100)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(AppTheme.themes[themeType]?.primaryColor ?? .gray)
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(
-                                        themeManager.currentTheme.type == themeType ? Color.black : Color.clear,
-                                        lineWidth: 3
-                                    )
-                            )
+                        }
+
+                        // 계절 테마 섹션
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(NSLocalizedString("seasonal_themes", comment: ""))
+                                .font(.headline)
+                                .foregroundStyle(themeManager.currentTheme.textColor)
+                                .padding(.horizontal)
+
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                                ForEach(ThemeType.seasonalCases, id: \.self) { themeType in
+                                    seasonalThemeButton(for: themeType)
+                                }
+                            }
                         }
                     }
+                    .padding()
                 }
-                .padding()
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Done") {
@@ -50,6 +49,56 @@ struct ThemeSelector: View {
                     }
                 }
             }
+        }
+    }
+
+    private func basicThemeButton(for themeType: ThemeType) -> some View {
+        Button {
+            themeManager.changeTheme(to: themeType)
+        } label: {
+            Text(themeType.localizedName)
+                .frame(maxWidth: .infinity)
+                .frame(height: 80)
+                .foregroundColor(.white)
+                .background(AppTheme.themes[themeType]?.primaryColor ?? .gray)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            themeManager.currentTheme.type == themeType ? Color.black : Color.clear,
+                            lineWidth: 3
+                        )
+                )
+        }
+    }
+
+    private func seasonalThemeButton(for themeType: ThemeType) -> some View {
+        let theme = AppTheme.themes[themeType]
+        return Button {
+            themeManager.changeTheme(to: themeType)
+        } label: {
+            ZStack {
+                if let colors = theme?.gradientColors {
+                    LinearGradient(
+                        colors: colors,
+                        startPoint: theme?.gradientStartPoint ?? .top,
+                        endPoint: theme?.gradientEndPoint ?? .bottom
+                    )
+                }
+                Text(themeType.localizedName)
+                    .foregroundColor(theme?.textColor ?? .black)
+                    .font(.system(size: 16, weight: .semibold))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 80)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        themeManager.currentTheme.type == themeType ? Color.black : Color.clear,
+                        lineWidth: 3
+                    )
+            )
         }
     }
 }

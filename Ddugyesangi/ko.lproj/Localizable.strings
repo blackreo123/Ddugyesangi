@@ -33,6 +33,12 @@
 "red" = "빨강";
 "blue" = "파랑";
 "pink" = "핑크";
+"spring" = "봄";
+"summer" = "여름";
+"autumn" = "가을";
+"winter" = "겨울";
+"basic_themes" = "기본 테마";
+"seasonal_themes" = "계절 테마";
 "Reset" = "리셋";
 "Reset Stitch Count" = "코수 리셋";
 "Are you sure you want to reset the stitch count to 0?" = "코수를 0으로 리셋하시겠습니까?";

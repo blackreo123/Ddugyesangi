@@ -17,7 +17,7 @@ struct ProjectAddView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                themeManager.currentTheme.backgroundColor
+                ThemedBackgroundView()
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {

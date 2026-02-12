@@ -26,7 +26,7 @@ struct ProjectEditView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                themeManager.currentTheme.backgroundColor
+                ThemedBackgroundView()
                     .ignoresSafeArea()
                 VStack(spacing: 20) {
                     NomalTextField(placeholder: NSLocalizedString("Project Name", comment: ""), text: $projectName)

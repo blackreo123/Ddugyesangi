@@ -5,6 +5,12 @@
   Created by JIHA YOON on 2025/08/21.
   
 */
+"spring" = "Spring";
+"summer" = "Summer";
+"autumn" = "Autumn";
+"winter" = "Winter";
+"basic_themes" = "Basic Themes";
+"seasonal_themes" = "Seasonal Themes";
 "smart_add" = "Smart Add";
 "selected_file" = "Selected File:";
 "file_size_format" = "Size: %@";

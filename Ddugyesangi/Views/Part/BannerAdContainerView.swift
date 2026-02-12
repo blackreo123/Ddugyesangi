@@ -14,6 +14,6 @@ struct BannerAdContainerView: View {
     var body: some View {
         BannerAdView(adService: adService)
             .frame(height: 50)
-            .background(themeManager.currentTheme.backgroundColor)
+            .background(.clear)
     }
 }

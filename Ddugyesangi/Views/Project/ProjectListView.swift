@@ -13,8 +13,8 @@ struct ProjectListView: View {
             SearchBar(text: $viewModel.searchText)
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
-                .background(themeManager.currentTheme.backgroundColor)
-            
+                .background(Color.clear)
+
             // 프로젝트 리스트 영역 (스크롤 가능)
             ScrollView {
                 LazyVStack(spacing: 12) {
@@ -36,9 +36,9 @@ struct ProjectListView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 16)
             }
-            .background(themeManager.currentTheme.backgroundColor)
+            .background(Color.clear)
         }
-        .background(themeManager.currentTheme.backgroundColor)
+        .themedBackground()
         .navigationTitle("Project List")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {

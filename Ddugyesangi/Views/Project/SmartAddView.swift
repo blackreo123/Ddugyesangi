@@ -22,7 +22,7 @@ struct SmartAddView: View {
     
     private var mainNavigationContent: some View {
         ZStack {
-            themeManager.currentTheme.backgroundColor
+            ThemedBackgroundView()
                 .ignoresSafeArea()
             mainContentView
         }

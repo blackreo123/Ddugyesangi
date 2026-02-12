@@ -50,7 +50,7 @@ struct PartListView: View {
             .padding(.top, 16)
             .padding(.bottom, 16)
         }
-        .background(themeManager.currentTheme.backgroundColor)
+        .themedBackground()
     }
     
     private var partListContent: some View {

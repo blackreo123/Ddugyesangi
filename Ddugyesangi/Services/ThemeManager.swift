@@ -18,6 +18,10 @@ class ThemeManager: ObservableObject {
         self.currentTheme = AppTheme.themes[themeType] ?? AppTheme.themes[.basic]!
     }
     
+    var isSeasonalTheme: Bool {
+        currentTheme.type.isSeasonal
+    }
+
     func changeTheme(to themeType: ThemeType) {
         currentTheme = AppTheme.themes[themeType] ?? AppTheme.themes[.basic]!
         UserDefaults.standard.set(themeType.rawValue, forKey: "selectedTheme")
