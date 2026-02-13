@@ -86,7 +86,7 @@ struct ThemeSelector: View {
                     )
                 }
                 Text(themeType.localizedName)
-                    .foregroundColor(theme?.textColor ?? .black)
+                    .foregroundColor(themeType == .summer ? .white : theme?.textColor ?? .black)
                     .font(.system(size: 16, weight: .semibold))
             }
             .frame(maxWidth: .infinity)

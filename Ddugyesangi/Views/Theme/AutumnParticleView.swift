@@ -23,9 +23,7 @@ struct AutumnParticleView: View {
                     context.translateBy(x: x, y: y)
                     context.rotate(by: rotation)
 
-                    let leafW = particle.size
-                    let leafH = particle.size * 0.6
-                    let leafPath = Path(ellipseIn: CGRect(x: -leafW / 2, y: -leafH / 2, width: leafW, height: leafH))
+                    let leafPath = AutumnParticleView.mapleLeafPath(size: particle.size)
                     context.fill(leafPath, with: .color(particle.color))
 
                     context.rotate(by: -rotation)
@@ -34,6 +32,65 @@ struct AutumnParticleView: View {
             }
         }
         .allowsHitTesting(false)
+    }
+
+    private static func mapleLeafPath(size: CGFloat) -> Path {
+        let s = size / 2
+        var path = Path()
+
+        // 중심점에서 시작 (줄기 연결부)
+        path.move(to: CGPoint(x: 0, y: s * 0.12))
+
+        // 1. 좌하단 잎
+        path.addQuadCurve(to: CGPoint(x: -s * 0.5, y: s * 0.3),
+                          control: CGPoint(x: -s * 0.35, y: s * 0.28))
+        path.addQuadCurve(to: CGPoint(x: -s * 0.15, y: s * 0.0),
+                          control: CGPoint(x: -s * 0.35, y: s * 0.08))
+
+        // 2. 좌측 잎
+        path.addQuadCurve(to: CGPoint(x: -s * 0.85, y: -s * 0.08),
+                          control: CGPoint(x: -s * 0.6, y: s * 0.05))
+        path.addQuadCurve(to: CGPoint(x: -s * 0.22, y: -s * 0.15),
+                          control: CGPoint(x: -s * 0.55, y: -s * 0.2))
+
+        // 3. 좌상단 잎
+        path.addQuadCurve(to: CGPoint(x: -s * 0.62, y: -s * 0.7),
+                          control: CGPoint(x: -s * 0.52, y: -s * 0.38))
+        path.addQuadCurve(to: CGPoint(x: -s * 0.1, y: -s * 0.32),
+                          control: CGPoint(x: -s * 0.35, y: -s * 0.55))
+
+        // 4. 중앙 잎 (가장 길게)
+        path.addQuadCurve(to: CGPoint(x: 0, y: -s),
+                          control: CGPoint(x: -s * 0.12, y: -s * 0.7))
+        path.addQuadCurve(to: CGPoint(x: s * 0.1, y: -s * 0.32),
+                          control: CGPoint(x: s * 0.12, y: -s * 0.7))
+
+        // 5. 우상단 잎
+        path.addQuadCurve(to: CGPoint(x: s * 0.62, y: -s * 0.7),
+                          control: CGPoint(x: s * 0.35, y: -s * 0.55))
+        path.addQuadCurve(to: CGPoint(x: s * 0.22, y: -s * 0.15),
+                          control: CGPoint(x: s * 0.52, y: -s * 0.38))
+
+        // 6. 우측 잎
+        path.addQuadCurve(to: CGPoint(x: s * 0.85, y: -s * 0.08),
+                          control: CGPoint(x: s * 0.55, y: -s * 0.2))
+        path.addQuadCurve(to: CGPoint(x: s * 0.15, y: s * 0.0),
+                          control: CGPoint(x: s * 0.6, y: s * 0.05))
+
+        // 7. 우하단 잎
+        path.addQuadCurve(to: CGPoint(x: s * 0.5, y: s * 0.3),
+                          control: CGPoint(x: s * 0.35, y: s * 0.08))
+        path.addQuadCurve(to: CGPoint(x: 0, y: s * 0.12),
+                          control: CGPoint(x: s * 0.35, y: s * 0.28))
+
+        // 줄기
+        path.addLine(to: CGPoint(x: s * 0.025, y: s * 0.55))
+        path.addLine(to: CGPoint(x: s * 0.015, y: s))
+        path.addLine(to: CGPoint(x: -s * 0.015, y: s))
+        path.addLine(to: CGPoint(x: -s * 0.025, y: s * 0.55))
+
+        path.closeSubpath()
+        return path
     }
 
     private static func createParticles() -> [AutumnParticle] {
