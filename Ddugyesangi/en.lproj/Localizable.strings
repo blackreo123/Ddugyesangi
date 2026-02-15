@@ -35,11 +35,8 @@
 
 "ad_load_failed" = "Failed to load ad. Please try again later.";
 "insufficient_credits" = "Insufficient AI analysis credits. Watch an ad to earn credits.";
-"image_process_failed" = "Failed to process image.";
-"analysis_timeout" = "Analysis timed out. Please try again.";
 "file_too_large" = "File size is too large. Please select a file under 20MB.";
 "unsupported_format" = "Unsupported file format. Only JPG, PNG, PDF, and HEIC files are supported.";
-"server_connection_failed" = "Failed to connect to server. Please check your network.";
 "no_available_models" = "No available models.";
 "invalid_ai_response" = "Invalid AI response format.";
 "cannot_parse_response" = "Unable to parse AI response.";
@@ -62,9 +59,11 @@
 "smart_add_menu" = "Smart Add";
 "normal_add_menu" = "Normal Add";
 
-"analysis_failed_credit_used" = "Analysis failed. (1 credit used)\nPlease try again with a clearer image.";
-"analysis_failed_no_credit" = "Cannot start analysis. (No credit used)";
-"network_error" = "Network connection error occurred. (No credit used)";
+"credit_used_suffix" = "(1 credit used)";
+"credit_not_used_suffix" = "(No credit used)";
+"analysis_error_retry_hint" = "Please try again with a clearer image.";
+"api_call_failed" = "Failed to call AI service.";
+"network_error" = "Network connection error occurred.";
 "bonus_credit_provided" = "1 bonus credit provided due to consecutive failures.";
 "credit_will_be_used" = "Credit will be deducted regardless of success or failure once analysis starts.";
 "analysis_warning" = "Warning: Credit will be deducted even if analysis fails once API call begins.";

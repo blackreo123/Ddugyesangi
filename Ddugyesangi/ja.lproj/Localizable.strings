@@ -67,11 +67,8 @@
 
 "ad_load_failed" = "広告の読み込みに失敗しました。しばらくしてからもう一度お試しください。";
 "insufficient_credits" = "AI分析クレジットが不足しています。広告を視聴してクレジットを獲得してください。";
-"image_process_failed" = "画像処理に失敗しました。";
-"analysis_timeout" = "分析がタイムアウトしました。もう一度お試しください。";
 "file_too_large" = "ファイルサイズが大きすぎます。20MB以下のファイルを選択してください。";
 "unsupported_format" = "サポートされていないファイル形式です。JPG、PNG、PDF、HEICファイルのみ対応しています。";
-"server_connection_failed" = "サーバー接続に失敗しました。ネットワークを確認してください。";
 "no_available_models" = "利用可能なモデルがありません。";
 "invalid_ai_response" = "AI応答形式が正しくありません。";
 "cannot_parse_response" = "AI応答を解析できません。";
@@ -93,9 +90,11 @@
 "smart_add_menu" = "スマート追加";
 "normal_add_menu" = "一般追加";
 
-"analysis_failed_credit_used" = "分析に失敗しました。（クレジット1回使用済み）\nより鮮明な画像で再度お試しください。";
-"analysis_failed_no_credit" = "分析を開始できません。（クレジット未使用）";
-"network_error" = "ネットワーク接続エラーが発生しました。（クレジット未使用）";
+"credit_used_suffix" = "(クレジット1回使用済み)";
+"credit_not_used_suffix" = "(クレジット未使用)";
+"analysis_error_retry_hint" = "より鮮明な画像で再度お試しください。";
+"api_call_failed" = "AIサービスの呼び出しに失敗しました。";
+"network_error" = "ネットワーク接続エラーが発生しました。";
 "bonus_credit_provided" = "連続失敗によりボーナスクレジット1回が提供されました。";
 "credit_will_be_used" = "分析を開始すると、成功/失敗に関わらずクレジットが消費されます。";
 "analysis_warning" = "注意：API呼び出しが開始されると、失敗してもクレジットが消費されます。";

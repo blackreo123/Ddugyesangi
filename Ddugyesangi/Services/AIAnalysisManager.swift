@@ -181,6 +181,33 @@ class AIAnalysisManager: ObservableObject {
         }
     }
     
+    /// 크레딧 환불 (API 호출 실패 시)
+    private func refundCredit() async {
+        do {
+            try await usageTracker.refundCredit()
+            remainingCredits += 1
+            print("🔄 Firebase 크레딧 환불: \(remainingCredits)회 남음")
+        } catch {
+            print("⚠️ Firebase 크레딧 환불 실패, 로컬로 대체: \(error)")
+            remainingCredits += 1
+            saveLocalCredits()
+            print("🔄 로컬 크레딧 환불: \(remainingCredits)회 남음")
+        }
+    }
+
+    /// 에러 메시지 조합 (본문 + 크레딧 접미사 + 재시도 힌트)
+    private func buildErrorMessage(for error: AIAnalysisError) -> String {
+        let body = error.errorBody
+        let suffix = error.creditUsed
+            ? NSLocalizedString("credit_used_suffix", comment: "")
+            : NSLocalizedString("credit_not_used_suffix", comment: "")
+        var message = "\(body)\n\(suffix)"
+        if error.creditUsed {
+            message += "\n" + NSLocalizedString("analysis_error_retry_hint", comment: "")
+        }
+        return message
+    }
+
     /// 크레딧 수동 갱신 (Pull to Refresh 등에서 사용)
     func refreshCredits() async {
         do {
@@ -232,14 +259,14 @@ class AIAnalysisManager: ObservableObject {
                     fileData: fileData,
                     fileName: fileName
                 )
-                
+
                 print("✅ [API 응답 받음]")
-                
+
                 // 분석 성공
                 analysisResult = result
                 isAnalyzing = false
                 consecutiveFailures = 0  // 연속 실패 카운터 리셋
-                
+
                 // 성공 기록
                 if let fileHash = try? usageTracker.calculateFileHash(fileData) {
                     try? await usageTracker.recordAnalysisAttempt(
@@ -248,15 +275,25 @@ class AIAnalysisManager: ObservableObject {
                         success: true
                     )
                 }
-                
+
                 print("✅ AI 파일 분석 완료: \(result.projectName)")
                 print("🧶 파트 수: \(result.parts.count)")
                 print("💳 남은 크레딧: \(remainingCredits)")
-                
+
+            } catch let error as ClaudeAPIError where {
+                if case .analysisError = error { return true }
+                return false
+            }() {
+                // AI가 도안이 아닌 파일로 판단한 경우 (크레딧 차감 유지)
+                if case .analysisError(let message) = error {
+                    print("⚠️ 도안 인식 실패 (크레딧 소모됨): \(error)")
+                    throw AIAnalysisError.aiAnalysisRejected(message)
+                }
             } catch {
-                // API 호출 후 실패 (크레딧은 이미 차감됨)
+                // API 호출 실패 → 크레딧 환불
                 consecutiveFailures += 1
-                
+                await refundCredit()
+
                 // 실패 기록
                 if let fileHash = try? usageTracker.calculateFileHash(fileData) {
                     try? await usageTracker.recordAnalysisAttempt(
@@ -265,26 +302,20 @@ class AIAnalysisManager: ObservableObject {
                         success: false
                     )
                 }
-                
-                print("❌ API 호출 실패 (크레딧 소모됨): \(error)")
-                throw AIAnalysisError.analysisFailedWithCreditUsed
+
+                print("❌ API 호출 실패 (크레딧 환불됨): \(error)")
+                throw AIAnalysisError.apiCallFailed
             }
-            
-        } catch AIAnalysisError.analysisFailedWithCreditUsed {
-            // 크레딧이 소모된 실패
-            errorMessage = NSLocalizedString("analysis_failed_credit_used", comment: "")
+
+        } catch let error as AIAnalysisError {
+            errorMessage = buildErrorMessage(for: error)
             isAnalyzing = false
-            print("⚠️ 분석 실패 - 크레딧 1회 사용됨")
-            
+            print("❌ AI 분석 에러: \(error)")
         } catch {
-            let errorKey: String
-            if let analysisError = error as? AIAnalysisError {
-                errorMessage = NSLocalizedString(analysisError.localizedDescription, comment: "")
-            } else {
-                errorMessage = NSLocalizedString("analysis_failed_no_credit", comment: "")
-            }
+            // 예상치 못한 에러
+            errorMessage = "\(error.localizedDescription)\n\(NSLocalizedString("credit_not_used_suffix", comment: ""))"
             isAnalyzing = false
-            print("❌ AI 파일 분석 실패 (크레딧 미소모): \(error)")
+            print("❌ AI 파일 분석 실패: \(error)")
         }
     }
     
@@ -362,32 +393,32 @@ class AIAnalysisManager: ObservableObject {
 
 enum AIAnalysisError: Error {
     case insufficientCredits
-    case imageProcessingFailed
-    case analysisTimeout
     case fileTooLarge
     case unsupportedFileType
-    case firebaseError
-    case networkError
-    case analysisFailedWithCreditUsed  // 크레딧 소모된 실패
-    
-    var localizedDescription: String {
+    case apiCallFailed
+    case aiAnalysisRejected(String)  // AI가 도안이 아닌 파일로 판단
+
+    var errorBody: String {
         switch self {
         case .insufficientCredits:
-            return "insufficient_credits"
-        case .imageProcessingFailed:
-            return "image_process_failed"
-        case .analysisTimeout:
-            return "analysis_timeout"
+            return NSLocalizedString("insufficient_credits", comment: "")
         case .fileTooLarge:
-            return "file_too_large"
+            return NSLocalizedString("file_too_large", comment: "")
         case .unsupportedFileType:
-            return "unsupported_format"
-        case .firebaseError:
-            return "server_connection_failed"
-        case .networkError:
-            return "network_error"
-        case .analysisFailedWithCreditUsed:
-            return "analysis_failed_credit_used"
+            return NSLocalizedString("unsupported_format", comment: "")
+        case .apiCallFailed:
+            return NSLocalizedString("api_call_failed", comment: "")
+        case .aiAnalysisRejected(let message):
+            return message
+        }
+    }
+
+    var creditUsed: Bool {
+        switch self {
+        case .aiAnalysisRejected:
+            return true
+        case .insufficientCredits, .fileTooLarge, .unsupportedFileType, .apiCallFailed:
+            return false
         }
     }
 }

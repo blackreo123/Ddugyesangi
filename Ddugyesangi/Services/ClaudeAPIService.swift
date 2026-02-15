@@ -73,40 +73,119 @@ class ClaudeAPIService {
     // MARK: - 폴백 모델 리스트
     private func getFallbackModels() -> [ModelsResponse.ClaudeModel] {
         return [
+            ModelsResponse.ClaudeModel(id: "claude-sonnet-4-5-20250929", type: "model", displayName: "Claude Sonnet 4.5", createdAt: "2025-09-29"),
+            ModelsResponse.ClaudeModel(id: "claude-haiku-4-5-20251001", type: "model", displayName: "Claude Haiku 4.5", createdAt: "2025-10-01"),
             ModelsResponse.ClaudeModel(id: "claude-3-5-sonnet-20241022", type: "model", displayName: "Claude 3.5 Sonnet", createdAt: "2024-10-22"),
-            ModelsResponse.ClaudeModel(id: "claude-3-5-sonnet-20240620", type: "model", displayName: "Claude 3.5 Sonnet", createdAt: "2024-06-20"),
-            ModelsResponse.ClaudeModel(id: "claude-3-sonnet-20240229", type: "model", displayName: "Claude 3 Sonnet", createdAt: "2024-02-29"),
-            ModelsResponse.ClaudeModel(id: "claude-3-haiku-20240307", type: "model", displayName: "Claude 3 Haiku", createdAt: "2024-03-07"),
-            ModelsResponse.ClaudeModel(id: "claude-3-opus-20240229", type: "model", displayName: "Claude 3 Opus", createdAt: "2024-02-29")
         ]
     }
-    
+
     // MARK: - 최적 모델 선택
     private func selectBestModel(from models: [ModelsResponse.ClaudeModel]) -> ModelsResponse.ClaudeModel? {
-        // 비전 기능이 있는 모델만 필터링 (이미지/PDF 분석용)
-        let visionCapableModels = models.filter { model in
-            model.id.contains("claude-3") || model.id.contains("sonnet") || model.id.contains("haiku") || model.id.contains("opus")
-        }
-        
-        // 우선순위: Sonnet > Opus > Haiku 순으로, 날짜가 최신인 것 우선
-        let prioritizedModels = visionCapableModels.sorted { model1, model2 in
-            // 1. Sonnet 모델 우선
-            let model1IsSonnet = model1.id.contains("sonnet")
-            let model2IsSonnet = model2.id.contains("sonnet")
-            
-            if model1IsSonnet && !model2IsSonnet {
-                return true
-            } else if !model1IsSonnet && model2IsSonnet {
-                return false
+        // Claude 모델만 필터링
+        let claudeModels = models.filter { $0.id.hasPrefix("claude-") }
+
+        // 성능 점수 기반 정렬 (세대 × 10 + 티어 점수), 높을수록 좋음
+        let sorted = claudeModels.sorted { model1, model2 in
+            let score1 = modelPerformanceScore(model1.id)
+            let score2 = modelPerformanceScore(model2.id)
+            if score1 != score2 {
+                return score1 > score2
             }
-            
-            // 2. 같은 계열이면 날짜순 (최신 우선)
             return model1.createdAt > model2.createdAt
         }
-        
-        return prioritizedModels.first
+
+        return sorted.first
+    }
+
+    /// 모델 ID에서 성능 점수 계산 (높을수록 좋음)
+    /// 세대(major.minor) × 10 + 티어(opus=3, sonnet=2, haiku=1)
+    private func modelPerformanceScore(_ modelId: String) -> Double {
+        return extractGeneration(from: modelId) * 10 + extractTierScore(from: modelId)
+    }
+
+    /// 모델 ID에서 세대 번호 추출
+    private func extractGeneration(from modelId: String) -> Double {
+        // 새 형식: claude-{tier}-{major}-{minor}[-date] (예: claude-sonnet-4-5-20250929)
+        // 날짜 없는 형식: claude-{tier}-{major}-{minor} (예: claude-opus-4-6)
+        // minor 없는 형식: claude-{tier}-{major}-{date} (예: claude-opus-4-20250514)
+        for tier in ["opus", "sonnet", "haiku"] {
+            let prefix = "claude-\(tier)-"
+            if modelId.hasPrefix(prefix) {
+                let afterTier = String(modelId.dropFirst(prefix.count))
+                let parts = afterTier.split(separator: "-")
+                guard let major = Double(parts[0]) else { continue }
+                if parts.count >= 2, let minor = Double(parts[1]), parts[1].count <= 2 {
+                    // minor 버전이 1~2자리일 때만 세대 버전으로 인식 (날짜 8자리 제외)
+                    return major + minor / 10.0
+                }
+                // minor 없는 형식 (예: claude-opus-4-20250514) → major만
+                return major
+            }
+        }
+        // 구 형식: claude-{major}-{minor}-{tier}-{date} (예: claude-3-5-sonnet-20241022)
+        if modelId.hasPrefix("claude-3-7-") { return 3.7 }
+        if modelId.hasPrefix("claude-3-5-") { return 3.5 }
+        if modelId.hasPrefix("claude-3-") { return 3.0 }
+        return 0
+    }
+
+    /// 모델 ID에서 티어 점수 추출 (opus=3, sonnet=2, haiku=1)
+    private func extractTierScore(from modelId: String) -> Double {
+        if modelId.contains("opus") { return 3.0 }
+        if modelId.contains("sonnet") { return 2.0 }
+        if modelId.contains("haiku") { return 1.0 }
+        return 0
+    }
+
+    /// PDF document 타입 지원 여부 (세대 3.5 이상만 지원)
+    private func isPDFCapable(_ modelId: String) -> Bool {
+        return extractGeneration(from: modelId) >= 3.5
     }
     
+    // MARK: - 로케일별 에러 메시지
+    private func errorMessageForCurrentLocale() -> String {
+        let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
+        switch languageCode {
+        case "ko": return "뜨개질 도안을 인식할 수 없습니다"
+        case "ja": return "編み図を認識できません"
+        default: return "Unable to recognize knitting pattern"
+        }
+    }
+
+    // MARK: - 분석 프롬프트
+    private func buildAnalysisPrompt(isPDF: Bool) -> String {
+        var prompt = """
+        업로드된 뜨개질 도안 파일을 분석해서 다음 JSON 형식으로 응답하세요. 반드시 JSON만 반환하고, 추가 설명이나 텍스트는 포함하지 마세요.
+
+        {
+            "projectName": "도안의 이름 또는 추정되는 이름",
+            "parts": [
+                {
+                    "partName": "파트 이름 (예: 앞판, 뒷판, 소매, 몸통 등)",
+                    "targetRow": 해당 파트를 완성하는 데 필요한 총 단수 (숫자만, 알 수 없으면 null)
+                }
+            ]
+        }
+
+        주의사항:
+        - 모든 숫자는 정수로만 표현
+        - 단수를 파악할 수 없는 파트는 targetRow를 null로 설정하세요
+        - projectName과 partName은 도안에 적힌 원문 그대로 사용하세요
+        - 뜨개질 도안이 아닌 파일인 경우, 다음 형식으로만 응답하세요: {"errorMessage": "\(errorMessageForCurrentLocale())"}
+        """
+
+        if isPDF {
+            prompt += """
+
+            - PDF의 모든 페이지를 종합적으로 분석하세요
+            - 차트, 도식, 텍스트를 모두 고려하세요
+            - 같은 파트가 여러 페이지에 걸쳐 있어도 하나의 파트로 통합하세요
+            """
+        }
+
+        return prompt
+    }
+
     // MARK: - 뜨개질 도안 분석 메인 함수
     func analyzeKnittingPattern(fileData: Data, fileName: String = "") async throws -> KnittingAnalysis {
         // PDF 파일인 경우 직접 처리
@@ -122,28 +201,8 @@ class ClaudeAPIService {
     // MARK: - PDF 직접 처리
     private func analyzePDFDirect(pdfData: Data, fileName: String) async throws -> KnittingAnalysis {
         let base64PDF = pdfData.base64EncodedString()
-        
-        let prompt = """
-        업로드된 뜨개질 도안 PDF 파일을 분석해서 다음 정보를 JSON 형태로 정확하게 제공해주세요:
+        let prompt = buildAnalysisPrompt(isPDF: true)
 
-        {
-            "projectName": "도안의 이름 또는 추정되는 이름",
-            "parts": [
-                {
-                    "partName": "파트 이름 (예: 앞판, 뒷판, 소매, 몸통 등)",
-                    "targetRow": 목표 단수 (숫자만)
-                }
-            ]
-        }
-
-        주의사항:
-        - PDF의 모든 페이지를 종합적으로 분석하세요
-        - 차트, 도식, 텍스트를 모두 고려하세요
-        - 모든 숫자는 정수로만 표현
-        - JSON 형식을 정확하게 맞춰주세요
-        - 중복된 파트는 하나로 통합하세요
-        """
-        
         let url = "\(baseURL)/messages"
         
         let headers: HTTPHeaders = [
@@ -152,13 +211,14 @@ class ClaudeAPIService {
             "anthropic-version": anthropicVersion
         ]
         
-        // 사용 가능한 모델 가져오기
+        // 사용 가능한 모델 중 PDF 지원 모델만 필터링
         let availableModels = try await fetchAvailableModels()
-        
-        guard let bestModel = selectBestModel(from: availableModels) else {
-            throw ClaudeAPIError.networkError("사용 가능한 모델이 없습니다.")
+        let pdfCapableModels = availableModels.filter { isPDFCapable($0.id) }
+
+        guard let bestModel = selectBestModel(from: pdfCapableModels) else {
+            throw ClaudeAPIError.networkError("PDF 분석이 가능한 모델이 없습니다.")
         }
-        
+
         print("🎯 PDF 직접 처리용 모델: \(bestModel.id)")
         
         let parameters: [String: Any] = [
@@ -192,23 +252,7 @@ class ClaudeAPIService {
     
     // MARK: - 이미지 파일 분석
     private func analyzeImageFile(fileData: Data, fileName: String) async throws -> KnittingAnalysis {
-        let prompt = """
-        업로드된 뜨개질 도안 파일을 분석해서 다음 정보를 JSON 형태로 정확하게 제공해주세요:
-
-        {
-            "projectName": "도안의 이름 또는 추정되는 이름",
-            "parts": [
-                {
-                    "partName": "파트 이름 (예: 앞판, 뒷판, 소매, 몸통 등)",
-                    "targetRow": 목표 단수 (숫자만)
-                }
-            ]
-        }
-
-        주의사항:
-        - 모든 숫자는 정수로만 표현
-        - JSON 형식을 정확하게 맞춰주세요
-        """
+        let prompt = buildAnalysisPrompt(isPDF: false)
         
         let response = try await sendMessage(fileData: fileData, fileName: fileName, prompt: prompt)
         return try parseKnittingAnalysis(from: response)
@@ -377,7 +421,13 @@ class ClaudeAPIService {
         guard let data = jsonString.data(using: .utf8) else {
             throw ClaudeAPIError.invalidResponse
         }
-        
+
+        // errorMessage 확인 (도안이 아닌 파일인 경우)
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let errorMessage = json["errorMessage"] as? String {
+            throw ClaudeAPIError.analysisError(errorMessage)
+        }
+
         do {
             return try JSONDecoder().decode(KnittingAnalysis.self, from: data)
         } catch {
@@ -438,7 +488,8 @@ enum ClaudeAPIError: Error {
     case invalidResponse
     case parsingFailed
     case networkError(String)
-    
+    case analysisError(String)
+
     var localizedDescription: String {
         switch self {
         case .invalidResponse:
@@ -447,6 +498,8 @@ enum ClaudeAPIError: Error {
             return "AI 응답을 분석할 수 없습니다."
         case .networkError(let message):
             return "네트워크 오류: \(message)"
+        case .analysisError(let message):
+            return message
         }
     }
 }

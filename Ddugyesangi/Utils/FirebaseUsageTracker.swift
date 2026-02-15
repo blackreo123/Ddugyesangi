@@ -326,6 +326,41 @@ class FirebaseUsageTracker: ObservableObject {
         return result as? Bool ?? false
     }
     
+    /// 크레딧 환불 (API 호출 실패 시)
+    func refundCredit() async throws {
+        guard let uid = currentUID else {
+            throw UsageError.notAuthenticated
+        }
+
+        let docRef = db.collection("usage").document(uid)
+
+        try await db.runTransaction { transaction, errorPointer in
+            let document: DocumentSnapshot
+            do {
+                document = try transaction.getDocument(docRef)
+            } catch let error as NSError {
+                errorPointer?.pointee = error
+                return nil
+            }
+
+            guard document.exists, let data = document.data() else {
+                return nil
+            }
+
+            let currentCredits = data["credits"] as? Int ?? 0
+            let newCredits = currentCredits + 1
+
+            transaction.updateData([
+                "credits": newCredits,
+                "updatedAt": Timestamp()
+            ], forDocument: docRef)
+
+            print("🔄 크레딧 환불: \(currentCredits) → \(newCredits)")
+
+            return newCredits
+        }
+    }
+
     /// 광고 시청으로 크레딧 추가
     func addCreditsFromAd(amount: Int = 5) async throws {
         guard let uid = currentUID else {

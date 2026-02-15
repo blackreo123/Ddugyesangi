@@ -1,0 +1,68 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Ddugyesangi (뜨개질) is a knitting counter iOS app built with SwiftUI. It helps users track row counts (단수) and stitch counts (코수) across multiple knitting projects and parts. The app includes AI-powered knitting pattern analysis via the Claude API.
+
+- **Bundle ID**: `com.jihayoon.ddugyesangi`
+- **Minimum iOS**: 17.6
+- **Swift**: 5.0
+- **Language**: Korean (primary), with English and Japanese localization
+
+## Build & Run
+
+This is a standard Xcode project (no workspace/CocoaPods). Open `Ddugyesangi.xcodeproj` in Xcode.
+
+```bash
+# Build from command line
+xcodebuild -project Ddugyesangi.xcodeproj -scheme Ddugyesangi -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16' build
+
+# Run tests
+xcodebuild -project Ddugyesangi.xcodeproj -scheme Ddugyesangi -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16' test
+```
+
+Dependencies are managed via Swift Package Manager (resolved automatically by Xcode):
+- **Google Mobile Ads SDK** — banner and rewarded ads
+- **Alamofire** — HTTP networking (used by ClaudeAPIService)
+- **Firebase iOS SDK** — FirebaseAnalytics, FirebaseAuth, FirebaseFirestore (usage tracking for AI analysis)
+
+## Architecture
+
+**MVVM pattern** with a singleton `CoreDataManager`.
+
+### Data Flow
+```
+Views → ViewModels → CoreDataManager.shared → Core Data (NSPersistentContainer)
+```
+
+- **ViewModels** (`ProjectListViewModel`, `PartListViewModel`, `PartDetailViewModel`) are `ObservableObject` classes that own `@Published` state and delegate persistence to `CoreDataManager.shared`.
+- **Core Data entities**: `Project` (has many `Part`), `Part` (belongs to `Project`). The data model file is `Ddugyesangi.xcdatamodeld` with a v2 migration.
+- **ThemeManager** is injected as `@EnvironmentObject` from the app root. Theme selection is persisted in `UserDefaults`.
+
+### Key Singletons
+| Singleton | Purpose |
+|---|---|
+| `CoreDataManager.shared` | All Core Data CRUD operations |
+| `AdService.shared` | Google AdMob banner & rewarded ads |
+| `AIAnalysisManager.shared` | AI pattern analysis orchestration, credit management |
+
+### AI Analysis Flow
+`SmartAddView` → `AIAnalysisManager` → `ClaudeAPIService` (via Alamofire) → Claude API. The Claude API key is loaded from `Config.plist` (not committed). Usage is tracked via `FirebaseUsageTracker` with a monthly free credit system and ad-reward credits.
+
+### Services
+- **AdService** — Manages banner/rewarded ads. Uses test ad IDs in `DEBUG` builds, production IDs in release.
+- **LifecycleManager** — Handles app lifecycle events and ATT (App Tracking Transparency) permission requests.
+- **ClaudeAPIService** — Sends PDF/image files to Claude API for knitting pattern analysis. Auto-selects best available model.
+
+## Localization
+
+Three languages: Korean (`ko`), English (`en`), Japanese (`ja`). Localized strings are in `{lang}.lproj/Localizable.strings` and `{lang}.lproj/InfoPlist.strings`. Use `NSLocalizedString()` for all user-facing strings.
+
+## Configuration
+
+- **Config.plist** — Contains `CLAUDE_API_KEY` (not in git). Required for AI analysis features.
+- **GoogleService-Info.plist** — Firebase configuration.
+- **Constants.swift** — AdMob IDs, app version, Claude API settings.
+- Ad unit IDs switch between test/production based on `#if DEBUG`.
