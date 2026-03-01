@@ -111,75 +111,67 @@ struct MediumWidgetView: View {
     }
 
     private var contentView: some View {
-        HStack(spacing: 12) {
-            // 왼쪽: 정보
-            VStack(alignment: .leading, spacing: 4) {
-                Text(entry.projectName)
-                    .font(.caption)
-                    .foregroundStyle(theme.secondaryColor)
-                    .lineLimit(1)
+        GeometryReader { geo in
+            let buttonWidth = geo.size.width / 3
+            let infoWidth = geo.size.width - buttonWidth - 12
 
-                Text(entry.partName)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(theme.textColor)
-                    .lineLimit(1)
+            HStack(spacing: 12) {
+                // 왼쪽 2/3: 정보
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.projectName)
+                        .font(.caption)
+                        .foregroundStyle(theme.secondaryColor)
+                        .lineLimit(1)
 
-                Spacer()
+                    Text(entry.partName)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(theme.textColor)
+                        .lineLimit(1)
 
-                HStack(spacing: 16) {
+                    Spacer()
+
                     VStack(alignment: .leading, spacing: 2) {
                         Text(NSLocalizedString("widget_row", comment: ""))
                             .font(.caption2)
                             .foregroundStyle(theme.secondaryColor)
                         if entry.targetRow > 0 {
                             Text("\(entry.currentRow)/\(entry.targetRow)")
-                                .font(.title3)
+                                .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundStyle(theme.primaryColor)
                         } else {
                             Text("\(entry.currentRow)")
-                                .font(.title3)
+                                .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundStyle(theme.primaryColor)
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(NSLocalizedString("widget_stitch", comment: ""))
-                            .font(.caption2)
-                            .foregroundStyle(theme.secondaryColor)
-                        Text("\(entry.currentStitch)")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundStyle(theme.primaryColor)
+                    if entry.targetRow > 0 {
+                        ProgressView(value: progress)
+                            .tint(theme.primaryColor)
                     }
                 }
+                .frame(width: infoWidth)
 
-                if entry.targetRow > 0 {
-                    ProgressView(value: progress)
-                        .tint(theme.primaryColor)
-                }
-            }
-
-            Spacer()
-
-            // 오른쪽: +1 버튼
-            if let partID = entry.partID {
-                Button(intent: IncrementRowIntent(partID: partID)) {
-                    VStack(spacing: 2) {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        Text("1")
-                            .font(.subheadline)
-                            .fontWeight(.bold)
+                // 오른쪽 1/3: +1 버튼
+                if let partID = entry.partID {
+                    Button(intent: IncrementRowIntent(partID: partID)) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            Text("1")
+                                .font(.title)
+                                .fontWeight(.bold)
+                        }
+                        .foregroundStyle(.white)
+                        .frame(width: buttonWidth, height: geo.size.height)
+                        .background(theme.primaryColor, in: RoundedRectangle(cornerRadius: 14))
                     }
-                    .foregroundStyle(.white)
-                    .frame(width: 56, height: 56)
-                    .background(theme.primaryColor, in: RoundedRectangle(cornerRadius: 12))
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .containerBackground(for: .widget) {
