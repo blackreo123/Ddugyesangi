@@ -2,113 +2,110 @@
   "images" : [
     {
       "filename" : "iPhone-Notification-20@2x.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "idiom" : "iphone",
       "scale" : "2x",
       "size" : "20x20"
     },
     {
       "filename" : "iPhone-Notification-20@3x.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "idiom" : "iphone",
       "scale" : "3x",
       "size" : "20x20"
     },
     {
       "filename" : "iPhone-Settings-29@2x.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "idiom" : "iphone",
       "scale" : "2x",
       "size" : "29x29"
     },
     {
       "filename" : "iPhone-Settings-29@3x.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "idiom" : "iphone",
       "scale" : "3x",
       "size" : "29x29"
     },
     {
-      "filename" : "knitting_app_icon_76x76.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "2x",
-      "size" : "38x38"
-    },
-    {
-      "filename" : "knitting_app_icon_114x114.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "3x",
-      "size" : "38x38"
-    },
-    {
-      "filename" : "knitting_app_icon_80x80.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "iPhone-Spotlight-40@2x.png",
+      "idiom" : "iphone",
       "scale" : "2x",
       "size" : "40x40"
     },
     {
-      "filename" : "knitting_app_icon_120x120.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "iPhone-Spotlight-40@3x.png",
+      "idiom" : "iphone",
       "scale" : "3x",
       "size" : "40x40"
     },
     {
-      "filename" : "knitting_app_icon_120x120 1.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "iPhone-60@2x.png",
+      "idiom" : "iphone",
       "scale" : "2x",
       "size" : "60x60"
     },
     {
-      "filename" : "knitting_app_icon_180x180.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "iPhone-60@3x.png",
+      "idiom" : "iphone",
       "scale" : "3x",
       "size" : "60x60"
     },
     {
-      "filename" : "knitting_app_icon_128x128.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "iPad-Notification-20@1x.png",
+      "idiom" : "ipad",
+      "scale" : "1x",
+      "size" : "20x20"
+    },
+    {
+      "filename" : "iPad-Notification-20@2x.png",
+      "idiom" : "ipad",
       "scale" : "2x",
-      "size" : "64x64"
+      "size" : "20x20"
     },
     {
-      "filename" : "knitting_app_icon_192x192.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "3x",
-      "size" : "64x64"
+      "filename" : "iPad-Settings-29@1x.png",
+      "idiom" : "ipad",
+      "scale" : "1x",
+      "size" : "29x29"
     },
     {
-      "filename" : "knitting_app_icon_136x136.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "iPad-Settings-29@2x.png",
+      "idiom" : "ipad",
       "scale" : "2x",
-      "size" : "68x68"
+      "size" : "29x29"
     },
     {
-      "filename" : "knitting_app_icon_152x152.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "iPad-Spotlight-40@1x.png",
+      "idiom" : "ipad",
+      "scale" : "1x",
+      "size" : "40x40"
+    },
+    {
+      "filename" : "iPad-Spotlight-40@2x.png",
+      "idiom" : "ipad",
+      "scale" : "2x",
+      "size" : "40x40"
+    },
+    {
+      "filename" : "iPad-76@1x.png",
+      "idiom" : "ipad",
+      "scale" : "1x",
+      "size" : "76x76"
+    },
+    {
+      "filename" : "iPad-76@2x.png",
+      "idiom" : "ipad",
       "scale" : "2x",
       "size" : "76x76"
     },
     {
-      "filename" : "knitting_app_icon_167x167.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "iPadPro-83.5@2x.png",
+      "idiom" : "ipad",
       "scale" : "2x",
       "size" : "83.5x83.5"
     },
     {
-      "filename" : "knitting_app_icon_1024x1024.png",
-      "idiom" : "universal",
-      "platform" : "ios",
+      "filename" : "AppStore-1024x1024.png",
+      "idiom" : "ios-marketing",
+      "scale" : "1x",
       "size" : "1024x1024"
     }
   ],

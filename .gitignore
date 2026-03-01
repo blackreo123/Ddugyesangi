@@ -141,7 +141,6 @@ exportOptions.plist
 *.tmp
 
 # Core Data
-*.xcdatamodeld/*.xcdatamodel/
 *.xcdatamodeld/*.xcdatamodel/*.binarystorage
 
 # Temporary files

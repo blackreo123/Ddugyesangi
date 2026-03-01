@@ -26,6 +26,7 @@ extension CoreDataManager {
         part.targetRow = targetRow
         part.currentRow = 0
         part.currentStitch = 0
+        part.lastModifiedAt = Date()
         part.project = project
         
         save()
