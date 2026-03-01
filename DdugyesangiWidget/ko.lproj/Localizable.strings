@@ -1,0 +1,8 @@
+/* Widget */
+"widget_display_name" = "뜨개질 카운터";
+"widget_description" = "현재 단수를 확인하고 +1 할 수 있어요";
+"widget_row" = "단수";
+"widget_stitch" = "코수";
+"widget_empty" = "파트가 없어요.\n앱에서 추가해 주세요.";
+"Part Name" = "파트 이름";
+"Project Name" = "뜨개질 이름";

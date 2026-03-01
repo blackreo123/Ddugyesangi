@@ -66,3 +66,22 @@ Three languages: Korean (`ko`), English (`en`), Japanese (`ja`). Localized strin
 - **GoogleService-Info.plist** — Firebase configuration.
 - **Constants.swift** — AdMob IDs, app version, Claude API settings.
 - Ad unit IDs switch between test/production based on `#if DEBUG`.
+
+## Git 규칙
+
+- 커밋 메시지에 `Co-Authored-By` 등 AI 관련 태그를 남기지 않는다.
+- 문서, 코드, 커밋 등 어떤 산출물에도 AI가 작성했음을 표시하지 않는다.
+
+## Changelog
+
+완료된 작업은 [CHANGELOG.md](CHANGELOG.md)에 기록.
+
+## TODO (개선 아이디어)
+
+우선순위 순으로 정리. 모두 구현 예정은 아니며 기록용.
+
+1. **WidgetKit 위젯** — 홈/잠금화면에서 현재 단수 확인 및 +1 가능
+2. **카운터 UX 개선** — 터치 영역 확대(화면 전체 탭), Haptic 피드백, Undo(실행 취소), 화면 꺼짐 방지
+3. **NavigationStack 마이그레이션** — deprecated NavigationView 전환 (코드 내 TODO 있음)
+4. **코수 목표 설정 + 메모** — 코수 진행률 표시 (현재 targetValue: 0 하드코딩), 파트별 메모 기능
+5. **iCloud 동기화** — NSPersistentCloudKitContainer로 기기 간 데이터 동기화

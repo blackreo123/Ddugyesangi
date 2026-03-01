@@ -97,3 +97,10 @@
 "bonus_credit_provided" = "연속 실패로 인해 보너스 크레딧 1회가 제공되었습니다.";
 "credit_will_be_used" = "분석을 시작하면 성공/실패와 관계없이 크레딧이 차감됩니다.";
 "analysis_warning" = "주의: API 호출이 시작되면 실패해도 크레딧이 차감됩니다.";
+
+/* Widget */
+"widget_display_name" = "뜨개질 카운터";
+"widget_description" = "현재 단수를 확인하고 +1 할 수 있어요";
+"widget_row" = "단수";
+"widget_stitch" = "코수";
+"widget_empty" = "파트가 없어요.\n앱에서 추가해 주세요.";

@@ -11,6 +11,7 @@
 		629FF53E2E95011C00BBBC29 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 629FF53D2E95011C00BBBC29 /* FirebaseAuth */; };
 		629FF5402E95011C00BBBC29 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 629FF53F2E95011C00BBBC29 /* FirebaseFirestore */; };
 		62B18DE12E815CCE00C7ED06 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 62B18DE02E815CCE00C7ED06 /* Alamofire */; };
+		62D1A00D000000000000000D /* DdugyesangiWidgetExtension.appex in Embed Extensions */ = {isa = PBXBuildFile; fileRef = 62D1A0010000000000000001 /* DdugyesangiWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		62E8BCFC2D25040C0082A0A9 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 62E8BCFB2D25040C0082A0A9 /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
@@ -29,12 +30,35 @@
 			remoteGlobalIDString = 6277CA142D2448200028F852;
 			remoteInfo = Ddugyesangi;
 		};
+		62D1A00B000000000000000B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6277CA0D2D2448200028F852 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 62D1A0020000000000000002;
+			remoteInfo = DdugyesangiWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		62D1A00A000000000000000A /* Embed Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				62D1A00D000000000000000D /* DdugyesangiWidgetExtension.appex in Embed Extensions */,
+			);
+			name = "Embed Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		623B9FA42F54B1FB00725D03 /* DdugyesangiWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DdugyesangiWidgetExtension.entitlements; sourceTree = "<group>"; };
 		6277CA152D2448200028F852 /* Ddugyesangi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ddugyesangi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6277CA2E2D2448210028F852 /* DdugyesangiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DdugyesangiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6277CA382D2448210028F852 /* DdugyesangiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DdugyesangiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		62D1A0010000000000000001 /* DdugyesangiWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DdugyesangiWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -44,6 +68,13 @@
 				Info.plist,
 			);
 			target = 6277CA142D2448200028F852 /* Ddugyesangi */;
+		};
+		62D1A00E000000000000000E /* Exceptions for "DdugyesangiWidget" folder in "DdugyesangiWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 62D1A0020000000000000002 /* DdugyesangiWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -64,6 +95,14 @@
 		6277CA3B2D2448210028F852 /* DdugyesangiUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DdugyesangiUITests;
+			sourceTree = "<group>";
+		};
+		62D1A0090000000000000009 /* DdugyesangiWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				62D1A00E000000000000000E /* Exceptions for "DdugyesangiWidget" folder in "DdugyesangiWidgetExtension" target */,
+			);
+			path = DdugyesangiWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -95,12 +134,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		62D1A0040000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		6277CA0C2D2448200028F852 = {
 			isa = PBXGroup;
 			children = (
+				623B9FA42F54B1FB00725D03 /* DdugyesangiWidgetExtension.entitlements */,
+				62D1A0090000000000000009 /* DdugyesangiWidget */,
 				6277CA172D2448200028F852 /* Ddugyesangi */,
 				6277CA312D2448210028F852 /* DdugyesangiTests */,
 				6277CA3B2D2448210028F852 /* DdugyesangiUITests */,
@@ -111,6 +159,7 @@
 		6277CA162D2448200028F852 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				62D1A0010000000000000001 /* DdugyesangiWidgetExtension.appex */,
 				6277CA152D2448200028F852 /* Ddugyesangi.app */,
 				6277CA2E2D2448210028F852 /* DdugyesangiTests.xctest */,
 				6277CA382D2448210028F852 /* DdugyesangiUITests.xctest */,
@@ -128,10 +177,12 @@
 				6277CA112D2448200028F852 /* Sources */,
 				6277CA122D2448200028F852 /* Frameworks */,
 				6277CA132D2448200028F852 /* Resources */,
+				62D1A00A000000000000000A /* Embed Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				62D1A00C000000000000000C /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6277CA172D2448200028F852 /* Ddugyesangi */,
@@ -194,6 +245,28 @@
 			productReference = 6277CA382D2448210028F852 /* DdugyesangiUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		62D1A0020000000000000002 /* DdugyesangiWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 62D1A0080000000000000008 /* Build configuration list for PBXNativeTarget "DdugyesangiWidgetExtension" */;
+			buildPhases = (
+				62D1A0030000000000000003 /* Sources */,
+				62D1A0040000000000000004 /* Frameworks */,
+				62D1A0050000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				62D1A0090000000000000009 /* DdugyesangiWidget */,
+			);
+			name = DdugyesangiWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = DdugyesangiWidgetExtension;
+			productReference = 62D1A0010000000000000001 /* DdugyesangiWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -214,6 +287,9 @@
 					6277CA372D2448210028F852 = {
 						CreatedOnToolsVersion = 16.2;
 						TestTargetID = 6277CA142D2448200028F852;
+					};
+					62D1A0020000000000000002 = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -239,6 +315,7 @@
 			projectRoot = "";
 			targets = (
 				6277CA142D2448200028F852 /* Ddugyesangi */,
+				62D1A0020000000000000002 /* DdugyesangiWidgetExtension */,
 				6277CA2D2D2448210028F852 /* DdugyesangiTests */,
 				6277CA372D2448210028F852 /* DdugyesangiUITests */,
 			);
@@ -261,6 +338,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		6277CA362D2448210028F852 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		62D1A0050000000000000005 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -291,6 +375,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		62D1A0030000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -304,6 +395,11 @@
 			target = 6277CA142D2448200028F852 /* Ddugyesangi */;
 			targetProxy = 6277CA392D2448210028F852 /* PBXContainerItemProxy */;
 		};
+		62D1A00C000000000000000C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 62D1A0020000000000000002 /* DdugyesangiWidgetExtension */;
+			targetProxy = 62D1A00B000000000000000B /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -312,6 +408,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Ddugyesangi/Ddugyesangi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -352,6 +449,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Ddugyesangi/Ddugyesangi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -578,6 +676,66 @@
 			};
 			name = Release;
 		};
+		62D1A0060000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = DdugyesangiWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 789YC4G9T9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DdugyesangiWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DdugyesangiWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.7.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jihayoon.ddugyesangi.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		62D1A0070000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = DdugyesangiWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 789YC4G9T9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DdugyesangiWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DdugyesangiWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.7.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jihayoon.ddugyesangi.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -613,6 +771,15 @@
 			buildConfigurations = (
 				6277CA4A2D2448210028F852 /* Debug */,
 				6277CA4B2D2448210028F852 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		62D1A0080000000000000008 /* Build configuration list for PBXNativeTarget "DdugyesangiWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				62D1A0060000000000000006 /* Debug */,
+				62D1A0070000000000000007 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,0 +1,8 @@
+/* Widget */
+"widget_display_name" = "Knitting Counter";
+"widget_description" = "Check row count and increment";
+"widget_row" = "Row";
+"widget_stitch" = "Stitch";
+"widget_empty" = "No parts yet.\nAdd one in the app.";
+"Part Name" = "Part Name";
+"Project Name" = "Project Name";

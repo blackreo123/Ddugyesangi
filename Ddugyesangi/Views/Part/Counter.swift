@@ -133,6 +133,12 @@ struct Counter: View {
                 .disabled(count == 0)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            let latest = Self.extractCurrentValue(from: part, type: type) ?? 0
+            if count != latest {
+                count = latest
+            }
+        }
         .alert("Reset Stitch Count", isPresented: $showingStitchResetAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Reset", role: .destructive) {

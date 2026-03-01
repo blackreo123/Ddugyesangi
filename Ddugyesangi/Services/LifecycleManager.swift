@@ -34,7 +34,10 @@ class LifecycleManager: ObservableObject {
     
     private func appDidBecomeActive() {
         appState = .foreground
-        
+
+        // 위젯에서 변경한 데이터 반영
+        CoreDataManager.shared.refreshFromStore()
+
         // 첫 번째 활성화에서만 ATT 요청
         if !hasRequestedATT {
             print("🚀 앱 첫 실행 - ATT 권한 요청 예정")

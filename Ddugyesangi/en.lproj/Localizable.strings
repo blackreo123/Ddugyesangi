@@ -67,3 +67,10 @@
 "bonus_credit_provided" = "1 bonus credit provided due to consecutive failures.";
 "credit_will_be_used" = "Credit will be deducted regardless of success or failure once analysis starts.";
 "analysis_warning" = "Warning: Credit will be deducted even if analysis fails once API call begins.";
+
+/* Widget */
+"widget_display_name" = "Knitting Counter";
+"widget_description" = "Check row count and increment";
+"widget_row" = "Row";
+"widget_stitch" = "Stitch";
+"widget_empty" = "No parts yet.\nAdd one in the app.";

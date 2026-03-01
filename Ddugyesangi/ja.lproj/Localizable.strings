@@ -98,3 +98,10 @@
 "bonus_credit_provided" = "連続失敗によりボーナスクレジット1回が提供されました。";
 "credit_will_be_used" = "分析を開始すると、成功/失敗に関わらずクレジットが消費されます。";
 "analysis_warning" = "注意：API呼び出しが開始されると、失敗してもクレジットが消費されます。";
+
+/* Widget */
+"widget_display_name" = "編み物カウンター";
+"widget_description" = "現在の段数を確認して+1できます";
+"widget_row" = "段数";
+"widget_stitch" = "目数";
+"widget_empty" = "パートがありません。\nアプリで追加してください。";

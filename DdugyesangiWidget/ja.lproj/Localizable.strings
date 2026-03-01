@@ -1,0 +1,8 @@
+/* Widget */
+"widget_display_name" = "編み物カウンター";
+"widget_description" = "現在の段数を確認して+1できます";
+"widget_row" = "段数";
+"widget_stitch" = "目数";
+"widget_empty" = "パートがありません。\nアプリで追加してください。";
+"Part Name" = "パート名";
+"Project Name" = "編み物名";

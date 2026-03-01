@@ -1,0 +1,207 @@
+//
+//  DdugyesangiWidgetViews.swift
+//  DdugyesangiWidget
+//
+
+import SwiftUI
+import WidgetKit
+
+// MARK: - Small Widget
+
+struct SmallWidgetView: View {
+    let entry: DdugyesangiWidgetEntry
+
+    private var theme: WidgetTheme {
+        WidgetTheme.themes[entry.themeType] ?? WidgetTheme.themes[.basic]!
+    }
+
+    private var progress: Double {
+        guard entry.targetRow > 0 else { return 0 }
+        return min(Double(entry.currentRow) / Double(entry.targetRow), 1.0)
+    }
+
+    var body: some View {
+        if entry.isEmpty {
+            emptyView
+        } else {
+            contentView
+        }
+    }
+
+    private var contentView: some View {
+        VStack(spacing: 4) {
+            Text(entry.partName)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(theme.textColor)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Spacer()
+
+            Text("\(entry.currentRow)")
+                .font(.system(size: 40, weight: .bold, design: .rounded))
+                .foregroundStyle(theme.primaryColor)
+                .minimumScaleFactor(0.5)
+
+            if entry.targetRow > 0 {
+                ProgressView(value: progress)
+                    .tint(theme.primaryColor)
+                Text("\(entry.currentRow)/\(entry.targetRow)")
+                    .font(.caption2)
+                    .foregroundStyle(theme.secondaryColor)
+            }
+
+            Spacer()
+
+            if let partID = entry.partID {
+                Button(intent: IncrementRowIntent(partID: partID)) {
+                    Text("+1")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                        .background(theme.primaryColor, in: RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .containerBackground(for: .widget) {
+            theme.backgroundColor
+        }
+    }
+
+    private var emptyView: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "square.stack.3d.up")
+                .font(.title2)
+                .foregroundStyle(.secondary)
+            Text(NSLocalizedString("widget_empty", comment: ""))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .containerBackground(for: .widget) {
+            Color(.systemBackground)
+        }
+    }
+}
+
+// MARK: - Medium Widget
+
+struct MediumWidgetView: View {
+    let entry: DdugyesangiWidgetEntry
+
+    private var theme: WidgetTheme {
+        WidgetTheme.themes[entry.themeType] ?? WidgetTheme.themes[.basic]!
+    }
+
+    private var progress: Double {
+        guard entry.targetRow > 0 else { return 0 }
+        return min(Double(entry.currentRow) / Double(entry.targetRow), 1.0)
+    }
+
+    var body: some View {
+        if entry.isEmpty {
+            emptyView
+        } else {
+            contentView
+        }
+    }
+
+    private var contentView: some View {
+        HStack(spacing: 12) {
+            // 왼쪽: 정보
+            VStack(alignment: .leading, spacing: 4) {
+                Text(entry.projectName)
+                    .font(.caption)
+                    .foregroundStyle(theme.secondaryColor)
+                    .lineLimit(1)
+
+                Text(entry.partName)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(theme.textColor)
+                    .lineLimit(1)
+
+                Spacer()
+
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(NSLocalizedString("widget_row", comment: ""))
+                            .font(.caption2)
+                            .foregroundStyle(theme.secondaryColor)
+                        if entry.targetRow > 0 {
+                            Text("\(entry.currentRow)/\(entry.targetRow)")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundStyle(theme.primaryColor)
+                        } else {
+                            Text("\(entry.currentRow)")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundStyle(theme.primaryColor)
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(NSLocalizedString("widget_stitch", comment: ""))
+                            .font(.caption2)
+                            .foregroundStyle(theme.secondaryColor)
+                        Text("\(entry.currentStitch)")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundStyle(theme.primaryColor)
+                    }
+                }
+
+                if entry.targetRow > 0 {
+                    ProgressView(value: progress)
+                        .tint(theme.primaryColor)
+                }
+            }
+
+            Spacer()
+
+            // 오른쪽: +1 버튼
+            if let partID = entry.partID {
+                Button(intent: IncrementRowIntent(partID: partID)) {
+                    VStack(spacing: 2) {
+                        Image(systemName: "plus")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text("1")
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                    }
+                    .foregroundStyle(.white)
+                    .frame(width: 56, height: 56)
+                    .background(theme.primaryColor, in: RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .containerBackground(for: .widget) {
+            theme.backgroundColor
+        }
+    }
+
+    private var emptyView: some View {
+        HStack {
+            Spacer()
+            VStack(spacing: 8) {
+                Image(systemName: "square.stack.3d.up")
+                    .font(.title)
+                    .foregroundStyle(.secondary)
+                Text(NSLocalizedString("widget_empty", comment: ""))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .containerBackground(for: .widget) {
+            Color(.systemBackground)
+        }
+    }
+}
