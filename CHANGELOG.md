@@ -3,6 +3,7 @@
 완료된 작업 기록.
 
 ## 2026-03-02
+- 위젯 -1 버튼 추가 (스몰: 좌우 배치, 미디움: 상하 배치)
 - 파트별 메모 기능 추가 (Core Data v4, 파트 추가/편집/상세 화면, AI 도안 분석 시 자동 추출)
 - 스마트 추가/분석 결과 화면 fullScreenCover 전환, 파티클 배경 적용
 - sheet 모달(ProjectAdd, ProjectEdit, PartEdit, ThemeSelector)에서 불필요한 ThemedBackgroundView 제거

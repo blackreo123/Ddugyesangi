@@ -81,3 +81,4 @@ Three languages: Korean (`ko`), English (`en`), Japanese (`ja`). Localized strin
 우선순위 순으로 정리. 모두 구현 예정은 아니며 기록용.
 
 1. **iCloud 동기화** — NSPersistentCloudKitContainer로 기기 간 데이터 동기화
+2. **계절 테마 만들기** — 계절별 테마 디자인 추가
