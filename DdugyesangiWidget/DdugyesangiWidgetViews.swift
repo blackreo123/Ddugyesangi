@@ -58,16 +58,29 @@ struct SmallWidgetView: View {
             Spacer()
 
             if let partID = entry.partID {
-                Button(intent: IncrementRowIntent(partID: partID)) {
-                    Text("+1")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                        .background(theme.primaryColor, in: RoundedRectangle(cornerRadius: 8))
+                HStack(spacing: 4) {
+                    Button(intent: DecrementRowIntent(partID: partID)) {
+                        Text("-1")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                            .background(theme.secondaryColor, in: RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(intent: IncrementRowIntent(partID: partID)) {
+                        Text("+1")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                            .background(theme.primaryColor, in: RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .widgetURL(entry.partID.map { URL(string: "ddugyesangi://part/\($0.uuidString)")! })
@@ -163,22 +176,39 @@ struct MediumWidgetView: View {
                 }
                 .frame(width: infoWidth)
 
-                // 오른쪽 1/3: +1 버튼
+                // 오른쪽 1/3: +1, -1 버튼
                 if let partID = entry.partID {
-                    Button(intent: IncrementRowIntent(partID: partID)) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                                .font(.title)
-                                .fontWeight(.bold)
-                            Text("1")
-                                .font(.title)
-                                .fontWeight(.bold)
+                    VStack(spacing: 4) {
+                        Button(intent: IncrementRowIntent(partID: partID)) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "plus")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                Text("1")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                            }
+                            .foregroundStyle(.white)
+                            .frame(width: buttonWidth, height: (geo.size.height - 4) / 2)
+                            .background(theme.primaryColor, in: RoundedRectangle(cornerRadius: 14))
                         }
-                        .foregroundStyle(.white)
-                        .frame(width: buttonWidth, height: geo.size.height)
-                        .background(theme.primaryColor, in: RoundedRectangle(cornerRadius: 14))
+                        .buttonStyle(.plain)
+
+                        Button(intent: DecrementRowIntent(partID: partID)) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "minus")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                Text("1")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                            }
+                            .foregroundStyle(.white)
+                            .frame(width: buttonWidth, height: (geo.size.height - 4) / 2)
+                            .background(theme.secondaryColor, in: RoundedRectangle(cornerRadius: 14))
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
