@@ -64,7 +64,9 @@ struct Counter: View {
 
             // 위쪽 화살표 버튼
             Button(action: {
-                count += 1
+                withAnimation {
+                    count += 1
+                }
                 if type == .row {
                     viewModel.incrementCurrentRow(part: part)
                 } else if type == .stitch {
@@ -105,12 +107,15 @@ struct Counter: View {
                     .onTapGesture {
                         startEditing()
                     }
+                    .contentTransition(.numericText())
             }
             
             // 아래쪽 화살표 버튼
             Button(action: {
                 if count > 0 {
-                    count -= 1
+                    withAnimation {
+                        count -= 1
+                    }
                     if type == .row {
                         viewModel.decrementCurrentRow(part: part)
                     } else if type == .stitch {
@@ -148,7 +153,9 @@ struct Counter: View {
         .alert("Reset Stitch Count", isPresented: $showingStitchResetAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Reset", role: .destructive) {
-                count = 0
+                withAnimation {
+                    count = 0
+                }
                 viewModel.resetCurrentStitch(part: part)
             }
         } message: {
@@ -168,12 +175,16 @@ struct Counter: View {
         switch type {
         case .row:
             if let newValue = Int(inputText), newValue > 0, newValue <= part.targetRow {
-                count = newValue
+                withAnimation {
+                    count = newValue
+                }
                 viewModel.updateCurrentRow(part: part, to: Int16(newValue))
             }
         case .stitch:
             if let newValue = Int(inputText), newValue > 0 {
-                count = newValue
+                withAnimation {
+                    count = newValue
+                }
                 viewModel.updateCurrentStitch(part: part, to: Int16(newValue))
             }
         }

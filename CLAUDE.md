@@ -80,6 +80,5 @@ Three languages: Korean (`ko`), English (`en`), Japanese (`ja`). Localized strin
 
 우선순위 순으로 정리. 모두 구현 예정은 아니며 기록용.
 
-1. **카운터 UX 개선** — 터치 영역 확대(화면 전체 탭), Haptic 피드백, Undo(실행 취소), 화면 꺼짐 방지
-2. **코수 목표 설정 + 메모** — 코수 진행률 표시 (현재 targetValue: 0 하드코딩), 파트별 메모 기능
-3. **iCloud 동기화** — NSPersistentCloudKitContainer로 기기 간 데이터 동기화
+1. **파트별 메모** — 파트에 메모 기능 추가
+2. **iCloud 동기화** — NSPersistentCloudKitContainer로 기기 간 데이터 동기화
