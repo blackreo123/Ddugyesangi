@@ -12,7 +12,7 @@ struct SmartAddView: View {
     @State private var reselectedPhoto: PhotosPickerItem?
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             mainNavigationContent
         }
         .modifier(SheetsModifier(viewModel: viewModel))

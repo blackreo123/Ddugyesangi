@@ -16,7 +16,7 @@ struct PartAddView: View {
     @State private var targetRow = ""
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 NomalTextField(placeholder: NSLocalizedString("Part Name", comment: ""), text: $name)
                

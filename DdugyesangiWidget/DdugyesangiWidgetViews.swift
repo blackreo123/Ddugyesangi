@@ -67,6 +67,7 @@ struct SmallWidgetView: View {
                 .buttonStyle(.plain)
             }
         }
+        .widgetURL(entry.partID.map { URL(string: "ddugyesangi://part/\($0.uuidString)")! })
         .containerBackground(for: .widget) {
             theme.backgroundColor
         }
@@ -174,6 +175,7 @@ struct MediumWidgetView: View {
                 }
             }
         }
+        .widgetURL(entry.partID.map { URL(string: "ddugyesangi://part/\($0.uuidString)")! })
         .containerBackground(for: .widget) {
             theme.backgroundColor
         }

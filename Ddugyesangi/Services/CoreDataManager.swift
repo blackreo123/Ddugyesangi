@@ -276,6 +276,19 @@ class CoreDataManager: ObservableObject {
         save()
     }
     
+    // ID로 파트 조회
+    func fetchPart(by id: UUID) -> Part? {
+        let request: NSFetchRequest<Part> = Part.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        do {
+            return try context.fetch(request).first
+        } catch {
+            print("Error fetching part: \(error)")
+            return nil
+        }
+    }
+
     // 파트 삭제
     func deletePart(_ part: Part) {
         context.delete(part)

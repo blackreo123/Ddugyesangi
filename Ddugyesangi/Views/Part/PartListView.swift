@@ -55,7 +55,7 @@ struct PartListView: View {
     
     private var partListContent: some View {
         ForEach(viewModel.partList, id: \.id) { part in
-            NavigationLink(destination: PartDetailView(part: part)) {
+            NavigationLink(value: AppDestination.partDetail(part)) {
                 ListRowView(project: project,
                             part: part,
                             viewType: .part,

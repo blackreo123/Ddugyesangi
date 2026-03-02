@@ -6,7 +6,7 @@ struct ThemeSelector: View {
     @Binding var isPresented: Bool
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 ThemedBackgroundView().ignoresSafeArea()
                 ScrollView {

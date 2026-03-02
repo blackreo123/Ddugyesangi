@@ -15,7 +15,7 @@ struct ProjectAddView: View {
     @State private var projectName = ""
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 ThemedBackgroundView()
                     .ignoresSafeArea()

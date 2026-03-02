@@ -23,7 +23,7 @@ struct AnalysisResultView: View {
     @State private var partToDelete: Int?
         
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 ThemedBackgroundView()
                     .ignoresSafeArea()

@@ -1,11 +1,19 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var navigationRouter: NavigationRouter
+
     var body: some View {
-        // TODO: navigationViewStyle이 사라질 예정이므로 다른 표현 방법을 찾기
-        NavigationView {
+        NavigationStack(path: $navigationRouter.path) {
             ProjectListView()
+                .navigationDestination(for: AppDestination.self) { destination in
+                    switch destination {
+                    case .partList(let project):
+                        PartListView(project: project)
+                    case .partDetail(let part):
+                        PartDetailView(part: part)
+                    }
+                }
         }
-        .navigationViewStyle(.stack)
     }
 }

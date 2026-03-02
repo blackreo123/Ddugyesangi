@@ -22,7 +22,7 @@ struct ProjectListView: View {
                         EmptyStateView()
                     } else {
                         ForEach(viewModel.filteredProjects, id: \.id) { project in
-                            NavigationLink(destination: PartListView(project: project)) {
+                            NavigationLink(value: AppDestination.partList(project)) {
                                 ListRowView(project: project,
                                             part: nil,
                                             viewType: .project,

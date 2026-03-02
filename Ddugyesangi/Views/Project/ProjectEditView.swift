@@ -24,7 +24,7 @@ struct ProjectEditView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 ThemedBackgroundView()
                     .ignoresSafeArea()

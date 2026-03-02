@@ -3,6 +3,9 @@
 완료된 작업 기록.
 
 ## 2026-03-02
+- NavigationView → NavigationStack 마이그레이션 (전체 10개 화면)
+- 위젯 딥링크: 위젯 탭 시 해당 파트 카운터 화면으로 이동 (URL 스킴 `ddugyesangi://part/{uuid}`)
+- NavigationRouter 추가 (프로그래매틱 네비게이션, 딥링크 처리)
 - 미디움 위젯 UI 개선: 코수 제거, +1 버튼 1/3 비율 확대
 - 앱 아이콘 교체 (iPhone/iPad/AppStore 전체 사이즈)
 
