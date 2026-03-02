@@ -191,13 +191,15 @@ final class SharedCoreDataStack {
 
     // MARK: - Mutate
 
-    /// 단수 +1
+    /// 단수 +1 (목표 단수 이상이면 무시)
     func incrementRow(for partID: UUID) {
         let request = NSFetchRequest<NSManagedObject>(entityName: "Part")
         request.predicate = NSPredicate(format: "id == %@", partID as CVarArg)
         request.fetchLimit = 1
         guard let obj = try? context.fetch(request).first else { return }
         let current = obj.value(forKey: "currentRow") as? Int16 ?? 0
+        let target = obj.value(forKey: "targetRow") as? Int16 ?? 0
+        if target > 0, current >= target { return }
         obj.setValue(current + 1, forKey: "currentRow")
         obj.setValue(Date(), forKey: "lastModifiedAt")
         try? context.save()

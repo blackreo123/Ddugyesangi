@@ -48,6 +48,11 @@ struct Counter: View {
         }
     }
     
+    private var isAtTarget: Bool {
+        guard type == .row, part.targetRow > 0 else { return false }
+        return count >= Int(part.targetRow)
+    }
+
     var body: some View {
         VStack(spacing: 20) {
             switch type {
@@ -68,8 +73,9 @@ struct Counter: View {
             }) {
                 Image(systemName: "chevron.up.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundStyle(themeManager.currentTheme.primaryColor)
+                    .foregroundStyle(isAtTarget ? themeManager.currentTheme.secondaryColor : themeManager.currentTheme.primaryColor)
             }
+            .disabled(isAtTarget)
             
             if isEditing {
                 TextField("\(count)", text: $inputText)

@@ -43,6 +43,8 @@ struct SmallWidgetView: View {
                 .font(.system(size: 40, weight: .bold, design: .rounded))
                 .foregroundStyle(theme.primaryColor)
                 .minimumScaleFactor(0.5)
+                .contentTransition(.numericText())
+                .invalidatableContent()
 
             if entry.targetRow > 0 {
                 ProgressView(value: progress)
@@ -50,6 +52,7 @@ struct SmallWidgetView: View {
                 Text("\(entry.currentRow)/\(entry.targetRow)")
                     .font(.caption2)
                     .foregroundStyle(theme.secondaryColor)
+                    .contentTransition(.numericText())
             }
 
             Spacer()
@@ -141,11 +144,15 @@ struct MediumWidgetView: View {
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundStyle(theme.primaryColor)
+                                .contentTransition(.numericText())
+                                .invalidatableContent()
                         } else {
                             Text("\(entry.currentRow)")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundStyle(theme.primaryColor)
+                                .contentTransition(.numericText())
+                                .invalidatableContent()
                         }
                     }
 

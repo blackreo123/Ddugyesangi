@@ -229,8 +229,9 @@ class CoreDataManager: ObservableObject {
         save()
     }
     
-    // 단수 업
+    // 단수 업 (목표 단수 이상이면 무시)
     func incrementCurrentRow(of part: Part) {
+        if part.targetRow > 0, part.currentRow >= part.targetRow { return }
         part.currentRow += 1
         part.lastModifiedAt = Date()
         save()
