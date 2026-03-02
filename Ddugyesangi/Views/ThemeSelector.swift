@@ -7,45 +7,42 @@ struct ThemeSelector: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                ThemedBackgroundView().ignoresSafeArea()
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // 기본 테마 섹션
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(NSLocalizedString("basic_themes", comment: ""))
-                                .font(.headline)
-                                .foregroundStyle(themeManager.currentTheme.textColor)
-                                .padding(.horizontal)
+            ScrollView {
+                VStack(spacing: 24) {
+                    // 기본 테마 섹션
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(NSLocalizedString("basic_themes", comment: ""))
+                            .font(.headline)
+                            .foregroundStyle(themeManager.currentTheme.textColor)
+                            .padding(.horizontal)
 
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                                ForEach(ThemeType.basicCases, id: \.self) { themeType in
-                                    basicThemeButton(for: themeType)
-                                }
-                            }
-                        }
-
-                        // 계절 테마 섹션
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(NSLocalizedString("seasonal_themes", comment: ""))
-                                .font(.headline)
-                                .foregroundStyle(themeManager.currentTheme.textColor)
-                                .padding(.horizontal)
-
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                                ForEach(ThemeType.seasonalCases, id: \.self) { themeType in
-                                    seasonalThemeButton(for: themeType)
-                                }
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                            ForEach(ThemeType.basicCases, id: \.self) { themeType in
+                                basicThemeButton(for: themeType)
                             }
                         }
                     }
-                    .padding()
-                }
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") {
-                            isPresented = false
+
+                    // 계절 테마 섹션
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(NSLocalizedString("seasonal_themes", comment: ""))
+                            .font(.headline)
+                            .foregroundStyle(themeManager.currentTheme.textColor)
+                            .padding(.horizontal)
+
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                            ForEach(ThemeType.seasonalCases, id: \.self) { themeType in
+                                seasonalThemeButton(for: themeType)
+                            }
                         }
+                    }
+                }
+                .padding()
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        isPresented = false
                     }
                 }
             }

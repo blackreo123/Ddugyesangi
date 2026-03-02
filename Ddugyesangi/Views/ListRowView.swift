@@ -45,7 +45,6 @@ struct ListRowView: View {
                 if let project = project {
                     ProjectEditView(project: project, viewModel: projectListViewModel, isPresented: $showingEditSheet)
                         .presentationDetents([.fraction(0.25)])
-                        
                 }
             case .part(let partListViewModel):
                 if let part = part {

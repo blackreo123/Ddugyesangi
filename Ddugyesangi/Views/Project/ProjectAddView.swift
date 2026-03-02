@@ -16,34 +16,29 @@ struct ProjectAddView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                ThemedBackgroundView()
-                    .ignoresSafeArea()
-                
-                VStack(spacing: 20) {
-                    NomalTextField(placeholder: NSLocalizedString("Project Name", comment: ""), text: $projectName)
-                    Spacer()
+            VStack(spacing: 20) {
+                NomalTextField(placeholder: NSLocalizedString("Project Name", comment: ""), text: $projectName)
+                Spacer()
+            }
+            .navigationTitle("New Project")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
                 }
-                .navigationTitle("New Project")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    let isNameValid = !projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    Button("Save") {
+                        if isNameValid {
+                            viewModel.createProject(name: projectName.trimmingCharacters(in: .whitespacesAndNewlines))
                             isPresented = false
                         }
                     }
-                    
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        let isNameValid = !projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        Button("Save") {
-                            if isNameValid {
-                                viewModel.createProject(name: projectName.trimmingCharacters(in: .whitespacesAndNewlines))
-                                isPresented = false
-                            }
-                        }
-                        .foregroundStyle(isNameValid ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
-                        .disabled(!isNameValid)
-                    }
+                    .foregroundStyle(isNameValid ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
+                    .disabled(!isNameValid)
                 }
             }
         }

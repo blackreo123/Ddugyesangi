@@ -29,49 +29,45 @@ struct PartEditView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                ThemedBackgroundView()
-                    .ignoresSafeArea()
-                VStack(spacing: 20) {
-                    VStack(alignment: .leading) {
-                        Text("Part Name")
-                            .foregroundStyle(.black)
-                            .padding(.horizontal)
-                        NomalTextField(placeholder: NSLocalizedString("Part Name", comment: ""), text: $name)
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("Target row")
-                            .foregroundStyle(.black)
-                            .padding(.horizontal)
-                        NomalTextField(placeholder: NSLocalizedString("Target row", comment: ""), text: $targetRow)
-                            .keyboardType(.numberPad)
-                    }
-                    
-                    Spacer()
+            VStack(spacing: 20) {
+                VStack(alignment: .leading) {
+                    Text("Part Name")
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
+                    NomalTextField(placeholder: NSLocalizedString("Part Name", comment: ""), text: $name)
                 }
-                .padding(.top)
-                .navigationTitle("Edit Part")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
+
+                VStack(alignment: .leading) {
+                    Text("Target row")
+                        .foregroundStyle(.black)
+                        .padding(.horizontal)
+                    NomalTextField(placeholder: NSLocalizedString("Target row", comment: ""), text: $targetRow)
+                        .keyboardType(.numberPad)
+                }
+
+                Spacer()
+            }
+            .padding(.top)
+            .navigationTitle("Edit Part")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    let isNameValid = !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    Button("Save") {
+                        if isNameValid {
+                            let targetRow = Int16(targetRow)
+                            viewModel.updatePart(part: part ,name: name, targetRow: targetRow ?? 0)
                             isPresented = false
                         }
                     }
-                    
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        let isNameValid = !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        Button("Save") {
-                            if isNameValid {
-                                let targetRow = Int16(targetRow)
-                                viewModel.updatePart(part: part ,name: name, targetRow: targetRow ?? 0)
-                                isPresented = false
-                            }
-                        }
-                        .foregroundStyle(isNameValid ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
-                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
+                    .foregroundStyle(isNameValid ? themeManager.currentTheme.primaryColor : themeManager.currentTheme.secondaryColor)
+                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }

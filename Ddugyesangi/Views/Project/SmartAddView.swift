@@ -500,7 +500,7 @@ private struct SheetsModifier: ViewModifier {
                     isPresented: $viewModel.showingFilePicker
                 )
             }
-            .sheet(isPresented: $viewModel.showingAnalysisResult) {
+            .fullScreenCover(isPresented: $viewModel.showingAnalysisResult) {
                 if let result = viewModel.aiManager.analysisResult {
                     AnalysisResultView(
                         isPresented: $viewModel.showingAnalysisResult,

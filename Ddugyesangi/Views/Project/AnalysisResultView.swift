@@ -27,9 +27,8 @@ struct AnalysisResultView: View {
             ZStack {
                 ThemedBackgroundView()
                     .ignoresSafeArea()
-                
                 ScrollView {
-                    VStack(spacing: 20) {
+                VStack(spacing: 20) {
                         // 분석된 파일 정보 표시
                         VStack(alignment: .leading, spacing: 12) {
                             Text(NSLocalizedString("analyzed_file", comment: ""))
@@ -110,7 +109,6 @@ struct AnalysisResultView: View {
                     .padding(.top, 20)
                     .padding(.bottom, 20)
                 }
-            }
             .navigationTitle(NSLocalizedString("analysis_result", comment: ""))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -149,6 +147,7 @@ struct AnalysisResultView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 20)
                 .background(themeManager.currentTheme.backgroundColor) // 하단 버튼 배경은 단색 유지
+            }
             }
         }
         .onAppear {
