@@ -160,7 +160,8 @@ struct AnalysisResultView: View {
         editedParts = analysisResult.parts.map { part in
             EditableKnittingPart(
                 partName: part.partName,
-                targetRow: part.targetRow ?? 0
+                targetRow: part.targetRow ?? 0,
+                memo: part.memo ?? ""
             )
         }
     }
@@ -168,7 +169,8 @@ struct AnalysisResultView: View {
     private func addNewPart() {
         let newPart = EditableKnittingPart(
             partName: String(format: NSLocalizedString("new_part_number", comment: ""), editedParts.count + 1),
-            targetRow: 10
+            targetRow: 10,
+            memo: ""
         )
         editedParts.append(newPart)
     }
@@ -199,6 +201,7 @@ struct AnalysisResultView: View {
             KnittingPart(
                 partName: editablePart.partName,
                 targetRow: editablePart.targetRow,
+                memo: editablePart.memo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : editablePart.memo.trimmingCharacters(in: .whitespacesAndNewlines)
             )
         }
         
@@ -227,6 +230,7 @@ struct AnalysisResultView: View {
 struct EditableKnittingPart {
     var partName: String
     var targetRow: Int
+    var memo: String
 }
 
 // MARK: - Editable Part View
@@ -294,10 +298,36 @@ struct EditablePartView: View {
                         Text(NSLocalizedString("target_row_label", comment: ""))
                             .font(.subheadline)
                             .foregroundColor(themeManager.currentTheme.textColor)
-                        
+
                         TextField(NSLocalizedString("target_row_label", comment: ""), value: $part.targetRow, format: .number)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .keyboardType(.numberPad)
+                    }
+
+                    // 메모 편집
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(NSLocalizedString("memo", comment: ""))
+                            .font(.subheadline)
+                            .foregroundColor(themeManager.currentTheme.textColor)
+
+                        ZStack(alignment: .topLeading) {
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
+
+                            if part.memo.isEmpty {
+                                Text(NSLocalizedString("memo_placeholder", comment: ""))
+                                    .foregroundColor(.gray.opacity(0.5))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 10)
+                            }
+
+                            TextEditor(text: $part.memo)
+                                .scrollContentBackground(.hidden)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 2)
+                        }
+                        .frame(height: 80)
                     }
                 }
                 .padding(.top, 8)
@@ -321,7 +351,8 @@ struct EditablePartView: View {
             parts: [
                 KnittingPart(
                     partName: "몸통",
-                    targetRow: 50
+                    targetRow: 50,
+                    memo: "대바늘 8호, 메리야스뜨기"
                 )
             ]
         ),

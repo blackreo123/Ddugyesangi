@@ -72,6 +72,11 @@ final class SharedCoreDataStack {
         partLastModifiedAt.attributeType = .dateAttributeType
         partLastModifiedAt.isOptional = true
 
+        let partMemo = NSAttributeDescription()
+        partMemo.name = "memo"
+        partMemo.attributeType = .stringAttributeType
+        partMemo.isOptional = true
+
         // Project entity
         let projectEntity = NSEntityDescription()
         projectEntity.name = "Project"
@@ -112,7 +117,7 @@ final class SharedCoreDataStack {
         partToProject.inverseRelationship = projectToParts
         projectToParts.inverseRelationship = partToProject
 
-        partEntity.properties = [partID, partName, partCurrentRow, partTargetRow, partCurrentStitch, partCreatedAt, partLastModifiedAt, partToProject]
+        partEntity.properties = [partID, partName, partCurrentRow, partTargetRow, partCurrentStitch, partCreatedAt, partLastModifiedAt, partMemo, partToProject]
         projectEntity.properties = [projectID, projectName, projectCreatedAt, projectToParts]
 
         model.entities = [partEntity, projectEntity]

@@ -3,6 +3,9 @@
 완료된 작업 기록.
 
 ## 2026-03-02
+- 파트별 메모 기능 추가 (Core Data v4, 파트 추가/편집/상세 화면, AI 도안 분석 시 자동 추출)
+- 스마트 추가/분석 결과 화면 fullScreenCover 전환, 파티클 배경 적용
+- sheet 모달(ProjectAdd, ProjectEdit, PartEdit, ThemeSelector)에서 불필요한 ThemedBackgroundView 제거
 - NavigationView → NavigationStack 마이그레이션 (전체 10개 화면)
 - 위젯 딥링크: 위젯 탭 시 해당 파트 카운터 화면으로 이동 (URL 스킴 `ddugyesangi://part/{uuid}`)
 - NavigationRouter 추가 (프로그래매틱 네비게이션, 딥링크 처리)

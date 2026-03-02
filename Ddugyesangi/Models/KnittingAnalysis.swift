@@ -44,4 +44,5 @@ struct KnittingAnalysis: Codable, Equatable {
 struct KnittingPart: Codable, Equatable {
     let partName: String
     let targetRow: Int?
+    let memo: String?
 }

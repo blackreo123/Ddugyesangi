@@ -18,6 +18,7 @@ extension CoreDataManager {
     func createSmartPart(
         name: String,
         targetRow: Int16,
+        memo: String? = nil,
         project: Project
     ) -> Part {
         let part = Part(context: context)
@@ -26,9 +27,10 @@ extension CoreDataManager {
         part.targetRow = targetRow
         part.currentRow = 0
         part.currentStitch = 0
+        part.memo = memo
         part.lastModifiedAt = Date()
         part.project = project
-        
+
         save()
         return part
     }
@@ -43,6 +45,7 @@ extension CoreDataManager {
             _ = createSmartPart(
                 name: knittingPart.partName,
                 targetRow: Int16(knittingPart.targetRow ?? 0),
+                memo: knittingPart.memo,
                 project: project
             )
         }

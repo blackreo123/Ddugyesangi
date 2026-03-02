@@ -99,6 +99,9 @@
 "credit_will_be_used" = "分析を開始すると、成功/失敗に関わらずクレジットが消費されます。";
 "analysis_warning" = "注意：API呼び出しが開始されると、失敗してもクレジットが消費されます。";
 
+"memo" = "メモ";
+"memo_placeholder" = "メモを入力してください";
+
 /* Widget */
 "widget_display_name" = "編み物カウンター";
 "widget_description" = "現在の段数を確認して+1できます";

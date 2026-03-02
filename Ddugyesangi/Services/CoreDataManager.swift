@@ -92,6 +92,9 @@ class CoreDataManager: ObservableObject {
 
         // App Group 공유 컨테이너 경로 설정 (없으면 기본 경로 사용)
         let description = NSPersistentStoreDescription(url: CoreDataManager.activeStoreURL)
+        // Lightweight migration 명시적 활성화
+        description.shouldMigrateStoreAutomatically = true
+        description.shouldInferMappingModelAutomatically = true
         // 위젯 등 외부 프로세스의 변경 감지
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         container.persistentStoreDescriptions = [description]
@@ -181,13 +184,14 @@ class CoreDataManager: ObservableObject {
     // MARK: - Part CRUD Operations
     
     // 파트 생성
-    func createPart(name: String, targetRow: Int16, targetStitch: Int16 = 0, project: Project) -> Part {
+    func createPart(name: String, targetRow: Int16, targetStitch: Int16 = 0, memo: String? = nil, project: Project) -> Part {
         let part = Part(context: context)
         part.id = UUID()
         part.name = name
         part.targetRow = targetRow
         part.currentRow = 0
         part.currentStitch = 0
+        part.memo = memo
         part.lastModifiedAt = Date()
         part.project = project
 
@@ -223,9 +227,10 @@ class CoreDataManager: ObservableObject {
     }
     
     // 파트 수정
-    func updatePart(_ part: Part, name: String, targetRow: Int16) {
+    func updatePart(_ part: Part, name: String, targetRow: Int16, memo: String? = nil) {
         part.name = name
         part.targetRow = targetRow
+        part.memo = memo
         save()
     }
     

@@ -162,7 +162,8 @@ class ClaudeAPIService {
             "parts": [
                 {
                     "partName": "파트 이름 (예: 앞판, 뒷판, 소매, 몸통 등)",
-                    "targetRow": 해당 파트를 완성하는 데 필요한 총 단수 (숫자만, 알 수 없으면 null)
+                    "targetRow": 해당 파트를 완성하는 데 필요한 총 단수 (숫자만, 알 수 없으면 null),
+                    "memo": "해당 파트의 뜨개질 방법, 게이지, 주의사항 등 요약 (없으면 null)"
                 }
             ]
         }
@@ -171,6 +172,7 @@ class ClaudeAPIService {
         - 모든 숫자는 정수로만 표현
         - 단수를 파악할 수 없는 파트는 targetRow를 null로 설정하세요
         - projectName과 partName은 도안에 적힌 원문 그대로 사용하세요
+        - memo에는 각 파트의 뜨개질 방법(코잡기, 무늬, 줄이기/늘리기 등), 게이지, 사용 바늘, 주의사항 등을 간결하게 요약하세요. 정보가 없으면 null로 설정하세요
         - 뜨개질 도안이 아닌 파일인 경우, 다음 형식으로만 응답하세요: {"errorMessage": "\(errorMessageForCurrentLocale())"}
         """
 

@@ -80,5 +80,4 @@ Three languages: Korean (`ko`), English (`en`), Japanese (`ja`). Localized strin
 
 우선순위 순으로 정리. 모두 구현 예정은 아니며 기록용.
 
-1. **파트별 메모** — 파트에 메모 기능 추가
-2. **iCloud 동기화** — NSPersistentCloudKitContainer로 기기 간 데이터 동기화
+1. **iCloud 동기화** — NSPersistentCloudKitContainer로 기기 간 데이터 동기화
