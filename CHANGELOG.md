@@ -3,6 +3,7 @@
 완료된 작업 기록.
 
 ## 2026-09-25
+- v1.7.4로 버전 업 (위젯 익스텐션 버전도 1.7.2 → 1.7.4로 앱과 맞춤)
 - 입력 시트 높이를 내용에 맞게 자동 조절하는 `fitSheetToContent()` modifier 추가 (ProjectAdd, ProjectEdit, PartAdd, PartEdit 적용, 고정 `.fraction(0.25)` 제거로 파트 추가 시트 잘림 수정)
 
 ## 2026-03-02
