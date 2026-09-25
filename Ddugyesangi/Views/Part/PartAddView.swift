@@ -52,10 +52,9 @@ struct PartAddView: View {
                     .frame(height: 100)
                     .padding(.horizontal, 16)
                 }
-
-                Spacer()
             }
-            .padding(.top)
+            .padding(.vertical)
+            .fitSheetToContent()
             .navigationTitle("Add New Part")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

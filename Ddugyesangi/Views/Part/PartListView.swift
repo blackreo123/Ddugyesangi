@@ -31,7 +31,6 @@ struct PartListView: View {
         }
         .sheet(isPresented: $showingAddPart) {
             PartAddView(viewModel: viewModel, project: project, isPresented: $showingAddPart)
-                .presentationDetents([.fraction(0.25)])
         }
     }
     

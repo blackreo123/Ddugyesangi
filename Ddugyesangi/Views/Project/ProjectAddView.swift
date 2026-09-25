@@ -18,8 +18,9 @@ struct ProjectAddView: View {
         NavigationStack {
             VStack(spacing: 20) {
                 NomalTextField(placeholder: NSLocalizedString("Project Name", comment: ""), text: $projectName)
-                Spacer()
             }
+            .padding(.vertical)
+            .fitSheetToContent()
             .navigationTitle("New Project")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

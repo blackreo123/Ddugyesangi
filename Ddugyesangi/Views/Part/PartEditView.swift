@@ -73,10 +73,9 @@ struct PartEditView: View {
                     .frame(height: 100)
                     .padding(.horizontal, 16)
                 }
-
-                Spacer()
             }
-            .padding(.top)
+            .padding(.vertical)
+            .fitSheetToContent()
             .navigationTitle("Edit Part")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

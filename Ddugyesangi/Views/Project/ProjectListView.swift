@@ -70,7 +70,6 @@ struct ProjectListView: View {
         }
         .sheet(isPresented: $showingAddProject) {
             ProjectAddView(viewModel: viewModel, isPresented: $showingAddProject)
-                .presentationDetents([.fraction(0.25)])
         }
         .fullScreenCover(isPresented: $showingSmartAdd) {
             SmartAddView(isPresented: $showingSmartAdd)

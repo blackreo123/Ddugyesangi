@@ -2,6 +2,9 @@
 
 완료된 작업 기록.
 
+## 2026-09-25
+- 입력 시트 높이를 내용에 맞게 자동 조절하는 `fitSheetToContent()` modifier 추가 (ProjectAdd, ProjectEdit, PartAdd, PartEdit 적용, 고정 `.fraction(0.25)` 제거로 파트 추가 시트 잘림 수정)
+
 ## 2026-03-02
 - 위젯 -1 버튼 추가 (스몰: 좌우 배치, 미디움: 상하 배치)
 - 파트별 메모 기능 추가 (Core Data v4, 파트 추가/편집/상세 화면, AI 도안 분석 시 자동 추출)
